@@ -1,2 +1,2 @@
 # ltl-autoblog-cloud
-Light Saas Project with Make Scenarios
+Light Saas Project with Make Scenarios.
