@@ -1,0 +1,1201 @@
+{
+  "name": "LTL Newsletter-Bot [DE]",
+  "flow": [
+    {
+      "id": 1,
+      "module": "wordpress:watchPosts",
+      "version": 3,
+      "parameters": {
+        "type": "posts",
+        "limit": 100,
+        "status": [
+          "publish"
+        ],
+        "__IMTCONN__": 0
+      },
+      "mapper": {},
+      "metadata": {
+        "designer": {
+          "x": 0,
+          "y": 0,
+          "name": "📰 Blog-Radar (Wochen-Sammler)"
+        },
+        "restore": {
+          "parameters": {
+            "type": {
+              "label": "Beiträge"
+            },
+            "status": {
+              "label": [
+                "Publish"
+              ]
+            },
+            "__IMTCONN__": {
+              "data": {
+                "scoped": "true",
+                "connection": "wordpress4"
+              },
+              "label": "Mein LazyTechLab Blog ([NAME] Sonntag)"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "__IMTCONN__",
+            "type": "account:wordpress4",
+            "label": "Connection",
+            "required": true
+          },
+          {
+            "name": "type",
+            "type": "select",
+            "label": "Type",
+            "required": true
+          },
+          {
+            "name": "status",
+            "type": "select",
+            "label": "Status",
+            "multiple": true
+          },
+          {
+            "name": "limit",
+            "type": "uinteger",
+            "label": "Limit"
+          }
+        ]
+      }
+    },
+    {
+      "id": 2,
+      "module": "util:TextAggregator",
+      "version": 1,
+      "parameters": {
+        "feeder": 1,
+        "rowSeparator": ""
+      },
+      "mapper": {
+        "value": "###\nTitel: {{1.title}}\nLink: {{1.link}}\nIntro: {{1.excerpt}}\n###"
+      },
+      "metadata": {
+        "designer": {
+          "x": 300,
+          "y": 0,
+          "name": "📦 Content-Paket"
+        },
+        "restore": {
+          "extra": {
+            "feeder": {
+              "label": "📰 Blog-Radar (Wochen-Sammler) - Watch Posts [1]"
+            }
+          },
+          "parameters": {
+            "rowSeparator": {
+              "label": "Empty"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "rowSeparator",
+            "type": "select",
+            "label": "Row separator",
+            "validate": {
+              "enum": [
+                "\n",
+                "\t",
+                "other"
+              ]
+            }
+          }
+        ],
+        "expect": [
+          {
+            "name": "value",
+            "type": "text",
+            "label": "Text"
+          }
+        ]
+      }
+    },
+    {
+      "id": 3,
+      "module": "gemini-ai:createACompletionGeminiPro",
+      "version": 1,
+      "parameters": {
+        "__IMTCONN__": 0
+      },
+      "mapper": {
+        "model": "gemini-3-pro-preview",
+        "contents": [
+          {
+            "role": "user",
+            "parts": [
+              {
+                "text": "Du bist der Newsletter-Redakteur vom \"LazyTechLab\".\nHier ist die Liste der neuen Artikel dieser Woche:\n{{2.text}} (Output von Modul 2)\n\nAUFGABE:\nSchreibe einen lockeren, coolen Newsletter.\n\nSTRUKTUR:\n\nBetreff: Knackig mit Emoji.\n\nIntro: \"Hey Tech-Freunde...\" (Maximal 2 Sätze!).\n\nTop-News: Wähle EXAKT die 3 spannendsten Themen aus.\n\nSchreibe zu jedem nur EINEN kurzen Teaser-Satz.\n\nFüge den Link darunter ein.\n\nTicker: Wähle MAXIMAL 3 weitere Artikel für den Ticker aus.\n\nFormat: \"• Titel: [Link]\"\n\nKEINE Beschreibung, nur Titel und Link!\n\nOutro: \"Euer [NAME]\".\n\nREGELN:\n\nNutze \"Du\"-Form.\n\nDie Links MÜSSEN enthalten sein.\n\nCRITICAL SAFETY: Der gesamte Text MUSS unter 1900 Zeichen bleiben! Discord blockiert alles darüber.\n\nNOTBREMSE: Wenn es knapp wird, LÖSCHE den Ticker komplett, aber behalte die Top 3 News!",
+                "type": "text"
+              }
+            ]
+          }
+        ],
+        "generationConfig": {
+          "thinkingConfig": {}
+        },
+        "system_instruction": {}
+      },
+      "metadata": {
+        "designer": {
+          "x": 600,
+          "y": 0,
+          "name": "🧠 Chefredakteur (Newsletter)"
+        },
+        "restore": {
+          "expect": {
+            "model": {
+              "mode": "chose",
+              "label": "Gemini 3 Pro Preview"
+            },
+            "contents": {
+              "mode": "chose",
+              "items": [
+                {
+                  "role": {
+                    "mode": "chose",
+                    "label": "User"
+                  },
+                  "parts": {
+                    "mode": "chose",
+                    "items": [
+                      {
+                        "type": {
+                          "mode": "chose",
+                          "label": "Text"
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            "url_context": {
+              "mode": "chose"
+            },
+            "code_execution": {
+              "mode": "chose"
+            },
+            "safetySettings": {
+              "mode": "chose"
+            },
+            "generationConfig": {
+              "nested": {
+                "stopSequences": {
+                  "mode": "chose"
+                },
+                "thinkingConfig": {
+                  "nested": {
+                    "thinking_level": {
+                      "mode": "chose",
+                      "label": "Empty"
+                    },
+                    "include_thoughts": {
+                      "mode": "chose"
+                    }
+                  }
+                },
+                "mediaResolution": {
+                  "mode": "chose",
+                  "label": "Empty"
+                },
+                "responseMimeType": {
+                  "mode": "chose",
+                  "label": "Empty"
+                },
+                "responseModalities": {
+                  "mode": "chose"
+                }
+              }
+            },
+            "system_instruction": {
+              "nested": {
+                "parts": {
+                  "mode": "chose"
+                }
+              }
+            },
+            "google_maps_context": {
+              "mode": "chose"
+            },
+            "google_search_context": {
+              "mode": "chose"
+            },
+            "file_search_store_context": {
+              "mode": "chose"
+            },
+            "function_declarations_context": {
+              "mode": "chose"
+            }
+          },
+          "parameters": {
+            "__IMTCONN__": {
+              "data": {
+                "scoped": "true",
+                "connection": "gemini-ai-q9zyjp"
+              },
+              "label": "My Gemini AI connection"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "__IMTCONN__",
+            "type": "account:gemini-ai-q9zyjp",
+            "label": "Connection",
+            "required": true
+          }
+        ],
+        "expect": [
+          {
+            "name": "model",
+            "type": "select",
+            "label": "AI Model",
+            "required": true
+          },
+          {
+            "name": "contents",
+            "spec": [
+              {
+                "name": "role",
+                "type": "select",
+                "label": "Role",
+                "options": [
+                  {
+                    "label": "User",
+                    "value": "user"
+                  },
+                  {
+                    "label": "Model",
+                    "value": "model"
+                  }
+                ]
+              },
+              {
+                "name": "parts",
+                "spec": [
+                  {
+                    "name": "type",
+                    "type": "select",
+                    "label": "Message Type",
+                    "options": [
+                      {
+                        "label": "Text",
+                        "value": "text",
+                        "nested": [
+                          {
+                            "name": "text",
+                            "type": "text",
+                            "label": "Text",
+                            "required": false
+                          }
+                        ]
+                      },
+                      {
+                        "label": "File",
+                        "value": "file",
+                        "nested": [
+                          {
+                            "name": "file_data",
+                            "spec": [
+                              {
+                                "name": "mime_type",
+                                "type": "text",
+                                "label": "Mime Type",
+                                "required": false
+                              },
+                              {
+                                "help": "You get this from the 'Upload a File' module.",
+                                "name": "file_uri",
+                                "type": "text",
+                                "label": "File URI",
+                                "required": false
+                              }
+                            ],
+                            "type": "collection",
+                            "label": "File Data",
+                            "required": false
+                          }
+                        ]
+                      },
+                      {
+                        "label": "Function Call",
+                        "value": "functionCall",
+                        "nested": [
+                          {
+                            "name": "functionCall",
+                            "spec": [
+                              {
+                                "help": "The name of the function to call.",
+                                "name": "name",
+                                "type": "text",
+                                "label": "Name",
+                                "required": true,
+                                "validate": {
+                                  "max": 64
+                                }
+                              },
+                              {
+                                "help": "The function parameters and values in JSON object format.",
+                                "name": "args",
+                                "type": "json",
+                                "label": "Arguments"
+                              },
+                              {
+                                "help": "The unique ID of the function call.",
+                                "name": "id",
+                                "type": "text",
+                                "label": "Function Call ID"
+                              }
+                            ],
+                            "type": "collection",
+                            "label": "Function Call"
+                          }
+                        ]
+                      },
+                      {
+                        "label": "Function Response",
+                        "value": "functionResponse",
+                        "nested": [
+                          {
+                            "name": "functionResponse",
+                            "spec": [
+                              {
+                                "help": "The name of the function to call.",
+                                "name": "name",
+                                "type": "text",
+                                "label": "Name",
+                                "required": true,
+                                "validate": {
+                                  "max": 64
+                                }
+                              },
+                              {
+                                "help": "The function response in JSON object format.",
+                                "name": "response",
+                                "type": "json",
+                                "label": "Response",
+                                "required": true
+                              }
+                            ],
+                            "type": "collection",
+                            "label": "Function Response"
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "name": "thoughtSignature",
+                    "type": "text",
+                    "label": "Thought Signature"
+                  }
+                ],
+                "type": "array",
+                "label": "Parts"
+              }
+            ],
+            "type": "array",
+            "label": "Messages",
+            "required": true
+          },
+          {
+            "name": "system_instruction",
+            "spec": [
+              {
+                "name": "parts",
+                "spec": {
+                  "name": "value",
+                  "spec": [
+                    {
+                      "name": "text",
+                      "type": "text",
+                      "label": "Value"
+                    }
+                  ],
+                  "type": "collection",
+                  "label": "Prompt"
+                },
+                "type": "array",
+                "label": "Prompts"
+              }
+            ],
+            "type": "collection",
+            "label": "System Instructions"
+          },
+          {
+            "name": "safetySettings",
+            "spec": [
+              {
+                "name": "category",
+                "type": "select",
+                "label": "Category",
+                "options": [
+                  {
+                    "label": "Harassment content",
+                    "value": "HARM_CATEGORY_HARASSMENT"
+                  },
+                  {
+                    "label": "Hate speech and content",
+                    "value": "HARM_CATEGORY_HATE_SPEECH"
+                  },
+                  {
+                    "label": "Sexually explicit content.",
+                    "value": "HARM_CATEGORY_SEXUALLY_EXPLICIT"
+                  },
+                  {
+                    "label": "Dangerous content:",
+                    "value": "HARM_CATEGORY_DANGEROUS_CONTENT"
+                  }
+                ]
+              },
+              {
+                "name": "threshold",
+                "type": "select",
+                "label": "Threshold",
+                "options": [
+                  {
+                    "label": "Block low and above.",
+                    "value": "BLOCK_LOW_AND_ABOVE"
+                  },
+                  {
+                    "label": "Block medium and above.",
+                    "value": "BLOCK_MEDIUM_AND_ABOVE"
+                  },
+                  {
+                    "label": "Block only high.",
+                    "value": "BLOCK_ONLY_HIGH"
+                  },
+                  {
+                    "label": "Block none.",
+                    "value": "BLOCK_NONE"
+                  }
+                ]
+              }
+            ],
+            "type": "array",
+            "label": "Safety Settings"
+          },
+          {
+            "name": "generationConfig",
+            "spec": [
+              {
+                "name": "stopSequences",
+                "spec": {
+                  "name": "value",
+                  "type": "text",
+                  "label": "Stop Sequence"
+                },
+                "type": "array",
+                "label": "Stop Sequences"
+              },
+              {
+                "name": "responseModalities",
+                "type": "select",
+                "label": "Response Modalities",
+                "multiple": true,
+                "validate": {
+                  "enum": [
+                    "text",
+                    "image"
+                  ]
+                }
+              },
+              {
+                "name": "maxOutputTokens",
+                "type": "number",
+                "label": "Max Output Tokens"
+              },
+              {
+                "name": "temperature",
+                "type": "number",
+                "label": "Temperature",
+                "validate": {
+                  "max": 1,
+                  "min": 0
+                }
+              },
+              {
+                "name": "topP",
+                "type": "number",
+                "label": "Top P",
+                "validate": {
+                  "max": 1,
+                  "min": 0
+                }
+              },
+              {
+                "name": "topK",
+                "type": "number",
+                "label": "Top K"
+              },
+              {
+                "name": "thinkingConfig",
+                "spec": [
+                  {
+                    "name": "thinkingBudget",
+                    "type": "number",
+                    "label": "Thinking Budget"
+                  },
+                  {
+                    "name": "include_thoughts",
+                    "type": "boolean",
+                    "label": "Include Thoughts"
+                  },
+                  {
+                    "name": "thinking_level",
+                    "type": "select",
+                    "label": "Thinking Level",
+                    "validate": {
+                      "enum": [
+                        "low",
+                        "high"
+                      ]
+                    }
+                  }
+                ],
+                "type": "collection",
+                "label": "Thinking Config"
+              },
+              {
+                "name": "mediaResolution",
+                "type": "select",
+                "label": "Media Resolution",
+                "validate": {
+                  "enum": [
+                    "media_resolution_low",
+                    "media_resolution_medium",
+                    "media_resolution_high"
+                  ]
+                }
+              },
+              {
+                "name": "responseMimeType",
+                "type": "select",
+                "label": "Response Format"
+              }
+            ],
+            "type": "collection",
+            "label": "Generation configurations"
+          },
+          {
+            "name": "tools",
+            "type": "any",
+            "label": "Tools"
+          },
+          {
+            "name": "tool_config",
+            "type": "any",
+            "label": "Tool Config"
+          },
+          {
+            "name": "function_declarations_context",
+            "type": "boolean",
+            "label": "Function Declarations Grounding"
+          },
+          {
+            "name": "url_context",
+            "type": "boolean",
+            "label": "URL Context"
+          },
+          {
+            "name": "google_search_context",
+            "type": "boolean",
+            "label": "Google Search Grounding"
+          },
+          {
+            "name": "code_execution",
+            "type": "boolean",
+            "label": "Code Execution"
+          },
+          {
+            "name": "google_maps_context",
+            "type": "boolean",
+            "label": "Google Maps Grounding"
+          },
+          {
+            "name": "file_search_store_context",
+            "type": "boolean",
+            "label": "File Search Store Context"
+          }
+        ]
+      }
+    },
+    {
+      "id": 4,
+      "module": "discord:PostMessage",
+      "version": 2,
+      "parameters": {
+        "__IMTCONN__": 0
+      },
+      "mapper": {
+        "content": "📧 **Dein Newsletter-Draft:**\r\n\r\n{{3.candidates[].content.parts[].text}}"
+      },
+      "metadata": {
+        "designer": {
+          "x": 900,
+          "y": 0,
+          "name": "📨 Discord (Draft-Zustellung)"
+        },
+        "restore": {
+          "expect": {
+            "tts": {
+              "mode": "chose"
+            },
+            "files": {
+              "mode": "chose"
+            },
+            "embeds": {
+              "mode": "chose"
+            },
+            "components": {
+              "mode": "chose"
+            },
+            "waitForMessageBody": {
+              "mode": "chose"
+            }
+          },
+          "parameters": {
+            "__IMTCONN__": {
+              "data": {
+                "scoped": "true",
+                "connection": "discord"
+              },
+              "label": "Discord Weekly-News Bot (Make (team1278341651986911253))"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "__IMTCONN__",
+            "type": "account:discord",
+            "label": "Connection",
+            "required": true
+          }
+        ],
+        "expect": [
+          {
+            "name": "content",
+            "type": "text",
+            "label": "Message"
+          },
+          {
+            "name": "waitForMessageBody",
+            "type": "boolean",
+            "label": "Wait for Message Body"
+          },
+          {
+            "name": "tts",
+            "type": "boolean",
+            "label": "Is TTS message"
+          },
+          {
+            "name": "embeds",
+            "spec": [
+              {
+                "name": "title",
+                "type": "text",
+                "label": "Title"
+              },
+              {
+                "name": "type",
+                "type": "text",
+                "label": "Type"
+              },
+              {
+                "name": "description",
+                "type": "text",
+                "label": "Description"
+              },
+              {
+                "name": "url",
+                "type": "url",
+                "label": "URL"
+              },
+              {
+                "name": "timestamp",
+                "type": "date",
+                "label": "Timestamp"
+              },
+              {
+                "name": "color",
+                "type": "uinteger",
+                "label": "Color"
+              },
+              {
+                "name": "footer",
+                "spec": [
+                  {
+                    "name": "text",
+                    "type": "text",
+                    "label": "Text"
+                  },
+                  {
+                    "name": "icon_url",
+                    "type": "url",
+                    "label": "Icon URL"
+                  },
+                  {
+                    "name": "proxy_icon_url",
+                    "type": "url",
+                    "label": "Proxy Icon URL"
+                  }
+                ],
+                "type": "collection",
+                "label": "Footer"
+              },
+              {
+                "name": "image",
+                "spec": [
+                  {
+                    "name": "url",
+                    "type": "url",
+                    "label": "URL"
+                  },
+                  {
+                    "name": "proxy_url",
+                    "type": "url",
+                    "label": "Proxy URL"
+                  },
+                  {
+                    "name": "height",
+                    "type": "uinteger",
+                    "label": "Height"
+                  },
+                  {
+                    "name": "width",
+                    "type": "uinteger",
+                    "label": "Width"
+                  }
+                ],
+                "type": "collection",
+                "label": "Image"
+              },
+              {
+                "name": "thumbnail",
+                "spec": [
+                  {
+                    "name": "url",
+                    "type": "url",
+                    "label": "URL"
+                  },
+                  {
+                    "name": "proxy_url",
+                    "type": "url",
+                    "label": "Proxy URL"
+                  },
+                  {
+                    "name": "height",
+                    "type": "uinteger",
+                    "label": "Height"
+                  },
+                  {
+                    "name": "width",
+                    "type": "uinteger",
+                    "label": "Width"
+                  }
+                ],
+                "type": "collection",
+                "label": "Thumbnail"
+              },
+              {
+                "name": "video",
+                "spec": [
+                  {
+                    "name": "url",
+                    "type": "url",
+                    "label": "URL"
+                  },
+                  {
+                    "name": "height",
+                    "type": "uinteger",
+                    "label": "Height"
+                  },
+                  {
+                    "name": "width",
+                    "type": "uinteger",
+                    "label": "Width"
+                  }
+                ],
+                "type": "collection",
+                "label": "Video"
+              },
+              {
+                "name": "provider",
+                "spec": [
+                  {
+                    "name": "name",
+                    "type": "text",
+                    "label": "Name"
+                  },
+                  {
+                    "name": "url",
+                    "type": "url",
+                    "label": "URL"
+                  }
+                ],
+                "type": "collection",
+                "label": "Provider"
+              },
+              {
+                "name": "author",
+                "spec": [
+                  {
+                    "name": "name",
+                    "type": "text",
+                    "label": "Name"
+                  },
+                  {
+                    "name": "url",
+                    "type": "url",
+                    "label": "URL"
+                  },
+                  {
+                    "name": "icon_url",
+                    "type": "url",
+                    "label": "Icon URL"
+                  },
+                  {
+                    "name": "proxy_icon_url",
+                    "type": "url",
+                    "label": "Proxy Icon URL"
+                  }
+                ],
+                "type": "collection",
+                "label": "Author"
+              },
+              {
+                "name": "fields",
+                "spec": [
+                  {
+                    "name": "name",
+                    "type": "text",
+                    "label": "Name"
+                  },
+                  {
+                    "name": "value",
+                    "type": "text",
+                    "label": "Value"
+                  },
+                  {
+                    "name": "inline",
+                    "type": "boolean",
+                    "label": "Inline Flag"
+                  }
+                ],
+                "type": "array",
+                "label": "Fields"
+              }
+            ],
+            "type": "array",
+            "label": "Embeds"
+          },
+          {
+            "name": "components",
+            "spec": [
+              {
+                "name": "type",
+                "type": "select",
+                "label": "Component Type",
+                "options": [
+                  {
+                    "label": "A New Row",
+                    "value": 1,
+                    "nested": [
+                      {
+                        "name": "components",
+                        "spec": [
+                          {
+                            "name": "type",
+                            "type": "select",
+                            "label": "Row Component Type",
+                            "options": [
+                              {
+                                "label": "Button",
+                                "value": 2,
+                                "nested": [
+                                  {
+                                    "name": "style",
+                                    "type": "select",
+                                    "label": "Style",
+                                    "options": [
+                                      {
+                                        "label": "Primary (blurple)",
+                                        "value": 1,
+                                        "nested": [
+                                          {
+                                            "help": "A developer-defined identifier for the button, max 100 characters.",
+                                            "name": "custom_id",
+                                            "type": "text",
+                                            "label": "Custom ID",
+                                            "required": true
+                                          }
+                                        ]
+                                      },
+                                      {
+                                        "label": "Secondary (grey)",
+                                        "value": 2,
+                                        "nested": [
+                                          {
+                                            "help": "A developer-defined identifier for the button, max 100 characters.",
+                                            "name": "custom_id",
+                                            "type": "text",
+                                            "label": "Custom ID",
+                                            "required": true
+                                          }
+                                        ]
+                                      },
+                                      {
+                                        "label": "Success (green)",
+                                        "value": 3,
+                                        "nested": [
+                                          {
+                                            "help": "A developer-defined identifier for the button, max 100 characters.",
+                                            "name": "custom_id",
+                                            "type": "text",
+                                            "label": "Custom ID",
+                                            "required": true
+                                          }
+                                        ]
+                                      },
+                                      {
+                                        "label": "Danger (red)",
+                                        "value": 4,
+                                        "nested": [
+                                          {
+                                            "help": "A developer-defined identifier for the button, max 100 characters.",
+                                            "name": "custom_id",
+                                            "type": "text",
+                                            "label": "Custom ID",
+                                            "required": true
+                                          }
+                                        ]
+                                      },
+                                      {
+                                        "label": "Link (grey)",
+                                        "value": 5,
+                                        "nested": [
+                                          {
+                                            "help": "A URL for link-style buttons.",
+                                            "name": "url",
+                                            "type": "url",
+                                            "label": "URL",
+                                            "required": true
+                                          }
+                                        ]
+                                      }
+                                    ],
+                                    "required": true
+                                  },
+                                  {
+                                    "help": "Text that appears on the button, max 80 characters.",
+                                    "name": "label",
+                                    "type": "text",
+                                    "label": "Label"
+                                  },
+                                  {
+                                    "name": "disabled",
+                                    "type": "boolean",
+                                    "label": "Disabled"
+                                  }
+                                ]
+                              },
+                              {
+                                "label": "Select Menu",
+                                "value": 3,
+                                "nested": [
+                                  {
+                                    "help": "A developer-defined identifier for the button, max 100 characters.",
+                                    "name": "custom_id",
+                                    "type": "text",
+                                    "label": "Custom ID",
+                                    "required": true
+                                  },
+                                  {
+                                    "name": "options",
+                                    "spec": [
+                                      {
+                                        "help": "The user-facing name of the option, max 100 characters.",
+                                        "name": "label",
+                                        "type": "text",
+                                        "label": "Label",
+                                        "required": true
+                                      },
+                                      {
+                                        "help": "The dev-defined value of the option, max 100 characters.",
+                                        "name": "value",
+                                        "type": "text",
+                                        "label": "Value",
+                                        "required": true
+                                      },
+                                      {
+                                        "help": "An additional description of the option, max 100 characters.",
+                                        "name": "description",
+                                        "type": "text",
+                                        "label": "Description"
+                                      },
+                                      {
+                                        "name": "default",
+                                        "type": "boolean",
+                                        "label": "Default"
+                                      }
+                                    ],
+                                    "type": "array",
+                                    "label": "Options",
+                                    "required": true,
+                                    "validate": {
+                                      "maxItems": 25
+                                    }
+                                  },
+                                  {
+                                    "help": "Custom placeholder text if nothing is selected, max 150 characters.",
+                                    "name": "placeholder",
+                                    "type": "text",
+                                    "label": "Placeholder"
+                                  },
+                                  {
+                                    "help": "The minimum number of items that must be chosen; default 1, min 0, max 2.",
+                                    "name": "min_values",
+                                    "type": "uinteger",
+                                    "label": "Minimum values"
+                                  },
+                                  {
+                                    "help": "The maximum number of items that must be chosen; default 1, max 25.",
+                                    "name": "max_values",
+                                    "type": "uinteger",
+                                    "label": "Maximum values"
+                                  },
+                                  {
+                                    "name": "disabled",
+                                    "type": "boolean",
+                                    "label": "Disabled"
+                                  }
+                                ]
+                              }
+                            ],
+                            "required": true
+                          }
+                        ],
+                        "type": "array",
+                        "label": "Row Components",
+                        "required": true
+                      }
+                    ]
+                  }
+                ],
+                "required": true
+              }
+            ],
+            "type": "array",
+            "label": "Components"
+          },
+          {
+            "name": "files",
+            "spec": [
+              {
+                "name": "filename",
+                "type": "filename",
+                "label": "File Name",
+                "required": true,
+                "semantic": "file:name"
+              },
+              {
+                "name": "data",
+                "type": "buffer",
+                "label": "Data",
+                "required": true,
+                "semantic": "file:data"
+              }
+            ],
+            "type": "array",
+            "label": "Files"
+          },
+          {
+            "name": "username",
+            "type": "text",
+            "label": "Username"
+          },
+          {
+            "name": "avatar_url",
+            "type": "url",
+            "label": "Avatar URL"
+          },
+          {
+            "name": "moduleWebhookUrl",
+            "type": "url",
+            "label": "Custom Webhook URL"
+          }
+        ]
+      }
+    }
+  ],
+  "metadata": {
+    "instant": false,
+    "version": 1,
+    "scenario": {
+      "roundtrips": 1,
+      "maxErrors": 3,
+      "autoCommit": true,
+      "autoCommitTriggerLast": true,
+      "sequential": false,
+      "slots": null,
+      "confidential": false,
+      "dataloss": false,
+      "dlq": false,
+      "freshVariables": false
+    },
+    "designer": {
+      "orphans": []
+    },
+    "zone": "eu1.make.com",
+    "notes": [
+      {
+        "moduleIds": [
+          4
+        ],
+        "content": "<p><strong>ZUSTELLUNG:</strong> </p><p>Postet den fertigen Entwurf in deinen Community Weekly-News Kanal.</p>",
+        "isFilterNote": false,
+        "metadata": {
+          "color": "#9138FE"
+        }
+      },
+      {
+        "moduleIds": [
+          3
+        ],
+        "content": "<p><strong>REDAKTEUR:</strong> </p><p>Wählt die Top-3 Themen aus und schreibt einen persönlichen Newsletter-Entwurf.</p>",
+        "isFilterNote": false,
+        "metadata": {
+          "color": "#9138FE"
+        }
+      },
+      {
+        "moduleIds": [
+          2
+        ],
+        "content": "<p><strong>BÜNDELUNG:</strong> </p><p>Fasst alle einzelnen Artikel zu einer langen Text-Liste für die KI zusammen.</p>",
+        "isFilterNote": false,
+        "metadata": {
+          "color": "#9138FE"
+        }
+      },
+      {
+        "moduleIds": [
+          1
+        ],
+        "content": "<p><strong>SAMMLER:</strong> </p><p>Holt jeden Freitagmorgen alle Artikel, die seit dem letzten Lauf veröffentlicht wurden. (Limit ist auf 100)</p>",
+        "isFilterNote": false,
+        "metadata": {
+          "color": "#9138FE"
+        }
+      }
+    ]
+  }
+}

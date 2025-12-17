@@ -1,0 +1,764 @@
+{
+  "name": "LTL Sales-Bot [US]",
+  "flow": [
+    {
+      "id": 1,
+      "module": "gumroad:TriggerNewSales",
+      "version": 1,
+      "parameters": {
+        "__IMTHOOK__": 0
+      },
+      "mapper": {},
+      "metadata": {
+        "designer": {
+          "x": 0,
+          "y": 0,
+          "name": "🛒 Gumroad Checkout (New Sale)"
+        },
+        "restore": {
+          "parameters": {
+            "__IMTHOOK__": {
+              "data": {
+                "editable": "false"
+              },
+              "label": "Gumroad Sales webhook"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "__IMTHOOK__",
+            "type": "hook:gumroad",
+            "label": "Webhook",
+            "required": true
+          }
+        ]
+      }
+    },
+    {
+      "id": 2,
+      "module": "discord:PostMessage",
+      "version": 2,
+      "parameters": {
+        "__IMTCONN__": 0
+      },
+      "mapper": {
+        "content": "💰 **KACHING! NEW SALE!** 💰\n\n**Product:** {{1.product_name}}\n**Price:** {{1.price}} {{1.currency}}\n**Customer:** {{1.email}}\n\n🚀 Keep it up!"
+      },
+      "metadata": {
+        "designer": {
+          "x": 300,
+          "y": 0,
+          "name": "🔔 Mission Control Alert (Kaching)"
+        },
+        "restore": {
+          "expect": {
+            "tts": {
+              "mode": "chose"
+            },
+            "files": {
+              "mode": "chose"
+            },
+            "embeds": {
+              "mode": "chose"
+            },
+            "components": {
+              "mode": "chose"
+            },
+            "waitForMessageBody": {
+              "mode": "chose"
+            }
+          },
+          "parameters": {
+            "__IMTCONN__": {
+              "data": {
+                "scoped": "true",
+                "connection": "discord"
+              },
+              "label": "Discord Admin-Sales (Make (team1278341651986911253))"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "__IMTCONN__",
+            "type": "account:discord",
+            "label": "Connection",
+            "required": true
+          }
+        ],
+        "expect": [
+          {
+            "name": "content",
+            "type": "text",
+            "label": "Message"
+          },
+          {
+            "name": "waitForMessageBody",
+            "type": "boolean",
+            "label": "Wait for Message Body"
+          },
+          {
+            "name": "tts",
+            "type": "boolean",
+            "label": "Is TTS message"
+          },
+          {
+            "name": "embeds",
+            "spec": [
+              {
+                "name": "title",
+                "type": "text",
+                "label": "Title"
+              },
+              {
+                "name": "type",
+                "type": "text",
+                "label": "Type"
+              },
+              {
+                "name": "description",
+                "type": "text",
+                "label": "Description"
+              },
+              {
+                "name": "url",
+                "type": "url",
+                "label": "URL"
+              },
+              {
+                "name": "timestamp",
+                "type": "date",
+                "label": "Timestamp"
+              },
+              {
+                "name": "color",
+                "type": "uinteger",
+                "label": "Color"
+              },
+              {
+                "name": "footer",
+                "spec": [
+                  {
+                    "name": "text",
+                    "type": "text",
+                    "label": "Text"
+                  },
+                  {
+                    "name": "icon_url",
+                    "type": "url",
+                    "label": "Icon URL"
+                  },
+                  {
+                    "name": "proxy_icon_url",
+                    "type": "url",
+                    "label": "Proxy Icon URL"
+                  }
+                ],
+                "type": "collection",
+                "label": "Footer"
+              },
+              {
+                "name": "image",
+                "spec": [
+                  {
+                    "name": "url",
+                    "type": "url",
+                    "label": "URL"
+                  },
+                  {
+                    "name": "proxy_url",
+                    "type": "url",
+                    "label": "Proxy URL"
+                  },
+                  {
+                    "name": "height",
+                    "type": "uinteger",
+                    "label": "Height"
+                  },
+                  {
+                    "name": "width",
+                    "type": "uinteger",
+                    "label": "Width"
+                  }
+                ],
+                "type": "collection",
+                "label": "Image"
+              },
+              {
+                "name": "thumbnail",
+                "spec": [
+                  {
+                    "name": "url",
+                    "type": "url",
+                    "label": "URL"
+                  },
+                  {
+                    "name": "proxy_url",
+                    "type": "url",
+                    "label": "Proxy URL"
+                  },
+                  {
+                    "name": "height",
+                    "type": "uinteger",
+                    "label": "Height"
+                  },
+                  {
+                    "name": "width",
+                    "type": "uinteger",
+                    "label": "Width"
+                  }
+                ],
+                "type": "collection",
+                "label": "Thumbnail"
+              },
+              {
+                "name": "video",
+                "spec": [
+                  {
+                    "name": "url",
+                    "type": "url",
+                    "label": "URL"
+                  },
+                  {
+                    "name": "height",
+                    "type": "uinteger",
+                    "label": "Height"
+                  },
+                  {
+                    "name": "width",
+                    "type": "uinteger",
+                    "label": "Width"
+                  }
+                ],
+                "type": "collection",
+                "label": "Video"
+              },
+              {
+                "name": "provider",
+                "spec": [
+                  {
+                    "name": "name",
+                    "type": "text",
+                    "label": "Name"
+                  },
+                  {
+                    "name": "url",
+                    "type": "url",
+                    "label": "URL"
+                  }
+                ],
+                "type": "collection",
+                "label": "Provider"
+              },
+              {
+                "name": "author",
+                "spec": [
+                  {
+                    "name": "name",
+                    "type": "text",
+                    "label": "Name"
+                  },
+                  {
+                    "name": "url",
+                    "type": "url",
+                    "label": "URL"
+                  },
+                  {
+                    "name": "icon_url",
+                    "type": "url",
+                    "label": "Icon URL"
+                  },
+                  {
+                    "name": "proxy_icon_url",
+                    "type": "url",
+                    "label": "Proxy Icon URL"
+                  }
+                ],
+                "type": "collection",
+                "label": "Author"
+              },
+              {
+                "name": "fields",
+                "spec": [
+                  {
+                    "name": "name",
+                    "type": "text",
+                    "label": "Name"
+                  },
+                  {
+                    "name": "value",
+                    "type": "text",
+                    "label": "Value"
+                  },
+                  {
+                    "name": "inline",
+                    "type": "boolean",
+                    "label": "Inline Flag"
+                  }
+                ],
+                "type": "array",
+                "label": "Fields"
+              }
+            ],
+            "type": "array",
+            "label": "Embeds"
+          },
+          {
+            "name": "components",
+            "spec": [
+              {
+                "name": "type",
+                "type": "select",
+                "label": "Component Type",
+                "options": [
+                  {
+                    "label": "A New Row",
+                    "value": 1,
+                    "nested": [
+                      {
+                        "name": "components",
+                        "spec": [
+                          {
+                            "name": "type",
+                            "type": "select",
+                            "label": "Row Component Type",
+                            "options": [
+                              {
+                                "label": "Button",
+                                "value": 2,
+                                "nested": [
+                                  {
+                                    "name": "style",
+                                    "type": "select",
+                                    "label": "Style",
+                                    "options": [
+                                      {
+                                        "label": "Primary (blurple)",
+                                        "value": 1,
+                                        "nested": [
+                                          {
+                                            "help": "A developer-defined identifier for the button, max 100 characters.",
+                                            "name": "custom_id",
+                                            "type": "text",
+                                            "label": "Custom ID",
+                                            "required": true
+                                          }
+                                        ]
+                                      },
+                                      {
+                                        "label": "Secondary (grey)",
+                                        "value": 2,
+                                        "nested": [
+                                          {
+                                            "help": "A developer-defined identifier for the button, max 100 characters.",
+                                            "name": "custom_id",
+                                            "type": "text",
+                                            "label": "Custom ID",
+                                            "required": true
+                                          }
+                                        ]
+                                      },
+                                      {
+                                        "label": "Success (green)",
+                                        "value": 3,
+                                        "nested": [
+                                          {
+                                            "help": "A developer-defined identifier for the button, max 100 characters.",
+                                            "name": "custom_id",
+                                            "type": "text",
+                                            "label": "Custom ID",
+                                            "required": true
+                                          }
+                                        ]
+                                      },
+                                      {
+                                        "label": "Danger (red)",
+                                        "value": 4,
+                                        "nested": [
+                                          {
+                                            "help": "A developer-defined identifier for the button, max 100 characters.",
+                                            "name": "custom_id",
+                                            "type": "text",
+                                            "label": "Custom ID",
+                                            "required": true
+                                          }
+                                        ]
+                                      },
+                                      {
+                                        "label": "Link (grey)",
+                                        "value": 5,
+                                        "nested": [
+                                          {
+                                            "help": "A URL for link-style buttons.",
+                                            "name": "url",
+                                            "type": "url",
+                                            "label": "URL",
+                                            "required": true
+                                          }
+                                        ]
+                                      }
+                                    ],
+                                    "required": true
+                                  },
+                                  {
+                                    "help": "Text that appears on the button, max 80 characters.",
+                                    "name": "label",
+                                    "type": "text",
+                                    "label": "Label"
+                                  },
+                                  {
+                                    "name": "disabled",
+                                    "type": "boolean",
+                                    "label": "Disabled"
+                                  }
+                                ]
+                              },
+                              {
+                                "label": "Select Menu",
+                                "value": 3,
+                                "nested": [
+                                  {
+                                    "help": "A developer-defined identifier for the button, max 100 characters.",
+                                    "name": "custom_id",
+                                    "type": "text",
+                                    "label": "Custom ID",
+                                    "required": true
+                                  },
+                                  {
+                                    "name": "options",
+                                    "spec": [
+                                      {
+                                        "help": "The user-facing name of the option, max 100 characters.",
+                                        "name": "label",
+                                        "type": "text",
+                                        "label": "Label",
+                                        "required": true
+                                      },
+                                      {
+                                        "help": "The dev-defined value of the option, max 100 characters.",
+                                        "name": "value",
+                                        "type": "text",
+                                        "label": "Value",
+                                        "required": true
+                                      },
+                                      {
+                                        "help": "An additional description of the option, max 100 characters.",
+                                        "name": "description",
+                                        "type": "text",
+                                        "label": "Description"
+                                      },
+                                      {
+                                        "name": "default",
+                                        "type": "boolean",
+                                        "label": "Default"
+                                      }
+                                    ],
+                                    "type": "array",
+                                    "label": "Options",
+                                    "required": true,
+                                    "validate": {
+                                      "maxItems": 25
+                                    }
+                                  },
+                                  {
+                                    "help": "Custom placeholder text if nothing is selected, max 150 characters.",
+                                    "name": "placeholder",
+                                    "type": "text",
+                                    "label": "Placeholder"
+                                  },
+                                  {
+                                    "help": "The minimum number of items that must be chosen; default 1, min 0, max 2.",
+                                    "name": "min_values",
+                                    "type": "uinteger",
+                                    "label": "Minimum values"
+                                  },
+                                  {
+                                    "help": "The maximum number of items that must be chosen; default 1, max 25.",
+                                    "name": "max_values",
+                                    "type": "uinteger",
+                                    "label": "Maximum values"
+                                  },
+                                  {
+                                    "name": "disabled",
+                                    "type": "boolean",
+                                    "label": "Disabled"
+                                  }
+                                ]
+                              }
+                            ],
+                            "required": true
+                          }
+                        ],
+                        "type": "array",
+                        "label": "Row Components",
+                        "required": true
+                      }
+                    ]
+                  }
+                ],
+                "required": true
+              }
+            ],
+            "type": "array",
+            "label": "Components"
+          },
+          {
+            "name": "files",
+            "spec": [
+              {
+                "name": "filename",
+                "type": "filename",
+                "label": "File Name",
+                "required": true,
+                "semantic": "file:name"
+              },
+              {
+                "name": "data",
+                "type": "buffer",
+                "label": "Data",
+                "required": true,
+                "semantic": "file:data"
+              }
+            ],
+            "type": "array",
+            "label": "Files"
+          },
+          {
+            "name": "username",
+            "type": "text",
+            "label": "Username"
+          },
+          {
+            "name": "avatar_url",
+            "type": "url",
+            "label": "Avatar URL"
+          },
+          {
+            "name": "moduleWebhookUrl",
+            "type": "url",
+            "label": "Custom Webhook URL"
+          }
+        ]
+      }
+    },
+    {
+      "id": 3,
+      "module": "mailerlite2:CreateUpdateSubscriber",
+      "version": 1,
+      "parameters": {
+        "__IMTCONN__": 0
+      },
+      "mapper": {
+        "email": "{{1.email}}",
+        "fields": {
+          "name": "{{1.full_name}}"
+        },
+        "groups": [
+          "172535402261906779"
+        ]
+      },
+      "metadata": {
+        "designer": {
+          "x": 600,
+          "y": 0,
+          "name": "📧 Customer List (Upsell Prep)"
+        },
+        "restore": {
+          "expect": {
+            "groups": {
+              "mode": "chose",
+              "items": [
+                {
+                  "value": {
+                    "mode": "chose",
+                    "label": "Gumroad Leads for more Products"
+                  }
+                }
+              ]
+            },
+            "status": {
+              "mode": "chose",
+              "label": "Empty"
+            }
+          },
+          "parameters": {
+            "__IMTCONN__": {
+              "data": {
+                "scoped": "true",
+                "connection": "mailerlite2"
+              },
+              "label": "My MailerLite connection"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "__IMTCONN__",
+            "type": "account:mailerlite2",
+            "label": "Connection",
+            "required": true
+          }
+        ],
+        "expect": [
+          {
+            "name": "email",
+            "type": "email",
+            "label": "Email address",
+            "required": true
+          },
+          {
+            "name": "fields",
+            "spec": [
+              {
+                "name": "name",
+                "type": "text",
+                "label": "Name"
+              },
+              {
+                "name": "last_name",
+                "type": "text",
+                "label": "Last name"
+              },
+              {
+                "name": "company",
+                "type": "text",
+                "label": "Company"
+              },
+              {
+                "name": "country",
+                "type": "text",
+                "label": "Country"
+              },
+              {
+                "name": "city",
+                "type": "text",
+                "label": "City"
+              },
+              {
+                "name": "phone",
+                "type": "text",
+                "label": "Phone"
+              },
+              {
+                "name": "state",
+                "type": "text",
+                "label": "State"
+              },
+              {
+                "name": "z_i_p",
+                "type": "text",
+                "label": "Zip"
+              }
+            ],
+            "type": "collection",
+            "label": "Fields"
+          },
+          {
+            "name": "groups",
+            "spec": {
+              "name": "value",
+              "type": "select",
+              "label": "Group ID",
+              "dynamic": true,
+              "options": []
+            },
+            "type": "array",
+            "label": "Group IDs"
+          },
+          {
+            "name": "status",
+            "type": "select",
+            "label": "Status",
+            "validate": {
+              "enum": [
+                "active",
+                "unsubscribed",
+                "unconfirmed",
+                "bounced",
+                "junk"
+              ]
+            }
+          },
+          {
+            "name": "subscribed_at",
+            "type": "date",
+            "label": "Subscribed On"
+          },
+          {
+            "name": "unsubscribed_at",
+            "type": "date",
+            "label": "Unsubscribed On"
+          },
+          {
+            "name": "opted_in_at",
+            "type": "date",
+            "label": "Opt-in date"
+          },
+          {
+            "name": "ip_address",
+            "type": "text",
+            "label": "Signup IP address"
+          },
+          {
+            "name": "optin_ip",
+            "type": "text",
+            "label": "Opt-in IP address"
+          }
+        ]
+      }
+    }
+  ],
+  "metadata": {
+    "instant": true,
+    "version": 1,
+    "scenario": {
+      "roundtrips": 1,
+      "maxErrors": 3,
+      "autoCommit": true,
+      "autoCommitTriggerLast": true,
+      "sequential": false,
+      "slots": null,
+      "confidential": false,
+      "dataloss": false,
+      "dlq": false,
+      "freshVariables": false
+    },
+    "designer": {
+      "orphans": []
+    },
+    "zone": "eu1.make.com",
+    "notes": [
+      {
+        "moduleIds": [
+          3
+        ],
+        "content": "<p><strong>EMAIL SORTING:</strong> </p><p>Adds the buyer to the \"Customers\" group to enable upsells.</p>",
+        "isFilterNote": false,
+        "metadata": {
+          "color": "#9138FE"
+        }
+      },
+      {
+        "moduleIds": [
+          2
+        ],
+        "content": "<p><strong>ALERT:</strong> </p><p>Posts the \"Kaching\" alert with price and product name to the admin chat.</p>",
+        "isFilterNote": false,
+        "metadata": {
+          "color": "#9138FE"
+        }
+      },
+      {
+        "moduleIds": [
+          1
+        ],
+        "content": "<p><strong>TRIGGER:</strong> </p><p>Fires immediately when a purchase happens on Gumroad.</p>",
+        "isFilterNote": false,
+        "metadata": {
+          "color": "#9138FE"
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,4898 @@
+{
+  "name": "LTL Admin-Watchdog [DE]",
+  "flow": [
+    {
+      "id": 1,
+      "module": "make:listScenarios",
+      "version": 1,
+      "parameters": {
+        "__IMTCONN__": 0
+      },
+      "mapper": {
+        "team": 567533,
+        "limit": "50",
+        "folder": 268205,
+        "islinked": true,
+        "organization": 5866005
+      },
+      "metadata": {
+        "designer": {
+          "x": 0,
+          "y": 0,
+          "name": "🤖 System-Scanner (Make API)"
+        },
+        "restore": {
+          "expect": {
+            "cols": {
+              "mode": "chose"
+            },
+            "team": {
+              "mode": "chose",
+              "label": "[NAME]+Gemini 3 Pro"
+            },
+            "folder": {
+              "mode": "chose",
+              "label": "LazyTechLab"
+            },
+            "islinked": {
+              "mode": "chose"
+            },
+            "organization": {
+              "mode": "chose",
+              "label": "LazyTechLab"
+            }
+          },
+          "parameters": {
+            "__IMTCONN__": {
+              "data": {
+                "scoped": "true",
+                "connection": "make"
+              },
+              "label": "My Make (API key) connection (REDACTED_EMAIL)"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "__IMTCONN__",
+            "type": "account:make2,make",
+            "label": "Connection",
+            "required": true
+          }
+        ],
+        "expect": [
+          {
+            "name": "organization",
+            "type": "select",
+            "label": "Organization"
+          },
+          {
+            "name": "islinked",
+            "type": "boolean",
+            "label": "Only active scenarios"
+          },
+          {
+            "name": "cols",
+            "type": "select",
+            "label": "Fields",
+            "multiple": true,
+            "validate": {
+              "enum": [
+                "created",
+                "createdByUser",
+                "description",
+                "deviceId",
+                "deviceScope",
+                "dlqCount",
+                "folderId",
+                "hookId",
+                "isinvalid",
+                "islinked",
+                "islocked",
+                "isPaused",
+                "iswaiting",
+                "lastEdit",
+                "name",
+                "nextExec",
+                "id",
+                "scheduling",
+                "teamId",
+                "updatedByUser",
+                "usedPackages",
+                "customProperties"
+              ]
+            }
+          },
+          {
+            "name": "limit",
+            "type": "uinteger",
+            "label": "Limit"
+          },
+          {
+            "name": "team",
+            "type": "select",
+            "label": "Team"
+          },
+          {
+            "name": "folder",
+            "type": "select",
+            "label": "Folder"
+          }
+        ]
+      }
+    },
+    {
+      "id": 2,
+      "module": "util:TextAggregator",
+      "version": 1,
+      "parameters": {
+        "feeder": 1,
+        "rowSeparator": ""
+      },
+      "mapper": {
+        "value": "- Szenario: {{1.name}} | Pausiert: {{1.isPaused}} | Ungültig: {{1.isinvalid}}"
+      },
+      "metadata": {
+        "designer": {
+          "x": 300,
+          "y": 0,
+          "name": "📦 Status-Log"
+        },
+        "restore": {
+          "extra": {
+            "feeder": {
+              "label": "🤖 System-Scanner (Make API) - List scenarios [1]"
+            }
+          },
+          "parameters": {
+            "rowSeparator": {
+              "label": "Empty"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "rowSeparator",
+            "type": "select",
+            "label": "Row separator",
+            "validate": {
+              "enum": [
+                "\n",
+                "\t",
+                "other"
+              ]
+            }
+          }
+        ],
+        "expect": [
+          {
+            "name": "value",
+            "type": "text",
+            "label": "Text"
+          }
+        ]
+      }
+    },
+    {
+      "id": 3,
+      "module": "google-analytics-4:generateAnalyticsReports",
+      "version": 1,
+      "parameters": {
+        "__IMTCONN__": 0
+      },
+      "mapper": {
+        "limit": "1000",
+        "metrics": [
+          "activeUsers",
+          "screenPageViews",
+          "sessions"
+        ],
+        "dateRanges": "yesterday",
+        "dimensions": [
+          "date"
+        ],
+        "keepEmptyRows": false,
+        "filterModeMetric": "choose",
+        "filterModeDimension": "choose"
+      },
+      "metadata": {
+        "designer": {
+          "x": 600,
+          "y": 0,
+          "name": "📊 Traffic-Daten (GA4)"
+        },
+        "restore": {
+          "expect": {
+            "metrics": {
+              "mode": "chose",
+              "label": [
+                "Active users",
+                "Views",
+                "Sessions"
+              ]
+            },
+            "dateRanges": {
+              "label": "Yesterday"
+            },
+            "dimensions": {
+              "mode": "chose",
+              "label": [
+                "Date"
+              ]
+            },
+            "keepEmptyRows": {
+              "mode": "chose"
+            },
+            "filterModeMetric": {
+              "label": "Choose"
+            },
+            "metricAggregations": {
+              "mode": "chose"
+            },
+            "filterModeDimension": {
+              "label": "Choose"
+            }
+          },
+          "parameters": {
+            "__IMTCONN__": {
+              "data": {
+                "scoped": "true",
+                "connection": "google-analytics-4"
+              },
+              "label": "My Google Analytics 4 connection (lazytechlab.de)"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "__IMTCONN__",
+            "type": "account:google-analytics-4",
+            "label": "Connection",
+            "required": true
+          }
+        ],
+        "expect": [
+          {
+            "name": "dateRanges",
+            "type": "select",
+            "label": "Date Ranges",
+            "validate": {
+              "enum": [
+                "yesterday",
+                "thisWeekMon",
+                "thisWeekSun",
+                "lastWeekSunSat",
+                "lastWeekMonSun",
+                "lastWeekSatFri",
+                "7daysAgo",
+                "28daysAgo",
+                "30daysAgo",
+                "quarter",
+                "custom"
+              ]
+            }
+          },
+          {
+            "name": "dimensions",
+            "type": "select",
+            "label": "Dimensions",
+            "multiple": true,
+            "required": true
+          },
+          {
+            "name": "metrics",
+            "type": "select",
+            "label": "Metrics",
+            "multiple": true,
+            "required": true,
+            "validate": {
+              "maxItems": 10
+            }
+          },
+          {
+            "name": "limit",
+            "type": "uinteger",
+            "label": "Limit",
+            "validate": {
+              "max": 100000
+            }
+          },
+          {
+            "name": "metricAggregations",
+            "spec": {
+              "name": "value",
+              "type": "select",
+              "label": "Aggregation",
+              "options": [
+                {
+                  "value": "MINIMUM"
+                },
+                {
+                  "value": "MAXIMUM"
+                },
+                {
+                  "value": "TOTAL"
+                },
+                {
+                  "value": "COUNT"
+                }
+              ],
+              "required": true
+            },
+            "type": "array",
+            "label": "Metric Aggregations"
+          },
+          {
+            "name": "keepEmptyRows",
+            "type": "boolean",
+            "label": "Keep Empty Rows",
+            "required": true
+          },
+          {
+            "name": "filterModeDimension",
+            "type": "select",
+            "label": "Filter mode",
+            "required": true,
+            "validate": {
+              "enum": [
+                "choose",
+                "map"
+              ]
+            }
+          },
+          {
+            "name": "dimensionFilter",
+            "type": "filter",
+            "label": "Dimension Filter",
+            "options": {
+              "store": [
+                {
+                  "label": "Date",
+                  "value": "date",
+                  "default": true
+                }
+              ],
+              "operators": [
+                {
+                  "label": "Text",
+                  "options": [
+                    {
+                      "label": "exactly matches",
+                      "value": "EXACT"
+                    },
+                    {
+                      "label": "contains",
+                      "value": "CONTAINS",
+                      "default": true
+                    },
+                    {
+                      "label": "begins with",
+                      "value": "BEGINS_WITH"
+                    },
+                    {
+                      "label": "ends with",
+                      "value": "ENDS_WITH"
+                    },
+                    {
+                      "label": "full match regex",
+                      "value": "FULL_REGEXP"
+                    },
+                    {
+                      "label": "partial match regex",
+                      "value": "PARTIAL_REGEXP"
+                    },
+                    {
+                      "label": "doesn't exactly match",
+                      "value": "!EXACT"
+                    },
+                    {
+                      "label": "doesn't contain",
+                      "value": "!CONTAINS"
+                    },
+                    {
+                      "label": "doesn't begin with",
+                      "value": "!BEGINS_WITH"
+                    },
+                    {
+                      "label": "doesn't end with",
+                      "value": "!ENDS_WITH"
+                    },
+                    {
+                      "label": "doesn't fully match regex",
+                      "value": "!FULL_REGEXP"
+                    },
+                    {
+                      "label": "doesn't partialy match regex",
+                      "value": "!PARTIAL_REGEXP"
+                    },
+                    {
+                      "label": "in list of values (must be comma-separated)",
+                      "value": "IN_LIST"
+                    }
+                  ]
+                },
+                {
+                  "label": "Text case-sensitive",
+                  "options": [
+                    {
+                      "label": "exactly matches",
+                      "value": "EXACT-sensitive"
+                    },
+                    {
+                      "label": "contains",
+                      "value": "CONTAINS-sensitive"
+                    },
+                    {
+                      "label": "begins with",
+                      "value": "BEGINS_WITH-sensitive"
+                    },
+                    {
+                      "label": "ends with",
+                      "value": "ENDS_WITH-sensitive"
+                    },
+                    {
+                      "label": "full match regex",
+                      "value": "FULL_REGEXP-sensitive"
+                    },
+                    {
+                      "label": "partial match regex",
+                      "value": "PARTIAL_REGEXP-sensitive"
+                    },
+                    {
+                      "label": "doesn't exactly match",
+                      "value": "!EXACT-sensitive"
+                    },
+                    {
+                      "label": "doesn't contain",
+                      "value": "!CONTAINS-sensitive"
+                    },
+                    {
+                      "label": "doesn't begin with",
+                      "value": "!BEGINS_WITH-sensitive"
+                    },
+                    {
+                      "label": "doesn't end with",
+                      "value": "!ENDS_WITH-sensitive"
+                    },
+                    {
+                      "label": "doesn't fully match regex",
+                      "value": "!FULL_REGEXP-sensitive"
+                    },
+                    {
+                      "label": "doesn't partialy match regex",
+                      "value": "!PARTIAL_REGEXP-sensitive"
+                    },
+                    {
+                      "label": "in list of values (must be comma-separated)",
+                      "value": "IN_LIST-sensitive"
+                    }
+                  ]
+                },
+                {
+                  "label": "Number",
+                  "options": [
+                    {
+                      "label": "=",
+                      "value": "EQUAL"
+                    },
+                    {
+                      "label": ">",
+                      "value": "GREATER_THAN"
+                    },
+                    {
+                      "label": "<",
+                      "value": "LESS_THAN"
+                    },
+                    {
+                      "label": "!=",
+                      "value": "!EQUAL"
+                    },
+                    {
+                      "label": "<=",
+                      "value": "LESS_THAN_OR_EQUAL"
+                    },
+                    {
+                      "label": ">=",
+                      "value": "GREATER_THAN_OR_EQUAL"
+                    }
+                  ]
+                },
+                {
+                  "label": "Other",
+                  "options": [
+                    {
+                      "label": "between two numbers (must be comma-separated)",
+                      "value": "BETWEEN"
+                    },
+                    {
+                      "label": "exists",
+                      "value": "exist"
+                    },
+                    {
+                      "label": "doesn't exist",
+                      "value": "notexist"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "name": "filterModeMetric",
+            "type": "select",
+            "label": "Filter mode",
+            "required": true,
+            "validate": {
+              "enum": [
+                "choose",
+                "map"
+              ]
+            }
+          },
+          {
+            "name": "metricFilter",
+            "type": "filter",
+            "label": "Metric Filter",
+            "options": {
+              "store": [
+                {
+                  "label": "Active users",
+                  "value": "activeUsers",
+                  "default": true
+                },
+                {
+                  "label": "Views",
+                  "value": "screenPageViews",
+                  "default": true
+                },
+                {
+                  "label": "Sessions",
+                  "value": "sessions",
+                  "default": true
+                }
+              ],
+              "operators": [
+                {
+                  "label": "Text",
+                  "options": [
+                    {
+                      "label": "exactly matches",
+                      "value": "EXACT"
+                    },
+                    {
+                      "label": "contains",
+                      "value": "CONTAINS",
+                      "default": true
+                    },
+                    {
+                      "label": "begins with",
+                      "value": "BEGINS_WITH"
+                    },
+                    {
+                      "label": "ends with",
+                      "value": "ENDS_WITH"
+                    },
+                    {
+                      "label": "full match regex",
+                      "value": "FULL_REGEXP"
+                    },
+                    {
+                      "label": "partial match regex",
+                      "value": "PARTIAL_REGEXP"
+                    },
+                    {
+                      "label": "doesn't exactly match",
+                      "value": "!EXACT"
+                    },
+                    {
+                      "label": "doesn't contain",
+                      "value": "!CONTAINS"
+                    },
+                    {
+                      "label": "doesn't begin with",
+                      "value": "!BEGINS_WITH"
+                    },
+                    {
+                      "label": "doesn't end with",
+                      "value": "!ENDS_WITH"
+                    },
+                    {
+                      "label": "doesn't fully match regex",
+                      "value": "!FULL_REGEXP"
+                    },
+                    {
+                      "label": "doesn't partialy match regex",
+                      "value": "!PARTIAL_REGEXP"
+                    },
+                    {
+                      "label": "in list of values (must be comma-separated)",
+                      "value": "IN_LIST"
+                    }
+                  ]
+                },
+                {
+                  "label": "Text case-sensitive",
+                  "options": [
+                    {
+                      "label": "exactly matches",
+                      "value": "EXACT-sensitive"
+                    },
+                    {
+                      "label": "contains",
+                      "value": "CONTAINS-sensitive"
+                    },
+                    {
+                      "label": "begins with",
+                      "value": "BEGINS_WITH-sensitive"
+                    },
+                    {
+                      "label": "ends with",
+                      "value": "ENDS_WITH-sensitive"
+                    },
+                    {
+                      "label": "full match regex",
+                      "value": "FULL_REGEXP-sensitive"
+                    },
+                    {
+                      "label": "partial match regex",
+                      "value": "PARTIAL_REGEXP-sensitive"
+                    },
+                    {
+                      "label": "doesn't exactly match",
+                      "value": "!EXACT-sensitive"
+                    },
+                    {
+                      "label": "doesn't contain",
+                      "value": "!CONTAINS-sensitive"
+                    },
+                    {
+                      "label": "doesn't begin with",
+                      "value": "!BEGINS_WITH-sensitive"
+                    },
+                    {
+                      "label": "doesn't end with",
+                      "value": "!ENDS_WITH-sensitive"
+                    },
+                    {
+                      "label": "doesn't fully match regex",
+                      "value": "!FULL_REGEXP-sensitive"
+                    },
+                    {
+                      "label": "doesn't partialy match regex",
+                      "value": "!PARTIAL_REGEXP-sensitive"
+                    },
+                    {
+                      "label": "in list of values (must be comma-separated)",
+                      "value": "IN_LIST-sensitive"
+                    }
+                  ]
+                },
+                {
+                  "label": "Number",
+                  "options": [
+                    {
+                      "label": "=",
+                      "value": "EQUAL"
+                    },
+                    {
+                      "label": ">",
+                      "value": "GREATER_THAN"
+                    },
+                    {
+                      "label": "<",
+                      "value": "LESS_THAN"
+                    },
+                    {
+                      "label": "!=",
+                      "value": "!EQUAL"
+                    },
+                    {
+                      "label": "<=",
+                      "value": "LESS_THAN_OR_EQUAL"
+                    },
+                    {
+                      "label": ">=",
+                      "value": "GREATER_THAN_OR_EQUAL"
+                    }
+                  ]
+                },
+                {
+                  "label": "Other",
+                  "options": [
+                    {
+                      "label": "between two numbers (must be comma-separated)",
+                      "value": "BETWEEN"
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ],
+        "interface": [
+          {
+            "name": "__IMTLENGTH__",
+            "type": "uinteger",
+            "label": "Total number of bundles"
+          },
+          {
+            "name": "__IMTINDEX__",
+            "type": "uinteger",
+            "label": "Bundle order position"
+          },
+          {
+            "name": "achievementId",
+            "type": "text",
+            "label": "Achievement ID"
+          },
+          {
+            "name": "adFormat",
+            "type": "text",
+            "label": "Ad format"
+          },
+          {
+            "name": "adSourceName",
+            "type": "text",
+            "label": "Ad source"
+          },
+          {
+            "name": "adUnitName",
+            "type": "text",
+            "label": "Ad unit"
+          },
+          {
+            "name": "appVersion",
+            "type": "text",
+            "label": "App version"
+          },
+          {
+            "name": "audienceId",
+            "type": "text",
+            "label": "Audience ID"
+          },
+          {
+            "name": "audienceName",
+            "type": "text",
+            "label": "Audience name"
+          },
+          {
+            "name": "audienceResourceName",
+            "type": "text",
+            "label": "Audience resource name"
+          },
+          {
+            "name": "brandingInterest",
+            "type": "text",
+            "label": "Interests"
+          },
+          {
+            "name": "browser",
+            "type": "text",
+            "label": "Browser"
+          },
+          {
+            "name": "campaignId",
+            "type": "text",
+            "label": "Campaign ID"
+          },
+          {
+            "name": "campaignName",
+            "type": "text",
+            "label": "Campaign"
+          },
+          {
+            "name": "character",
+            "type": "text",
+            "label": "Character"
+          },
+          {
+            "name": "city",
+            "type": "text",
+            "label": "City"
+          },
+          {
+            "name": "cityId",
+            "type": "text",
+            "label": "City ID"
+          },
+          {
+            "name": "cm360AccountId",
+            "type": "text",
+            "label": "CM360 account ID"
+          },
+          {
+            "name": "cm360AccountName",
+            "type": "text",
+            "label": "CM360 account name"
+          },
+          {
+            "name": "cm360AdvertiserId",
+            "type": "text",
+            "label": "CM360 advertiser ID"
+          },
+          {
+            "name": "cm360AdvertiserName",
+            "type": "text",
+            "label": "CM360 advertiser name"
+          },
+          {
+            "name": "cm360CampaignId",
+            "type": "text",
+            "label": "CM360 campaign ID"
+          },
+          {
+            "name": "cm360CampaignName",
+            "type": "text",
+            "label": "CM360 campaign name"
+          },
+          {
+            "name": "cm360CreativeFormat",
+            "type": "text",
+            "label": "CM360 creative format"
+          },
+          {
+            "name": "cm360CreativeId",
+            "type": "text",
+            "label": "CM360 creative ID"
+          },
+          {
+            "name": "cm360CreativeName",
+            "type": "text",
+            "label": "CM360 creative name"
+          },
+          {
+            "name": "cm360CreativeType",
+            "type": "text",
+            "label": "CM360 creative type"
+          },
+          {
+            "name": "cm360CreativeTypeId",
+            "type": "text",
+            "label": "CM360 creative type ID"
+          },
+          {
+            "name": "cm360CreativeVersion",
+            "type": "text",
+            "label": "CM360 creative version"
+          },
+          {
+            "name": "cm360Medium",
+            "type": "text",
+            "label": "CM360 medium"
+          },
+          {
+            "name": "cm360PlacementCostStructure",
+            "type": "text",
+            "label": "CM360 placement cost structure"
+          },
+          {
+            "name": "cm360PlacementId",
+            "type": "text",
+            "label": "CM360 placement ID"
+          },
+          {
+            "name": "cm360PlacementName",
+            "type": "text",
+            "label": "CM360 placement name"
+          },
+          {
+            "name": "cm360RenderingId",
+            "type": "text",
+            "label": "CM360 rendering ID"
+          },
+          {
+            "name": "cm360SiteId",
+            "type": "text",
+            "label": "CM360 site ID"
+          },
+          {
+            "name": "cm360SiteName",
+            "type": "text",
+            "label": "CM360 site name"
+          },
+          {
+            "name": "cm360Source",
+            "type": "text",
+            "label": "CM360 source"
+          },
+          {
+            "name": "cm360SourceMedium",
+            "type": "text",
+            "label": "CM360 source / medium"
+          },
+          {
+            "name": "cohort",
+            "type": "text",
+            "label": "Cohort"
+          },
+          {
+            "name": "cohortNthDay",
+            "type": "text",
+            "label": "Daily cohort"
+          },
+          {
+            "name": "cohortNthMonth",
+            "type": "text",
+            "label": "Monthly cohort"
+          },
+          {
+            "name": "cohortNthWeek",
+            "type": "text",
+            "label": "Weekly cohort"
+          },
+          {
+            "name": "comparison",
+            "type": "text",
+            "label": "Comparison"
+          },
+          {
+            "name": "contentGroup",
+            "type": "text",
+            "label": "Content group"
+          },
+          {
+            "name": "contentId",
+            "type": "text",
+            "label": "Content ID"
+          },
+          {
+            "name": "contentType",
+            "type": "text",
+            "label": "Content type"
+          },
+          {
+            "name": "continent",
+            "type": "text",
+            "label": "Continent"
+          },
+          {
+            "name": "continentId",
+            "type": "text",
+            "label": "Continent ID"
+          },
+          {
+            "name": "country",
+            "type": "text",
+            "label": "Country"
+          },
+          {
+            "name": "countryId",
+            "type": "text",
+            "label": "Country ID"
+          },
+          {
+            "name": "currencyCode",
+            "type": "text",
+            "label": "Currency"
+          },
+          {
+            "name": "date",
+            "type": "text",
+            "label": "Date"
+          },
+          {
+            "name": "dateHour",
+            "type": "text",
+            "label": "Date + hour (YYYYMMDDHH)"
+          },
+          {
+            "name": "dateHourMinute",
+            "type": "text",
+            "label": "Date hour and minute"
+          },
+          {
+            "name": "day",
+            "type": "text",
+            "label": "Day"
+          },
+          {
+            "name": "dayOfWeek",
+            "type": "text",
+            "label": "Day of week"
+          },
+          {
+            "name": "dayOfWeekName",
+            "type": "text",
+            "label": "Day of week name"
+          },
+          {
+            "name": "defaultChannelGroup",
+            "type": "text",
+            "label": "Default channel group"
+          },
+          {
+            "name": "deviceCategory",
+            "type": "text",
+            "label": "Device category"
+          },
+          {
+            "name": "deviceModel",
+            "type": "text",
+            "label": "Device model"
+          },
+          {
+            "name": "dv360AdvertiserId",
+            "type": "text",
+            "label": "DV360 advertiser ID"
+          },
+          {
+            "name": "dv360AdvertiserName",
+            "type": "text",
+            "label": "DV360 advertiser name"
+          },
+          {
+            "name": "dv360CampaignId",
+            "type": "text",
+            "label": "DV360 campaign ID"
+          },
+          {
+            "name": "dv360CampaignName",
+            "type": "text",
+            "label": "DV360 campaign name"
+          },
+          {
+            "name": "dv360CreativeFormat",
+            "type": "text",
+            "label": "DV360 creative format"
+          },
+          {
+            "name": "dv360CreativeId",
+            "type": "text",
+            "label": "DV360 creative ID"
+          },
+          {
+            "name": "dv360CreativeName",
+            "type": "text",
+            "label": "DV360 creative name"
+          },
+          {
+            "name": "dv360ExchangeId",
+            "type": "text",
+            "label": "DV360 exchange ID"
+          },
+          {
+            "name": "dv360ExchangeName",
+            "type": "text",
+            "label": "DV360 exchange name"
+          },
+          {
+            "name": "dv360InsertionOrderId",
+            "type": "text",
+            "label": "DV360 insertion order ID"
+          },
+          {
+            "name": "dv360InsertionOrderName",
+            "type": "text",
+            "label": "DV360 insertion order name"
+          },
+          {
+            "name": "dv360LineItemId",
+            "type": "text",
+            "label": "DV360 line item ID"
+          },
+          {
+            "name": "dv360LineItemName",
+            "type": "text",
+            "label": "DV360 line item name"
+          },
+          {
+            "name": "dv360Medium",
+            "type": "text",
+            "label": "DV360 medium"
+          },
+          {
+            "name": "dv360PartnerId",
+            "type": "text",
+            "label": "DV360 partner ID"
+          },
+          {
+            "name": "dv360PartnerName",
+            "type": "text",
+            "label": "DV360 partner name"
+          },
+          {
+            "name": "dv360Source",
+            "type": "text",
+            "label": "DV360 source"
+          },
+          {
+            "name": "dv360SourceMedium",
+            "type": "text",
+            "label": "DV360 source / medium"
+          },
+          {
+            "name": "eventName",
+            "type": "text",
+            "label": "Event name"
+          },
+          {
+            "name": "fileExtension",
+            "type": "text",
+            "label": "File extension"
+          },
+          {
+            "name": "fileName",
+            "type": "text",
+            "label": "File name"
+          },
+          {
+            "name": "firstSessionDate",
+            "type": "text",
+            "label": "First session date"
+          },
+          {
+            "name": "firstUserCampaignId",
+            "type": "text",
+            "label": "First user campaign ID"
+          },
+          {
+            "name": "firstUserCampaignName",
+            "type": "text",
+            "label": "First user campaign"
+          },
+          {
+            "name": "firstUserCm360AccountId",
+            "type": "text",
+            "label": "First user CM360 account ID"
+          },
+          {
+            "name": "firstUserCm360AccountName",
+            "type": "text",
+            "label": "First user CM360 account name"
+          },
+          {
+            "name": "firstUserCm360AdvertiserId",
+            "type": "text",
+            "label": "First user CM360 advertiser ID"
+          },
+          {
+            "name": "firstUserCm360AdvertiserName",
+            "type": "text",
+            "label": "First user CM360 advertiser name"
+          },
+          {
+            "name": "firstUserCm360CampaignId",
+            "type": "text",
+            "label": "First user CM360 campaign ID"
+          },
+          {
+            "name": "firstUserCm360CampaignName",
+            "type": "text",
+            "label": "First user CM360 campaign name"
+          },
+          {
+            "name": "firstUserCm360CreativeFormat",
+            "type": "text",
+            "label": "First user CM360 creative format"
+          },
+          {
+            "name": "firstUserCm360CreativeId",
+            "type": "text",
+            "label": "First user CM360 creative ID"
+          },
+          {
+            "name": "firstUserCm360CreativeName",
+            "type": "text",
+            "label": "First user CM360 creative name"
+          },
+          {
+            "name": "firstUserCm360CreativeType",
+            "type": "text",
+            "label": "First user CM360 creative type"
+          },
+          {
+            "name": "firstUserCm360CreativeTypeId",
+            "type": "text",
+            "label": "First user CM360 creative type ID"
+          },
+          {
+            "name": "firstUserCm360CreativeVersion",
+            "type": "text",
+            "label": "First user CM360 creative version"
+          },
+          {
+            "name": "firstUserCm360Medium",
+            "type": "text",
+            "label": "First user CM360 medium"
+          },
+          {
+            "name": "firstUserCm360PlacementCostStructure",
+            "type": "text",
+            "label": "First user CM360 placement cost structure"
+          },
+          {
+            "name": "firstUserCm360PlacementId",
+            "type": "text",
+            "label": "First user CM360 placement ID"
+          },
+          {
+            "name": "firstUserCm360PlacementName",
+            "type": "text",
+            "label": "First user CM360 placement name"
+          },
+          {
+            "name": "firstUserCm360RenderingId",
+            "type": "text",
+            "label": "First user CM360 rendering ID"
+          },
+          {
+            "name": "firstUserCm360SiteId",
+            "type": "text",
+            "label": "First user CM360 site ID"
+          },
+          {
+            "name": "firstUserCm360SiteName",
+            "type": "text",
+            "label": "First user CM360 site name"
+          },
+          {
+            "name": "firstUserCm360Source",
+            "type": "text",
+            "label": "First user CM360 source"
+          },
+          {
+            "name": "firstUserCm360SourceMedium",
+            "type": "text",
+            "label": "First user CM360 source / medium"
+          },
+          {
+            "name": "firstUserDefaultChannelGroup",
+            "type": "text",
+            "label": "First user default channel group"
+          },
+          {
+            "name": "firstUserDv360AdvertiserId",
+            "type": "text",
+            "label": "First user DV360 advertiser ID"
+          },
+          {
+            "name": "firstUserDv360AdvertiserName",
+            "type": "text",
+            "label": "First user DV360 advertiser name"
+          },
+          {
+            "name": "firstUserDv360CampaignId",
+            "type": "text",
+            "label": "First user DV360 campaign ID"
+          },
+          {
+            "name": "firstUserDv360CampaignName",
+            "type": "text",
+            "label": "First user DV360 campaign name"
+          },
+          {
+            "name": "firstUserDv360CreativeFormat",
+            "type": "text",
+            "label": "First user DV360 creative format"
+          },
+          {
+            "name": "firstUserDv360CreativeId",
+            "type": "text",
+            "label": "First user DV360 creative ID"
+          },
+          {
+            "name": "firstUserDv360CreativeName",
+            "type": "text",
+            "label": "First user DV360 creative name"
+          },
+          {
+            "name": "firstUserDv360ExchangeId",
+            "type": "text",
+            "label": "First user DV360 exchange ID"
+          },
+          {
+            "name": "firstUserDv360ExchangeName",
+            "type": "text",
+            "label": "First user DV360 exchange name"
+          },
+          {
+            "name": "firstUserDv360InsertionOrderId",
+            "type": "text",
+            "label": "First user DV360 insertion order ID"
+          },
+          {
+            "name": "firstUserDv360InsertionOrderName",
+            "type": "text",
+            "label": "First user DV360 insertion order name"
+          },
+          {
+            "name": "firstUserDv360LineItemId",
+            "type": "text",
+            "label": "First user DV360 line item ID"
+          },
+          {
+            "name": "firstUserDv360LineItemName",
+            "type": "text",
+            "label": "First user DV360 line item name"
+          },
+          {
+            "name": "firstUserDv360Medium",
+            "type": "text",
+            "label": "First user DV360 medium"
+          },
+          {
+            "name": "firstUserDv360PartnerId",
+            "type": "text",
+            "label": "First user DV360 partner ID"
+          },
+          {
+            "name": "firstUserDv360PartnerName",
+            "type": "text",
+            "label": "First user DV360 partner name"
+          },
+          {
+            "name": "firstUserDv360Source",
+            "type": "text",
+            "label": "First user DV360 source"
+          },
+          {
+            "name": "firstUserDv360SourceMedium",
+            "type": "text",
+            "label": "First user DV360 source / medium"
+          },
+          {
+            "name": "firstUserGoogleAdsAccountName",
+            "type": "text",
+            "label": "First user Google Ads account name"
+          },
+          {
+            "name": "firstUserGoogleAdsAdGroupId",
+            "type": "text",
+            "label": "First user Google Ads ad group ID"
+          },
+          {
+            "name": "firstUserGoogleAdsAdGroupName",
+            "type": "text",
+            "label": "First user Google Ads ad group name"
+          },
+          {
+            "name": "firstUserGoogleAdsAdNetworkType",
+            "type": "text",
+            "label": "First user Google Ads ad network type"
+          },
+          {
+            "name": "firstUserGoogleAdsCampaignId",
+            "type": "text",
+            "label": "First user Google Ads campaign ID"
+          },
+          {
+            "name": "firstUserGoogleAdsCampaignName",
+            "type": "text",
+            "label": "First user Google Ads campaign"
+          },
+          {
+            "name": "firstUserGoogleAdsCampaignType",
+            "type": "text",
+            "label": "First user Google Ads campaign type"
+          },
+          {
+            "name": "firstUserGoogleAdsCreativeId",
+            "type": "text",
+            "label": "First user Google Ads creative ID"
+          },
+          {
+            "name": "firstUserGoogleAdsCustomerId",
+            "type": "text",
+            "label": "First user Google Ads customer ID"
+          },
+          {
+            "name": "firstUserGoogleAdsKeyword",
+            "type": "text",
+            "label": "First user Google Ads keyword text"
+          },
+          {
+            "name": "firstUserGoogleAdsQuery",
+            "type": "text",
+            "label": "First user Google Ads query"
+          },
+          {
+            "name": "firstUserManualAdContent",
+            "type": "text",
+            "label": "First user manual ad content"
+          },
+          {
+            "name": "firstUserManualCampaignId",
+            "type": "text",
+            "label": "First user manual campaign ID"
+          },
+          {
+            "name": "firstUserManualCampaignName",
+            "type": "text",
+            "label": "First user manual campaign name"
+          },
+          {
+            "name": "firstUserManualCreativeFormat",
+            "type": "text",
+            "label": "First user manual creative format"
+          },
+          {
+            "name": "firstUserManualMarketingTactic",
+            "type": "text",
+            "label": "First user manual marketing tactic"
+          },
+          {
+            "name": "firstUserManualMedium",
+            "type": "text",
+            "label": "First user manual medium"
+          },
+          {
+            "name": "firstUserManualSource",
+            "type": "text",
+            "label": "First user manual source"
+          },
+          {
+            "name": "firstUserManualSourceMedium",
+            "type": "text",
+            "label": "First user manual source / medium"
+          },
+          {
+            "name": "firstUserManualSourcePlatform",
+            "type": "text",
+            "label": "First user manual source platform"
+          },
+          {
+            "name": "firstUserManualTerm",
+            "type": "text",
+            "label": "First user manual term"
+          },
+          {
+            "name": "firstUserMedium",
+            "type": "text",
+            "label": "First user medium"
+          },
+          {
+            "name": "firstUserPrimaryChannelGroup",
+            "type": "text",
+            "label": "First user primary channel group"
+          },
+          {
+            "name": "firstUserSa360AdGroupId",
+            "type": "text",
+            "label": "First user SA360 ad group ID"
+          },
+          {
+            "name": "firstUserSa360AdGroupName",
+            "type": "text",
+            "label": "First user SA360 ad group name"
+          },
+          {
+            "name": "firstUserSa360CampaignId",
+            "type": "text",
+            "label": "First user SA360 campaign ID"
+          },
+          {
+            "name": "firstUserSa360CampaignName",
+            "type": "text",
+            "label": "First user SA360 campaign"
+          },
+          {
+            "name": "firstUserSa360CreativeFormat",
+            "type": "text",
+            "label": "First user SA360 creative format"
+          },
+          {
+            "name": "firstUserSa360EngineAccountId",
+            "type": "text",
+            "label": "First user SA360 engine account ID"
+          },
+          {
+            "name": "firstUserSa360EngineAccountName",
+            "type": "text",
+            "label": "First user SA360 engine account name"
+          },
+          {
+            "name": "firstUserSa360EngineAccountType",
+            "type": "text",
+            "label": "First user SA360 engine account type"
+          },
+          {
+            "name": "firstUserSa360KeywordText",
+            "type": "text",
+            "label": "First user SA360 keyword text"
+          },
+          {
+            "name": "firstUserSa360ManagerAccountId",
+            "type": "text",
+            "label": "First user SA360 manager account ID"
+          },
+          {
+            "name": "firstUserSa360ManagerAccountName",
+            "type": "text",
+            "label": "First user SA360 manager account name"
+          },
+          {
+            "name": "firstUserSa360Medium",
+            "type": "text",
+            "label": "First user SA360 medium"
+          },
+          {
+            "name": "firstUserSa360Query",
+            "type": "text",
+            "label": "First user SA360 query"
+          },
+          {
+            "name": "firstUserSa360Source",
+            "type": "text",
+            "label": "First user SA360 source"
+          },
+          {
+            "name": "firstUserSa360SourceMedium",
+            "type": "text",
+            "label": "First user SA360 source / medium"
+          },
+          {
+            "name": "firstUserSource",
+            "type": "text",
+            "label": "First user source"
+          },
+          {
+            "name": "firstUserSourceMedium",
+            "type": "text",
+            "label": "First user source / medium"
+          },
+          {
+            "name": "firstUserSourcePlatform",
+            "type": "text",
+            "label": "First user source platform"
+          },
+          {
+            "name": "fullPageUrl",
+            "type": "text",
+            "label": "Full page URL"
+          },
+          {
+            "name": "googleAdsAccountName",
+            "type": "text",
+            "label": "Google Ads account name"
+          },
+          {
+            "name": "googleAdsAdGroupId",
+            "type": "text",
+            "label": "Google Ads ad group ID"
+          },
+          {
+            "name": "googleAdsAdGroupName",
+            "type": "text",
+            "label": "Google Ads ad group name"
+          },
+          {
+            "name": "googleAdsAdNetworkType",
+            "type": "text",
+            "label": "Google Ads ad network type"
+          },
+          {
+            "name": "googleAdsCampaignId",
+            "type": "text",
+            "label": "Google Ads campaign ID"
+          },
+          {
+            "name": "googleAdsCampaignName",
+            "type": "text",
+            "label": "Google Ads campaign"
+          },
+          {
+            "name": "googleAdsCampaignType",
+            "type": "text",
+            "label": "Google Ads campaign type"
+          },
+          {
+            "name": "googleAdsCreativeId",
+            "type": "text",
+            "label": "Google Ads creative ID"
+          },
+          {
+            "name": "googleAdsCustomerId",
+            "type": "text",
+            "label": "Google Ads customer ID"
+          },
+          {
+            "name": "googleAdsKeyword",
+            "type": "text",
+            "label": "Google Ads keyword text"
+          },
+          {
+            "name": "googleAdsQuery",
+            "type": "text",
+            "label": "Google Ads query"
+          },
+          {
+            "name": "groupId",
+            "type": "text",
+            "label": "Group ID"
+          },
+          {
+            "name": "hostName",
+            "type": "text",
+            "label": "Hostname"
+          },
+          {
+            "name": "hour",
+            "type": "text",
+            "label": "Hour"
+          },
+          {
+            "name": "isKeyEvent",
+            "type": "text",
+            "label": "Is key event"
+          },
+          {
+            "name": "isoWeek",
+            "type": "text",
+            "label": "ISO week of the year"
+          },
+          {
+            "name": "isoYear",
+            "type": "text",
+            "label": "ISO year"
+          },
+          {
+            "name": "isoYearIsoWeek",
+            "type": "text",
+            "label": "ISO week of ISO year"
+          },
+          {
+            "name": "itemAffiliation",
+            "type": "text",
+            "label": "Item affiliation"
+          },
+          {
+            "name": "itemBrand",
+            "type": "text",
+            "label": "Item brand"
+          },
+          {
+            "name": "itemCategory",
+            "type": "text",
+            "label": "Item category"
+          },
+          {
+            "name": "itemCategory2",
+            "type": "text",
+            "label": "Item category 2"
+          },
+          {
+            "name": "itemCategory3",
+            "type": "text",
+            "label": "Item category 3"
+          },
+          {
+            "name": "itemCategory4",
+            "type": "text",
+            "label": "Item category 4"
+          },
+          {
+            "name": "itemCategory5",
+            "type": "text",
+            "label": "Item category 5"
+          },
+          {
+            "name": "itemId",
+            "type": "text",
+            "label": "Item ID"
+          },
+          {
+            "name": "itemListId",
+            "type": "text",
+            "label": "Item list ID"
+          },
+          {
+            "name": "itemListName",
+            "type": "text",
+            "label": "Item list name"
+          },
+          {
+            "name": "itemListPosition",
+            "type": "text",
+            "label": "Item list position"
+          },
+          {
+            "name": "itemLocationID",
+            "type": "text",
+            "label": "Item location ID"
+          },
+          {
+            "name": "itemName",
+            "type": "text",
+            "label": "Item name"
+          },
+          {
+            "name": "itemPromotionCreativeName",
+            "type": "text",
+            "label": "Item promotion creative name"
+          },
+          {
+            "name": "itemPromotionCreativeSlot",
+            "type": "text",
+            "label": "Item promotion creative slot"
+          },
+          {
+            "name": "itemPromotionId",
+            "type": "text",
+            "label": "Item promotion ID"
+          },
+          {
+            "name": "itemPromotionName",
+            "type": "text",
+            "label": "Item promotion name"
+          },
+          {
+            "name": "itemVariant",
+            "type": "text",
+            "label": "Item variant"
+          },
+          {
+            "name": "landingPage",
+            "type": "text",
+            "label": "Landing page"
+          },
+          {
+            "name": "landingPagePlusQueryString",
+            "type": "text",
+            "label": "Landing page + query string"
+          },
+          {
+            "name": "language",
+            "type": "text",
+            "label": "Language"
+          },
+          {
+            "name": "languageCode",
+            "type": "text",
+            "label": "Language code"
+          },
+          {
+            "name": "level",
+            "type": "text",
+            "label": "Level"
+          },
+          {
+            "name": "linkClasses",
+            "type": "text",
+            "label": "Link classes"
+          },
+          {
+            "name": "linkDomain",
+            "type": "text",
+            "label": "Link domain"
+          },
+          {
+            "name": "linkId",
+            "type": "text",
+            "label": "Link ID"
+          },
+          {
+            "name": "linkText",
+            "type": "text",
+            "label": "Link text"
+          },
+          {
+            "name": "linkUrl",
+            "type": "text",
+            "label": "Link URL"
+          },
+          {
+            "name": "manualAdContent",
+            "type": "text",
+            "label": "Manual ad content"
+          },
+          {
+            "name": "manualCampaignId",
+            "type": "text",
+            "label": "Manual campaign ID"
+          },
+          {
+            "name": "manualCampaignName",
+            "type": "text",
+            "label": "Manual campaign name"
+          },
+          {
+            "name": "manualCreativeFormat",
+            "type": "text",
+            "label": "Manual creative format"
+          },
+          {
+            "name": "manualMarketingTactic",
+            "type": "text",
+            "label": "Manual marketing tactic"
+          },
+          {
+            "name": "manualMedium",
+            "type": "text",
+            "label": "Manual medium"
+          },
+          {
+            "name": "manualSource",
+            "type": "text",
+            "label": "Manual source"
+          },
+          {
+            "name": "manualSourceMedium",
+            "type": "text",
+            "label": "Manual source / medium"
+          },
+          {
+            "name": "manualSourcePlatform",
+            "type": "text",
+            "label": "Manual source platform"
+          },
+          {
+            "name": "manualTerm",
+            "type": "text",
+            "label": "Manual term"
+          },
+          {
+            "name": "medium",
+            "type": "text",
+            "label": "Medium"
+          },
+          {
+            "name": "method",
+            "type": "text",
+            "label": "Method"
+          },
+          {
+            "name": "minute",
+            "type": "text",
+            "label": "Minute"
+          },
+          {
+            "name": "mobileDeviceBranding",
+            "type": "text",
+            "label": "Device brand"
+          },
+          {
+            "name": "mobileDeviceMarketingName",
+            "type": "text",
+            "label": "Device"
+          },
+          {
+            "name": "mobileDeviceModel",
+            "type": "text",
+            "label": "Mobile model"
+          },
+          {
+            "name": "month",
+            "type": "text",
+            "label": "Month"
+          },
+          {
+            "name": "newVsReturning",
+            "type": "text",
+            "label": "New / returning"
+          },
+          {
+            "name": "nthDay",
+            "type": "text",
+            "label": "Nth day"
+          },
+          {
+            "name": "nthHour",
+            "type": "text",
+            "label": "Nth hour"
+          },
+          {
+            "name": "nthMinute",
+            "type": "text",
+            "label": "Nth minute"
+          },
+          {
+            "name": "nthMonth",
+            "type": "text",
+            "label": "Nth month"
+          },
+          {
+            "name": "nthWeek",
+            "type": "text",
+            "label": "Nth week"
+          },
+          {
+            "name": "nthYear",
+            "type": "text",
+            "label": "Nth year"
+          },
+          {
+            "name": "operatingSystem",
+            "type": "text",
+            "label": "Operating system"
+          },
+          {
+            "name": "operatingSystemVersion",
+            "type": "text",
+            "label": "OS version"
+          },
+          {
+            "name": "operatingSystemWithVersion",
+            "type": "text",
+            "label": "Operating system with version"
+          },
+          {
+            "name": "orderCoupon",
+            "type": "text",
+            "label": "Order coupon"
+          },
+          {
+            "name": "outbound",
+            "type": "text",
+            "label": "Outbound"
+          },
+          {
+            "name": "pageLocation",
+            "type": "text",
+            "label": "Page location"
+          },
+          {
+            "name": "pagePath",
+            "type": "text",
+            "label": "Page path"
+          },
+          {
+            "name": "pagePathPlusQueryString",
+            "type": "text",
+            "label": "Page path + query string"
+          },
+          {
+            "name": "pageReferrer",
+            "type": "text",
+            "label": "Page referrer"
+          },
+          {
+            "name": "pageTitle",
+            "type": "text",
+            "label": "Page title"
+          },
+          {
+            "name": "percentScrolled",
+            "type": "text",
+            "label": "Percent scrolled"
+          },
+          {
+            "name": "platform",
+            "type": "text",
+            "label": "Platform"
+          },
+          {
+            "name": "platformDeviceCategory",
+            "type": "text",
+            "label": "Platform / device category"
+          },
+          {
+            "name": "primaryChannelGroup",
+            "type": "text",
+            "label": "Primary channel group"
+          },
+          {
+            "name": "region",
+            "type": "text",
+            "label": "Region"
+          },
+          {
+            "name": "sa360AdGroupId",
+            "type": "text",
+            "label": "SA360 ad group ID"
+          },
+          {
+            "name": "sa360AdGroupName",
+            "type": "text",
+            "label": "SA360 ad group name"
+          },
+          {
+            "name": "sa360CampaignId",
+            "type": "text",
+            "label": "SA360 campaign ID"
+          },
+          {
+            "name": "sa360CampaignName",
+            "type": "text",
+            "label": "SA360 campaign"
+          },
+          {
+            "name": "sa360CreativeFormat",
+            "type": "text",
+            "label": "SA360 creative format"
+          },
+          {
+            "name": "sa360EngineAccountId",
+            "type": "text",
+            "label": "SA360 engine account ID"
+          },
+          {
+            "name": "sa360EngineAccountName",
+            "type": "text",
+            "label": "SA360 engine account name"
+          },
+          {
+            "name": "sa360EngineAccountType",
+            "type": "text",
+            "label": "SA360 engine account type"
+          },
+          {
+            "name": "sa360KeywordText",
+            "type": "text",
+            "label": "SA360 keyword text"
+          },
+          {
+            "name": "sa360ManagerAccountId",
+            "type": "text",
+            "label": "SA360 manager account ID"
+          },
+          {
+            "name": "sa360ManagerAccountName",
+            "type": "text",
+            "label": "SA360 manager account name"
+          },
+          {
+            "name": "sa360Medium",
+            "type": "text",
+            "label": "SA360 medium"
+          },
+          {
+            "name": "sa360Query",
+            "type": "text",
+            "label": "SA360 query"
+          },
+          {
+            "name": "sa360Source",
+            "type": "text",
+            "label": "SA360 source"
+          },
+          {
+            "name": "sa360SourceMedium",
+            "type": "text",
+            "label": "SA360 source / medium"
+          },
+          {
+            "name": "screenResolution",
+            "type": "text",
+            "label": "Screen resolution"
+          },
+          {
+            "name": "searchTerm",
+            "type": "text",
+            "label": "Search term"
+          },
+          {
+            "name": "sessionCampaignId",
+            "type": "text",
+            "label": "Session campaign ID"
+          },
+          {
+            "name": "sessionCampaignName",
+            "type": "text",
+            "label": "Session campaign"
+          },
+          {
+            "name": "sessionCm360AccountId",
+            "type": "text",
+            "label": "Session CM360 account ID"
+          },
+          {
+            "name": "sessionCm360AccountName",
+            "type": "text",
+            "label": "Session CM360 account name"
+          },
+          {
+            "name": "sessionCm360AdvertiserId",
+            "type": "text",
+            "label": "Session CM360 advertiser ID"
+          },
+          {
+            "name": "sessionCm360AdvertiserName",
+            "type": "text",
+            "label": "Session CM360 advertiser name"
+          },
+          {
+            "name": "sessionCm360CampaignId",
+            "type": "text",
+            "label": "Session CM360 campaign ID"
+          },
+          {
+            "name": "sessionCm360CampaignName",
+            "type": "text",
+            "label": "Session CM360 campaign name"
+          },
+          {
+            "name": "sessionCm360CreativeFormat",
+            "type": "text",
+            "label": "Session CM360 creative format"
+          },
+          {
+            "name": "sessionCm360CreativeId",
+            "type": "text",
+            "label": "Session CM360 creative ID"
+          },
+          {
+            "name": "sessionCm360CreativeName",
+            "type": "text",
+            "label": "Session CM360 creative name"
+          },
+          {
+            "name": "sessionCm360CreativeType",
+            "type": "text",
+            "label": "Session CM360 creative type"
+          },
+          {
+            "name": "sessionCm360CreativeTypeId",
+            "type": "text",
+            "label": "Session CM360 creative type ID"
+          },
+          {
+            "name": "sessionCm360CreativeVersion",
+            "type": "text",
+            "label": "Session CM360 creative version"
+          },
+          {
+            "name": "sessionCm360Medium",
+            "type": "text",
+            "label": "Session CM360 medium"
+          },
+          {
+            "name": "sessionCm360PlacementCostStructure",
+            "type": "text",
+            "label": "Session CM360 placement cost structure"
+          },
+          {
+            "name": "sessionCm360PlacementId",
+            "type": "text",
+            "label": "Session CM360 placement ID"
+          },
+          {
+            "name": "sessionCm360PlacementName",
+            "type": "text",
+            "label": "Session CM360 placement name"
+          },
+          {
+            "name": "sessionCm360RenderingId",
+            "type": "text",
+            "label": "Session CM360 rendering ID"
+          },
+          {
+            "name": "sessionCm360SiteId",
+            "type": "text",
+            "label": "Session CM360 site ID"
+          },
+          {
+            "name": "sessionCm360SiteName",
+            "type": "text",
+            "label": "Session CM360 site name"
+          },
+          {
+            "name": "sessionCm360Source",
+            "type": "text",
+            "label": "Session CM360 source"
+          },
+          {
+            "name": "sessionCm360SourceMedium",
+            "type": "text",
+            "label": "Session CM360 source / medium"
+          },
+          {
+            "name": "sessionDefaultChannelGroup",
+            "type": "text",
+            "label": "Session default channel group"
+          },
+          {
+            "name": "sessionDv360AdvertiserId",
+            "type": "text",
+            "label": "Session DV360 advertiser ID"
+          },
+          {
+            "name": "sessionDv360AdvertiserName",
+            "type": "text",
+            "label": "Session DV360 advertiser name"
+          },
+          {
+            "name": "sessionDv360CampaignId",
+            "type": "text",
+            "label": "Session DV360 campaign ID"
+          },
+          {
+            "name": "sessionDv360CampaignName",
+            "type": "text",
+            "label": "Session DV360 campaign name"
+          },
+          {
+            "name": "sessionDv360CreativeFormat",
+            "type": "text",
+            "label": "Session DV360 creative format"
+          },
+          {
+            "name": "sessionDv360CreativeId",
+            "type": "text",
+            "label": "Session DV360 creative ID"
+          },
+          {
+            "name": "sessionDv360CreativeName",
+            "type": "text",
+            "label": "Session DV360 creative name"
+          },
+          {
+            "name": "sessionDv360ExchangeId",
+            "type": "text",
+            "label": "Session DV360 exchange ID"
+          },
+          {
+            "name": "sessionDv360ExchangeName",
+            "type": "text",
+            "label": "Session DV360 exchange name"
+          },
+          {
+            "name": "sessionDv360InsertionOrderId",
+            "type": "text",
+            "label": "Session DV360 insertion order ID"
+          },
+          {
+            "name": "sessionDv360InsertionOrderName",
+            "type": "text",
+            "label": "Session DV360 insertion order name"
+          },
+          {
+            "name": "sessionDv360LineItemId",
+            "type": "text",
+            "label": "Session DV360 line item ID"
+          },
+          {
+            "name": "sessionDv360LineItemName",
+            "type": "text",
+            "label": "Session DV360 line item name"
+          },
+          {
+            "name": "sessionDv360Medium",
+            "type": "text",
+            "label": "Session DV360 medium"
+          },
+          {
+            "name": "sessionDv360PartnerId",
+            "type": "text",
+            "label": "Session DV360 partner ID"
+          },
+          {
+            "name": "sessionDv360PartnerName",
+            "type": "text",
+            "label": "Session DV360 partner name"
+          },
+          {
+            "name": "sessionDv360Source",
+            "type": "text",
+            "label": "Session DV360 source"
+          },
+          {
+            "name": "sessionDv360SourceMedium",
+            "type": "text",
+            "label": "Session DV360 source / medium"
+          },
+          {
+            "name": "sessionGoogleAdsAccountName",
+            "type": "text",
+            "label": "Session Google Ads account name"
+          },
+          {
+            "name": "sessionGoogleAdsAdGroupId",
+            "type": "text",
+            "label": "Session Google Ads ad group ID"
+          },
+          {
+            "name": "sessionGoogleAdsAdGroupName",
+            "type": "text",
+            "label": "Session Google Ads ad group name"
+          },
+          {
+            "name": "sessionGoogleAdsAdNetworkType",
+            "type": "text",
+            "label": "Session Google Ads ad network type"
+          },
+          {
+            "name": "sessionGoogleAdsCampaignId",
+            "type": "text",
+            "label": "Session Google Ads campaign ID"
+          },
+          {
+            "name": "sessionGoogleAdsCampaignName",
+            "type": "text",
+            "label": "Session Google Ads campaign"
+          },
+          {
+            "name": "sessionGoogleAdsCampaignType",
+            "type": "text",
+            "label": "Session Google Ads campaign type"
+          },
+          {
+            "name": "sessionGoogleAdsCreativeId",
+            "type": "text",
+            "label": "Session Google Ads creative ID"
+          },
+          {
+            "name": "sessionGoogleAdsCustomerId",
+            "type": "text",
+            "label": "Session Google Ads customer ID"
+          },
+          {
+            "name": "sessionGoogleAdsKeyword",
+            "type": "text",
+            "label": "Session Google Ads keyword text"
+          },
+          {
+            "name": "sessionGoogleAdsQuery",
+            "type": "text",
+            "label": "Session Google Ads query"
+          },
+          {
+            "name": "sessionManualAdContent",
+            "type": "text",
+            "label": "Session manual ad content"
+          },
+          {
+            "name": "sessionManualCampaignId",
+            "type": "text",
+            "label": "Session manual campaign ID"
+          },
+          {
+            "name": "sessionManualCampaignName",
+            "type": "text",
+            "label": "Session manual campaign name"
+          },
+          {
+            "name": "sessionManualCreativeFormat",
+            "type": "text",
+            "label": "Session manual creative format"
+          },
+          {
+            "name": "sessionManualMarketingTactic",
+            "type": "text",
+            "label": "Session manual marketing tactic"
+          },
+          {
+            "name": "sessionManualMedium",
+            "type": "text",
+            "label": "Session manual medium"
+          },
+          {
+            "name": "sessionManualSource",
+            "type": "text",
+            "label": "Session manual source"
+          },
+          {
+            "name": "sessionManualSourceMedium",
+            "type": "text",
+            "label": "Session manual source / medium"
+          },
+          {
+            "name": "sessionManualSourcePlatform",
+            "type": "text",
+            "label": "Session manual source platform"
+          },
+          {
+            "name": "sessionManualTerm",
+            "type": "text",
+            "label": "Session manual term"
+          },
+          {
+            "name": "sessionMedium",
+            "type": "text",
+            "label": "Session medium"
+          },
+          {
+            "name": "sessionPrimaryChannelGroup",
+            "type": "text",
+            "label": "Session primary channel group"
+          },
+          {
+            "name": "sessionSa360AdGroupId",
+            "type": "text",
+            "label": "Session SA360 ad group ID"
+          },
+          {
+            "name": "sessionSa360AdGroupName",
+            "type": "text",
+            "label": "Session SA360 ad group name"
+          },
+          {
+            "name": "sessionSa360CampaignId",
+            "type": "text",
+            "label": "Session SA360 campaign ID"
+          },
+          {
+            "name": "sessionSa360CampaignName",
+            "type": "text",
+            "label": "Session SA360 campaign"
+          },
+          {
+            "name": "sessionSa360CreativeFormat",
+            "type": "text",
+            "label": "Session SA360 creative format"
+          },
+          {
+            "name": "sessionSa360EngineAccountId",
+            "type": "text",
+            "label": "Session SA360 engine account ID"
+          },
+          {
+            "name": "sessionSa360EngineAccountName",
+            "type": "text",
+            "label": "Session SA360 engine account name"
+          },
+          {
+            "name": "sessionSa360EngineAccountType",
+            "type": "text",
+            "label": "Session SA360 engine account type"
+          },
+          {
+            "name": "sessionSa360Keyword",
+            "type": "text",
+            "label": "Session SA360 keyword text"
+          },
+          {
+            "name": "sessionSa360ManagerAccountId",
+            "type": "text",
+            "label": "Session SA360 manager account ID"
+          },
+          {
+            "name": "sessionSa360ManagerAccountName",
+            "type": "text",
+            "label": "Session SA360 manager account name"
+          },
+          {
+            "name": "sessionSa360Medium",
+            "type": "text",
+            "label": "Session SA360 medium"
+          },
+          {
+            "name": "sessionSa360Query",
+            "type": "text",
+            "label": "Session SA360 query"
+          },
+          {
+            "name": "sessionSa360Source",
+            "type": "text",
+            "label": "Session SA360 source"
+          },
+          {
+            "name": "sessionSa360SourceMedium",
+            "type": "text",
+            "label": "Session SA360 source / medium"
+          },
+          {
+            "name": "sessionSource",
+            "type": "text",
+            "label": "Session source"
+          },
+          {
+            "name": "sessionSourceMedium",
+            "type": "text",
+            "label": "Session source / medium"
+          },
+          {
+            "name": "sessionSourcePlatform",
+            "type": "text",
+            "label": "Session source platform"
+          },
+          {
+            "name": "shippingTier",
+            "type": "text",
+            "label": "Shipping tier"
+          },
+          {
+            "name": "signedInWithUserId",
+            "type": "text",
+            "label": "Signed in with user ID"
+          },
+          {
+            "name": "source",
+            "type": "text",
+            "label": "Source"
+          },
+          {
+            "name": "sourceMedium",
+            "type": "text",
+            "label": "Source / medium"
+          },
+          {
+            "name": "sourcePlatform",
+            "type": "text",
+            "label": "Source platform"
+          },
+          {
+            "name": "streamId",
+            "type": "text",
+            "label": "Stream ID"
+          },
+          {
+            "name": "streamName",
+            "type": "text",
+            "label": "Stream name"
+          },
+          {
+            "name": "testDataFilterId",
+            "type": "text",
+            "label": "Test data filter ID"
+          },
+          {
+            "name": "testDataFilterName",
+            "type": "text",
+            "label": "Test data filter name"
+          },
+          {
+            "name": "transactionId",
+            "type": "text",
+            "label": "Transaction ID"
+          },
+          {
+            "name": "unifiedPagePathScreen",
+            "type": "text",
+            "label": "Page path and screen class"
+          },
+          {
+            "name": "unifiedPageScreen",
+            "type": "text",
+            "label": "Page path + query string and screen class"
+          },
+          {
+            "name": "unifiedScreenClass",
+            "type": "text",
+            "label": "Page title and screen class"
+          },
+          {
+            "name": "unifiedScreenName",
+            "type": "text",
+            "label": "Page title and screen name"
+          },
+          {
+            "name": "userAgeBracket",
+            "type": "text",
+            "label": "Age"
+          },
+          {
+            "name": "userGender",
+            "type": "text",
+            "label": "Gender"
+          },
+          {
+            "name": "videoProvider",
+            "type": "text",
+            "label": "Video provider"
+          },
+          {
+            "name": "videoTitle",
+            "type": "text",
+            "label": "Video title"
+          },
+          {
+            "name": "videoUrl",
+            "type": "text",
+            "label": "Video URL"
+          },
+          {
+            "name": "virtualCurrencyName",
+            "type": "text",
+            "label": "Virtual currency name"
+          },
+          {
+            "name": "visible",
+            "type": "text",
+            "label": "Visible"
+          },
+          {
+            "name": "week",
+            "type": "text",
+            "label": "Week"
+          },
+          {
+            "name": "year",
+            "type": "text",
+            "label": "Year"
+          },
+          {
+            "name": "yearMonth",
+            "type": "text",
+            "label": "Year month"
+          },
+          {
+            "name": "yearWeek",
+            "type": "text",
+            "label": "Year week"
+          },
+          {
+            "name": "active1DayUsers",
+            "type": "integer",
+            "label": "1-day active users"
+          },
+          {
+            "name": "active28DayUsers",
+            "type": "integer",
+            "label": "28-day active users"
+          },
+          {
+            "name": "active7DayUsers",
+            "type": "integer",
+            "label": "7-day active users"
+          },
+          {
+            "name": "activeUsers",
+            "type": "integer",
+            "label": "Active users"
+          },
+          {
+            "name": "addToCarts",
+            "type": "integer",
+            "label": "Add to carts"
+          },
+          {
+            "name": "adUnitExposure",
+            "type": "number",
+            "label": "Ad unit exposure"
+          },
+          {
+            "name": "advertiserAdClicks",
+            "type": "integer",
+            "label": "Ads clicks"
+          },
+          {
+            "name": "advertiserAdCost",
+            "type": "number",
+            "label": "Ads cost"
+          },
+          {
+            "name": "advertiserAdCostPerClick",
+            "type": "number",
+            "label": "Ads cost per click"
+          },
+          {
+            "name": "advertiserAdCostPerKeyEvent",
+            "type": "number",
+            "label": "Cost per key event"
+          },
+          {
+            "name": "advertiserAdImpressions",
+            "type": "integer",
+            "label": "Ads impressions"
+          },
+          {
+            "name": "averagePurchaseRevenue",
+            "type": "number",
+            "label": "Average purchase revenue"
+          },
+          {
+            "name": "averagePurchaseRevenuePerPayingUser",
+            "type": "number",
+            "label": "ARPPU"
+          },
+          {
+            "name": "averagePurchaseRevenuePerUser",
+            "type": "number",
+            "label": "Average purchase revenue per user"
+          },
+          {
+            "name": "averageRevenuePerUser",
+            "type": "number",
+            "label": "ARPU"
+          },
+          {
+            "name": "averageSessionDuration",
+            "type": "number",
+            "label": "Average session duration"
+          },
+          {
+            "name": "bounceRate",
+            "type": "number",
+            "label": "Bounce rate"
+          },
+          {
+            "name": "cartToViewRate",
+            "type": "number",
+            "label": "Cart-to-view rate"
+          },
+          {
+            "name": "checkouts",
+            "type": "integer",
+            "label": "Checkouts"
+          },
+          {
+            "name": "cohortActiveUsers",
+            "type": "integer",
+            "label": "Cohort active users"
+          },
+          {
+            "name": "cohortTotalUsers",
+            "type": "integer",
+            "label": "Cohort total users"
+          },
+          {
+            "name": "crashAffectedUsers",
+            "type": "integer",
+            "label": "Crash-affected users"
+          },
+          {
+            "name": "crashFreeUsersRate",
+            "type": "number",
+            "label": "Crash-free users rate"
+          },
+          {
+            "name": "dauPerMau",
+            "type": "number",
+            "label": "DAU / MAU"
+          },
+          {
+            "name": "dauPerWau",
+            "type": "number",
+            "label": "DAU / WAU"
+          },
+          {
+            "name": "ecommercePurchases",
+            "type": "integer",
+            "label": "Ecommerce purchases"
+          },
+          {
+            "name": "engagedSessions",
+            "type": "integer",
+            "label": "Engaged sessions"
+          },
+          {
+            "name": "engagementRate",
+            "type": "number",
+            "label": "Engagement rate"
+          },
+          {
+            "name": "eventCount",
+            "type": "integer",
+            "label": "Event count"
+          },
+          {
+            "name": "eventCountPerUser",
+            "type": "number",
+            "label": "Event count per user"
+          },
+          {
+            "name": "eventsPerSession",
+            "type": "number",
+            "label": "Events per session"
+          },
+          {
+            "name": "eventValue",
+            "type": "number",
+            "label": "Event value"
+          },
+          {
+            "name": "firstTimePurchaserRate",
+            "type": "number",
+            "label": "First-time purchaser rate"
+          },
+          {
+            "name": "firstTimePurchasers",
+            "type": "integer",
+            "label": "First time purchasers"
+          },
+          {
+            "name": "firstTimePurchasersPerNewUser",
+            "type": "number",
+            "label": "First-time purchasers per new user"
+          },
+          {
+            "name": "grossItemRevenue",
+            "type": "number",
+            "label": "Gross item revenue"
+          },
+          {
+            "name": "grossPurchaseRevenue",
+            "type": "number",
+            "label": "Gross purchase revenue"
+          },
+          {
+            "name": "itemDiscountAmount",
+            "type": "number",
+            "label": "Item discount amount"
+          },
+          {
+            "name": "itemListClickEvents",
+            "type": "integer",
+            "label": "Item-list click events"
+          },
+          {
+            "name": "itemListClickThroughRate",
+            "type": "number",
+            "label": "Item list click through rate"
+          },
+          {
+            "name": "itemListViewEvents",
+            "type": "integer",
+            "label": "Item-list view events"
+          },
+          {
+            "name": "itemPromotionClickThroughRate",
+            "type": "number",
+            "label": "Item promotion click through rate"
+          },
+          {
+            "name": "itemRefundAmount",
+            "type": "number",
+            "label": "Item refund amount"
+          },
+          {
+            "name": "itemRevenue",
+            "type": "number",
+            "label": "Item revenue"
+          },
+          {
+            "name": "itemsAddedToCart",
+            "type": "integer",
+            "label": "Items added to cart"
+          },
+          {
+            "name": "itemsCheckedOut",
+            "type": "integer",
+            "label": "Items checked out"
+          },
+          {
+            "name": "itemsClickedInList",
+            "type": "integer",
+            "label": "Items clicked in list"
+          },
+          {
+            "name": "itemsClickedInPromotion",
+            "type": "integer",
+            "label": "Items clicked in promotion"
+          },
+          {
+            "name": "itemsPurchased",
+            "type": "integer",
+            "label": "Items purchased"
+          },
+          {
+            "name": "itemsViewed",
+            "type": "integer",
+            "label": "Items viewed"
+          },
+          {
+            "name": "itemsViewedInList",
+            "type": "integer",
+            "label": "Items viewed in list"
+          },
+          {
+            "name": "itemsViewedInPromotion",
+            "type": "integer",
+            "label": "Items viewed in promotion"
+          },
+          {
+            "name": "itemViewEvents",
+            "type": "integer",
+            "label": "Item view events"
+          },
+          {
+            "name": "keyEvents",
+            "type": "number",
+            "label": "Key events"
+          },
+          {
+            "name": "newUsers",
+            "type": "integer",
+            "label": "New users"
+          },
+          {
+            "name": "organicGoogleSearchAveragePosition",
+            "type": "number",
+            "label": "Organic Google Search average position"
+          },
+          {
+            "name": "organicGoogleSearchClicks",
+            "type": "integer",
+            "label": "Organic Google Search clicks"
+          },
+          {
+            "name": "organicGoogleSearchClickThroughRate",
+            "type": "number",
+            "label": "Organic Google Search click through rate"
+          },
+          {
+            "name": "organicGoogleSearchImpressions",
+            "type": "integer",
+            "label": "Organic Google Search impressions"
+          },
+          {
+            "name": "promotionClicks",
+            "type": "integer",
+            "label": "Promotion clicks"
+          },
+          {
+            "name": "promotionViews",
+            "type": "integer",
+            "label": "Promotion views"
+          },
+          {
+            "name": "publisherAdClicks",
+            "type": "integer",
+            "label": "Publisher ad clicks"
+          },
+          {
+            "name": "publisherAdImpressions",
+            "type": "integer",
+            "label": "Publisher ad impressions"
+          },
+          {
+            "name": "purchaseRevenue",
+            "type": "number",
+            "label": "Purchase revenue"
+          },
+          {
+            "name": "purchaserRate",
+            "type": "number",
+            "label": "Purchaser rate"
+          },
+          {
+            "name": "purchaseToViewRate",
+            "type": "number",
+            "label": "Purchase-to-view rate"
+          },
+          {
+            "name": "refundAmount",
+            "type": "number",
+            "label": "Refund amount"
+          },
+          {
+            "name": "returnOnAdSpend",
+            "type": "number",
+            "label": "Return on ad spend"
+          },
+          {
+            "name": "screenPageViews",
+            "type": "integer",
+            "label": "Views"
+          },
+          {
+            "name": "screenPageViewsPerSession",
+            "type": "number",
+            "label": "Views per session"
+          },
+          {
+            "name": "screenPageViewsPerUser",
+            "type": "number",
+            "label": "Views per user"
+          },
+          {
+            "name": "scrolledUsers",
+            "type": "integer",
+            "label": "Scrolled users"
+          },
+          {
+            "name": "sessionKeyEventRate",
+            "type": "number",
+            "label": "Session key event rate"
+          },
+          {
+            "name": "sessions",
+            "type": "integer",
+            "label": "Sessions"
+          },
+          {
+            "name": "sessionsPerUser",
+            "type": "number",
+            "label": "Sessions per user"
+          },
+          {
+            "name": "shippingAmount",
+            "type": "number",
+            "label": "Shipping amount"
+          },
+          {
+            "name": "taxAmount",
+            "type": "number",
+            "label": "Tax amount"
+          },
+          {
+            "name": "totalAdRevenue",
+            "type": "number",
+            "label": "Total ad revenue"
+          },
+          {
+            "name": "totalPurchasers",
+            "type": "integer",
+            "label": "Total purchasers"
+          },
+          {
+            "name": "totalRevenue",
+            "type": "number",
+            "label": "Total revenue"
+          },
+          {
+            "name": "totalUsers",
+            "type": "integer",
+            "label": "Total users"
+          },
+          {
+            "name": "transactions",
+            "type": "integer",
+            "label": "Transactions"
+          },
+          {
+            "name": "transactionsPerPurchaser",
+            "type": "number",
+            "label": "Transactions per purchaser"
+          },
+          {
+            "name": "userEngagementDuration",
+            "type": "number",
+            "label": "User engagement"
+          },
+          {
+            "name": "userKeyEventRate",
+            "type": "number",
+            "label": "User key event rate"
+          },
+          {
+            "name": "wauPerMau",
+            "type": "number",
+            "label": "WAU / MAU"
+          },
+          {
+            "name": "keyEvents:purchase",
+            "type": "integer",
+            "label": "Key event count for purchase"
+          },
+          {
+            "name": "sessionKeyEventRate:purchase",
+            "type": "number",
+            "label": "Session key event rate for purchase"
+          },
+          {
+            "name": "userKeyEventRate:purchase",
+            "type": "number",
+            "label": "User key event rate for purchase"
+          },
+          {
+            "name": "propertyQuota",
+            "spec": [
+              {
+                "name": "tokensPerDay",
+                "spec": [
+                  {
+                    "name": "consumed",
+                    "type": "number",
+                    "label": "Consumed"
+                  },
+                  {
+                    "name": "remaining",
+                    "type": "number",
+                    "label": "Remaining"
+                  }
+                ],
+                "type": "collection",
+                "label": "Tokens Per Day"
+              },
+              {
+                "name": "tokensPerHour",
+                "spec": [
+                  {
+                    "name": "consumed",
+                    "type": "number",
+                    "label": "Consumed"
+                  },
+                  {
+                    "name": "remaining",
+                    "type": "number",
+                    "label": "Remaining"
+                  }
+                ],
+                "type": "collection",
+                "label": "Tokens Per Hour"
+              },
+              {
+                "name": "concurrentRequests",
+                "spec": [
+                  {
+                    "name": "consumed",
+                    "type": "number",
+                    "label": "Consumed"
+                  },
+                  {
+                    "name": "remaining",
+                    "type": "number",
+                    "label": "Remaining"
+                  }
+                ],
+                "type": "collection",
+                "label": "Concurrent Requests"
+              },
+              {
+                "name": "serverErrorsPerProjectPerHour",
+                "spec": [
+                  {
+                    "name": "consumed",
+                    "type": "number",
+                    "label": "Consumed"
+                  },
+                  {
+                    "name": "remaining",
+                    "type": "number",
+                    "label": "Remaining"
+                  }
+                ],
+                "type": "collection",
+                "label": "Server Errors Per Project Per Hour"
+              },
+              {
+                "name": "potentiallyThresholdedRequestsPerHour",
+                "spec": [
+                  {
+                    "name": "consumed",
+                    "type": "number",
+                    "label": "Consumed"
+                  },
+                  {
+                    "name": "remaining",
+                    "type": "number",
+                    "label": "Remaining"
+                  }
+                ],
+                "type": "collection",
+                "label": "Potentially Thresholded Requests Per Hour"
+              },
+              {
+                "name": "tokensPerProjectPerHour",
+                "spec": [
+                  {
+                    "name": "consumed",
+                    "type": "number",
+                    "label": "Consumed"
+                  },
+                  {
+                    "name": "remaining",
+                    "type": "number",
+                    "label": "Remaining"
+                  }
+                ],
+                "type": "collection",
+                "label": "Tokens Per Project Per Hour"
+              }
+            ],
+            "type": "collection",
+            "label": "Property Quota"
+          },
+          {
+            "name": "warning",
+            "type": "text",
+            "label": "Warning"
+          },
+          {
+            "name": "totals",
+            "spec": [
+              {
+                "name": "mappableTotals",
+                "spec": [
+                  {
+                    "name": "activeUsers",
+                    "type": "integer",
+                    "label": "Active users"
+                  },
+                  {
+                    "name": "screenPageViews",
+                    "type": "integer",
+                    "label": "Views"
+                  },
+                  {
+                    "name": "sessions",
+                    "type": "integer",
+                    "label": "Sessions"
+                  }
+                ],
+                "type": "array",
+                "label": "Mappable totals"
+              },
+              {
+                "name": "dimensionValues",
+                "type": "array",
+                "label": "Dimension values"
+              },
+              {
+                "name": "metricValues",
+                "type": "array",
+                "label": "Metric values"
+              }
+            ],
+            "type": "collection",
+            "label": "Totals"
+          },
+          {
+            "name": "minimums",
+            "spec": [
+              {
+                "name": "mappableMinimums",
+                "spec": [
+                  {
+                    "name": "activeUsers",
+                    "type": "integer",
+                    "label": "Active users"
+                  },
+                  {
+                    "name": "screenPageViews",
+                    "type": "integer",
+                    "label": "Views"
+                  },
+                  {
+                    "name": "sessions",
+                    "type": "integer",
+                    "label": "Sessions"
+                  }
+                ],
+                "type": "array",
+                "label": "Mappable minimums"
+              },
+              {
+                "name": "dimensionValues",
+                "type": "array",
+                "label": "Dimension values"
+              },
+              {
+                "name": "metricValues",
+                "type": "array",
+                "label": "Metric values"
+              }
+            ],
+            "type": "collection",
+            "label": "Minimums"
+          },
+          {
+            "name": "maximums",
+            "spec": [
+              {
+                "name": "mappableMaximums",
+                "spec": [
+                  {
+                    "name": "activeUsers",
+                    "type": "integer",
+                    "label": "Active users"
+                  },
+                  {
+                    "name": "screenPageViews",
+                    "type": "integer",
+                    "label": "Views"
+                  },
+                  {
+                    "name": "sessions",
+                    "type": "integer",
+                    "label": "Sessions"
+                  }
+                ],
+                "type": "array",
+                "label": "Mappable maximums"
+              },
+              {
+                "name": "dimensionValues",
+                "type": "array",
+                "label": "Dimension values"
+              },
+              {
+                "name": "metricValues",
+                "type": "array",
+                "label": "Metric values"
+              }
+            ],
+            "type": "collection",
+            "label": "Maximums"
+          }
+        ]
+      }
+    },
+    {
+      "id": 4,
+      "module": "mailerlite2:ListGroupSubscribers",
+      "version": 1,
+      "parameters": {
+        "__IMTCONN__": 0
+      },
+      "mapper": {
+        "limit": "1",
+        "status": "active",
+        "group_id": "172353809632200144"
+      },
+      "metadata": {
+        "designer": {
+          "x": 900,
+          "y": 0,
+          "name": "📈 Leads-Wachstum"
+        },
+        "restore": {
+          "expect": {
+            "status": {
+              "mode": "chose",
+              "label": "Active"
+            },
+            "group_id": {
+              "mode": "chose",
+              "label": "Blueprint Leads"
+            }
+          },
+          "parameters": {
+            "__IMTCONN__": {
+              "data": {
+                "scoped": "true",
+                "connection": "mailerlite2"
+              },
+              "label": "My MailerLite connection"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "__IMTCONN__",
+            "type": "account:mailerlite2",
+            "label": "Connection",
+            "required": true
+          }
+        ],
+        "expect": [
+          {
+            "name": "status",
+            "type": "select",
+            "label": "Status",
+            "validate": {
+              "enum": [
+                "active",
+                "unsubscribed",
+                "unconfirmed",
+                "bounced",
+                "junk"
+              ]
+            }
+          },
+          {
+            "name": "group_id",
+            "type": "select",
+            "label": "Group ID"
+          },
+          {
+            "name": "limit",
+            "type": "number",
+            "label": "Limit"
+          }
+        ]
+      }
+    },
+    {
+      "id": 5,
+      "module": "gemini-ai:createACompletionGeminiPro",
+      "version": 1,
+      "parameters": {
+        "__IMTCONN__": 0
+      },
+      "mapper": {
+        "model": "gemini-2.5-flash",
+        "contents": [
+          {
+            "role": "user",
+            "parts": [
+              {
+                "text": "Du bist der strategische Business-Berater für das \"LazyTechLab\".\n\nKONTEXT (WICHTIG):\nWir sind ein junges Tech-Blog-Start-up. Wir bauen gerade erst auf.\n\nTraffic-Erwartung: 0-10 Besucher/Tag ist normal. Alles über 20 ist ein Erfolg. Alles über 50 ist ein Fest.\n\nLeads-Erwartung: Jeder neue Lead ist Gold wert.\n\nZiel: Wachstum und Stabilität. Sei motivierend, aber ehrlich.\n\nDATEN-INPUT:\n1. SYSTEM-STATUS:\n{{2.text}} (Output von Modul 2)\n2. TRAFFIC (Gestern):\nBesucher: {{3.activeUsers}}\nViews: {{3.screenPageViews}} (oder Output von Modul 3 \"Views\")\n3. LEADS (Gesamt):\nAbonnenten: {{4.`__IMTLENGTH__`}}\n\nAUFGABE:\nErstelle das CEO-Briefing für [NAME].\n\nSTRUKTUR:\n\n🚦 Status-Ampel:\n\n  - Analysiere die Liste. Ist irgendein Bot `Pausiert: true`?\n  - JA: \"🔴 ALARM: [Name] steht still\\! Sofort prüfen.\"\n  - NEIN: \"🟢 Alle Systeme laufen stabil.\"\n\n\n📊 KPI-Check:\n\n  - Nenne die Zahlen.\n  - **Bewertung:** Ordne die Zahlen anhand des KONTEXTS ein (z.B. \"4 Besucher - wir sind noch am Anfang, weiter machen\\!\" oder \"50 Besucher - Wow, starker Tag\\!\").\n\n\n💡 Strategie-Tipp:\n\n  - Gib eine konkrete Handlungsanweisung passend zur Phase.\n  - Bei wenig Traffic: \"Mehr auf Discord/LinkedIn teilen.\"\n  - Bei viel Traffic: \"Checken, welcher Artikel rankt und mehr dazu schreiben.\"\n  - Bei Technik-Problemen: \"Make Logfiles prüfen.\"\n\n\nFormatierung: Nutze Fettdruck und Emojis für Discord.\nWICHTIG: Bleibe ABSOLUT unter 1900 Zeichen das ist das Limit. Wir müssen sicher stellen, das Discord unseren Text immer Postet und dadurch das Limit einhalten.",
+                "type": "text"
+              }
+            ]
+          }
+        ],
+        "generationConfig": {
+          "thinkingConfig": {}
+        },
+        "system_instruction": {}
+      },
+      "metadata": {
+        "designer": {
+          "x": 1200,
+          "y": 0,
+          "name": "🧠 Business-Analyst"
+        },
+        "restore": {
+          "expect": {
+            "model": {
+              "mode": "chose",
+              "label": "Gemini 2.5 Flash"
+            },
+            "contents": {
+              "mode": "chose",
+              "items": [
+                {
+                  "role": {
+                    "mode": "chose",
+                    "label": "User"
+                  },
+                  "parts": {
+                    "mode": "chose",
+                    "items": [
+                      {
+                        "type": {
+                          "mode": "chose",
+                          "label": "Text"
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            "url_context": {
+              "mode": "chose"
+            },
+            "code_execution": {
+              "mode": "chose"
+            },
+            "safetySettings": {
+              "mode": "chose"
+            },
+            "generationConfig": {
+              "nested": {
+                "stopSequences": {
+                  "mode": "chose"
+                },
+                "thinkingConfig": {
+                  "nested": {
+                    "thinking_level": {
+                      "mode": "chose",
+                      "label": "Empty"
+                    },
+                    "include_thoughts": {
+                      "mode": "chose"
+                    }
+                  }
+                },
+                "mediaResolution": {
+                  "mode": "chose",
+                  "label": "Empty"
+                },
+                "responseMimeType": {
+                  "mode": "chose",
+                  "label": "Empty"
+                },
+                "responseModalities": {
+                  "mode": "chose"
+                }
+              }
+            },
+            "system_instruction": {
+              "nested": {
+                "parts": {
+                  "mode": "chose"
+                }
+              }
+            },
+            "google_maps_context": {
+              "mode": "chose"
+            },
+            "google_search_context": {
+              "mode": "chose"
+            },
+            "file_search_store_context": {
+              "mode": "chose"
+            },
+            "function_declarations_context": {
+              "mode": "chose"
+            }
+          },
+          "parameters": {
+            "__IMTCONN__": {
+              "data": {
+                "scoped": "true",
+                "connection": "gemini-ai-q9zyjp"
+              },
+              "label": "My Gemini AI connection"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "__IMTCONN__",
+            "type": "account:gemini-ai-q9zyjp",
+            "label": "Connection",
+            "required": true
+          }
+        ],
+        "expect": [
+          {
+            "name": "model",
+            "type": "select",
+            "label": "AI Model",
+            "required": true
+          },
+          {
+            "name": "contents",
+            "spec": [
+              {
+                "name": "role",
+                "type": "select",
+                "label": "Role",
+                "options": [
+                  {
+                    "label": "User",
+                    "value": "user"
+                  },
+                  {
+                    "label": "Model",
+                    "value": "model"
+                  }
+                ]
+              },
+              {
+                "name": "parts",
+                "spec": [
+                  {
+                    "name": "type",
+                    "type": "select",
+                    "label": "Message Type",
+                    "options": [
+                      {
+                        "label": "Text",
+                        "value": "text",
+                        "nested": [
+                          {
+                            "name": "text",
+                            "type": "text",
+                            "label": "Text",
+                            "required": false
+                          }
+                        ]
+                      },
+                      {
+                        "label": "File",
+                        "value": "file",
+                        "nested": [
+                          {
+                            "name": "file_data",
+                            "spec": [
+                              {
+                                "name": "mime_type",
+                                "type": "text",
+                                "label": "Mime Type",
+                                "required": false
+                              },
+                              {
+                                "help": "You get this from the 'Upload a File' module.",
+                                "name": "file_uri",
+                                "type": "text",
+                                "label": "File URI",
+                                "required": false
+                              }
+                            ],
+                            "type": "collection",
+                            "label": "File Data",
+                            "required": false
+                          }
+                        ]
+                      },
+                      {
+                        "label": "Function Call",
+                        "value": "functionCall",
+                        "nested": [
+                          {
+                            "name": "functionCall",
+                            "spec": [
+                              {
+                                "help": "The name of the function to call.",
+                                "name": "name",
+                                "type": "text",
+                                "label": "Name",
+                                "required": true,
+                                "validate": {
+                                  "max": 64
+                                }
+                              },
+                              {
+                                "help": "The function parameters and values in JSON object format.",
+                                "name": "args",
+                                "type": "json",
+                                "label": "Arguments"
+                              },
+                              {
+                                "help": "The unique ID of the function call.",
+                                "name": "id",
+                                "type": "text",
+                                "label": "Function Call ID"
+                              }
+                            ],
+                            "type": "collection",
+                            "label": "Function Call"
+                          }
+                        ]
+                      },
+                      {
+                        "label": "Function Response",
+                        "value": "functionResponse",
+                        "nested": [
+                          {
+                            "name": "functionResponse",
+                            "spec": [
+                              {
+                                "help": "The name of the function to call.",
+                                "name": "name",
+                                "type": "text",
+                                "label": "Name",
+                                "required": true,
+                                "validate": {
+                                  "max": 64
+                                }
+                              },
+                              {
+                                "help": "The function response in JSON object format.",
+                                "name": "response",
+                                "type": "json",
+                                "label": "Response",
+                                "required": true
+                              }
+                            ],
+                            "type": "collection",
+                            "label": "Function Response"
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "name": "thoughtSignature",
+                    "type": "text",
+                    "label": "Thought Signature"
+                  }
+                ],
+                "type": "array",
+                "label": "Parts"
+              }
+            ],
+            "type": "array",
+            "label": "Messages",
+            "required": true
+          },
+          {
+            "name": "system_instruction",
+            "spec": [
+              {
+                "name": "parts",
+                "spec": {
+                  "name": "value",
+                  "spec": [
+                    {
+                      "name": "text",
+                      "type": "text",
+                      "label": "Value"
+                    }
+                  ],
+                  "type": "collection",
+                  "label": "Prompt"
+                },
+                "type": "array",
+                "label": "Prompts"
+              }
+            ],
+            "type": "collection",
+            "label": "System Instructions"
+          },
+          {
+            "name": "safetySettings",
+            "spec": [
+              {
+                "name": "category",
+                "type": "select",
+                "label": "Category",
+                "options": [
+                  {
+                    "label": "Harassment content",
+                    "value": "HARM_CATEGORY_HARASSMENT"
+                  },
+                  {
+                    "label": "Hate speech and content",
+                    "value": "HARM_CATEGORY_HATE_SPEECH"
+                  },
+                  {
+                    "label": "Sexually explicit content.",
+                    "value": "HARM_CATEGORY_SEXUALLY_EXPLICIT"
+                  },
+                  {
+                    "label": "Dangerous content:",
+                    "value": "HARM_CATEGORY_DANGEROUS_CONTENT"
+                  }
+                ]
+              },
+              {
+                "name": "threshold",
+                "type": "select",
+                "label": "Threshold",
+                "options": [
+                  {
+                    "label": "Block low and above.",
+                    "value": "BLOCK_LOW_AND_ABOVE"
+                  },
+                  {
+                    "label": "Block medium and above.",
+                    "value": "BLOCK_MEDIUM_AND_ABOVE"
+                  },
+                  {
+                    "label": "Block only high.",
+                    "value": "BLOCK_ONLY_HIGH"
+                  },
+                  {
+                    "label": "Block none.",
+                    "value": "BLOCK_NONE"
+                  }
+                ]
+              }
+            ],
+            "type": "array",
+            "label": "Safety Settings"
+          },
+          {
+            "name": "generationConfig",
+            "spec": [
+              {
+                "name": "stopSequences",
+                "spec": {
+                  "name": "value",
+                  "type": "text",
+                  "label": "Stop Sequence"
+                },
+                "type": "array",
+                "label": "Stop Sequences"
+              },
+              {
+                "name": "responseModalities",
+                "type": "select",
+                "label": "Response Modalities",
+                "multiple": true,
+                "validate": {
+                  "enum": [
+                    "text",
+                    "image"
+                  ]
+                }
+              },
+              {
+                "name": "maxOutputTokens",
+                "type": "number",
+                "label": "Max Output Tokens"
+              },
+              {
+                "name": "temperature",
+                "type": "number",
+                "label": "Temperature",
+                "validate": {
+                  "max": 1,
+                  "min": 0
+                }
+              },
+              {
+                "name": "topP",
+                "type": "number",
+                "label": "Top P",
+                "validate": {
+                  "max": 1,
+                  "min": 0
+                }
+              },
+              {
+                "name": "topK",
+                "type": "number",
+                "label": "Top K"
+              },
+              {
+                "name": "thinkingConfig",
+                "spec": [
+                  {
+                    "name": "thinkingBudget",
+                    "type": "number",
+                    "label": "Thinking Budget"
+                  },
+                  {
+                    "name": "include_thoughts",
+                    "type": "boolean",
+                    "label": "Include Thoughts"
+                  },
+                  {
+                    "name": "thinking_level",
+                    "type": "select",
+                    "label": "Thinking Level",
+                    "validate": {
+                      "enum": [
+                        "low",
+                        "high"
+                      ]
+                    }
+                  }
+                ],
+                "type": "collection",
+                "label": "Thinking Config"
+              },
+              {
+                "name": "mediaResolution",
+                "type": "select",
+                "label": "Media Resolution",
+                "validate": {
+                  "enum": [
+                    "media_resolution_low",
+                    "media_resolution_medium",
+                    "media_resolution_high"
+                  ]
+                }
+              },
+              {
+                "name": "responseMimeType",
+                "type": "select",
+                "label": "Response Format"
+              }
+            ],
+            "type": "collection",
+            "label": "Generation configurations"
+          },
+          {
+            "name": "tools",
+            "type": "any",
+            "label": "Tools"
+          },
+          {
+            "name": "tool_config",
+            "type": "any",
+            "label": "Tool Config"
+          },
+          {
+            "name": "function_declarations_context",
+            "type": "boolean",
+            "label": "Function Declarations Grounding"
+          },
+          {
+            "name": "url_context",
+            "type": "boolean",
+            "label": "URL Context"
+          },
+          {
+            "name": "google_search_context",
+            "type": "boolean",
+            "label": "Google Search Grounding"
+          },
+          {
+            "name": "code_execution",
+            "type": "boolean",
+            "label": "Code Execution"
+          },
+          {
+            "name": "google_maps_context",
+            "type": "boolean",
+            "label": "Google Maps Grounding"
+          },
+          {
+            "name": "file_search_store_context",
+            "type": "boolean",
+            "label": "File Search Store Context"
+          }
+        ]
+      }
+    },
+    {
+      "id": 6,
+      "module": "discord:PostMessage",
+      "version": 2,
+      "parameters": {
+        "__IMTCONN__": 0
+      },
+      "mapper": {
+        "content": "🛡️ **Daily Watchdog**\n\n{{5.result}}"
+      },
+      "metadata": {
+        "designer": {
+          "x": 1500,
+          "y": 0,
+          "name": "🛡️ Daily Report"
+        },
+        "restore": {
+          "expect": {
+            "tts": {
+              "mode": "chose"
+            },
+            "files": {
+              "mode": "chose"
+            },
+            "embeds": {
+              "mode": "chose"
+            },
+            "components": {
+              "mode": "chose"
+            },
+            "waitForMessageBody": {
+              "mode": "chose"
+            }
+          },
+          "parameters": {
+            "__IMTCONN__": {
+              "data": {
+                "scoped": "true",
+                "connection": "discord"
+              },
+              "label": "My Discord connection Privat"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "__IMTCONN__",
+            "type": "account:discord",
+            "label": "Connection",
+            "required": true
+          }
+        ],
+        "expect": [
+          {
+            "name": "content",
+            "type": "text",
+            "label": "Message"
+          },
+          {
+            "name": "waitForMessageBody",
+            "type": "boolean",
+            "label": "Wait for Message Body"
+          },
+          {
+            "name": "tts",
+            "type": "boolean",
+            "label": "Is TTS message"
+          },
+          {
+            "name": "embeds",
+            "spec": [
+              {
+                "name": "title",
+                "type": "text",
+                "label": "Title"
+              },
+              {
+                "name": "type",
+                "type": "text",
+                "label": "Type"
+              },
+              {
+                "name": "description",
+                "type": "text",
+                "label": "Description"
+              },
+              {
+                "name": "url",
+                "type": "url",
+                "label": "URL"
+              },
+              {
+                "name": "timestamp",
+                "type": "date",
+                "label": "Timestamp"
+              },
+              {
+                "name": "color",
+                "type": "uinteger",
+                "label": "Color"
+              },
+              {
+                "name": "footer",
+                "spec": [
+                  {
+                    "name": "text",
+                    "type": "text",
+                    "label": "Text"
+                  },
+                  {
+                    "name": "icon_url",
+                    "type": "url",
+                    "label": "Icon URL"
+                  },
+                  {
+                    "name": "proxy_icon_url",
+                    "type": "url",
+                    "label": "Proxy Icon URL"
+                  }
+                ],
+                "type": "collection",
+                "label": "Footer"
+              },
+              {
+                "name": "image",
+                "spec": [
+                  {
+                    "name": "url",
+                    "type": "url",
+                    "label": "URL"
+                  },
+                  {
+                    "name": "proxy_url",
+                    "type": "url",
+                    "label": "Proxy URL"
+                  },
+                  {
+                    "name": "height",
+                    "type": "uinteger",
+                    "label": "Height"
+                  },
+                  {
+                    "name": "width",
+                    "type": "uinteger",
+                    "label": "Width"
+                  }
+                ],
+                "type": "collection",
+                "label": "Image"
+              },
+              {
+                "name": "thumbnail",
+                "spec": [
+                  {
+                    "name": "url",
+                    "type": "url",
+                    "label": "URL"
+                  },
+                  {
+                    "name": "proxy_url",
+                    "type": "url",
+                    "label": "Proxy URL"
+                  },
+                  {
+                    "name": "height",
+                    "type": "uinteger",
+                    "label": "Height"
+                  },
+                  {
+                    "name": "width",
+                    "type": "uinteger",
+                    "label": "Width"
+                  }
+                ],
+                "type": "collection",
+                "label": "Thumbnail"
+              },
+              {
+                "name": "video",
+                "spec": [
+                  {
+                    "name": "url",
+                    "type": "url",
+                    "label": "URL"
+                  },
+                  {
+                    "name": "height",
+                    "type": "uinteger",
+                    "label": "Height"
+                  },
+                  {
+                    "name": "width",
+                    "type": "uinteger",
+                    "label": "Width"
+                  }
+                ],
+                "type": "collection",
+                "label": "Video"
+              },
+              {
+                "name": "provider",
+                "spec": [
+                  {
+                    "name": "name",
+                    "type": "text",
+                    "label": "Name"
+                  },
+                  {
+                    "name": "url",
+                    "type": "url",
+                    "label": "URL"
+                  }
+                ],
+                "type": "collection",
+                "label": "Provider"
+              },
+              {
+                "name": "author",
+                "spec": [
+                  {
+                    "name": "name",
+                    "type": "text",
+                    "label": "Name"
+                  },
+                  {
+                    "name": "url",
+                    "type": "url",
+                    "label": "URL"
+                  },
+                  {
+                    "name": "icon_url",
+                    "type": "url",
+                    "label": "Icon URL"
+                  },
+                  {
+                    "name": "proxy_icon_url",
+                    "type": "url",
+                    "label": "Proxy Icon URL"
+                  }
+                ],
+                "type": "collection",
+                "label": "Author"
+              },
+              {
+                "name": "fields",
+                "spec": [
+                  {
+                    "name": "name",
+                    "type": "text",
+                    "label": "Name"
+                  },
+                  {
+                    "name": "value",
+                    "type": "text",
+                    "label": "Value"
+                  },
+                  {
+                    "name": "inline",
+                    "type": "boolean",
+                    "label": "Inline Flag"
+                  }
+                ],
+                "type": "array",
+                "label": "Fields"
+              }
+            ],
+            "type": "array",
+            "label": "Embeds"
+          },
+          {
+            "name": "components",
+            "spec": [
+              {
+                "name": "type",
+                "type": "select",
+                "label": "Component Type",
+                "options": [
+                  {
+                    "label": "A New Row",
+                    "value": 1,
+                    "nested": [
+                      {
+                        "name": "components",
+                        "spec": [
+                          {
+                            "name": "type",
+                            "type": "select",
+                            "label": "Row Component Type",
+                            "options": [
+                              {
+                                "label": "Button",
+                                "value": 2,
+                                "nested": [
+                                  {
+                                    "name": "style",
+                                    "type": "select",
+                                    "label": "Style",
+                                    "options": [
+                                      {
+                                        "label": "Primary (blurple)",
+                                        "value": 1,
+                                        "nested": [
+                                          {
+                                            "help": "A developer-defined identifier for the button, max 100 characters.",
+                                            "name": "custom_id",
+                                            "type": "text",
+                                            "label": "Custom ID",
+                                            "required": true
+                                          }
+                                        ]
+                                      },
+                                      {
+                                        "label": "Secondary (grey)",
+                                        "value": 2,
+                                        "nested": [
+                                          {
+                                            "help": "A developer-defined identifier for the button, max 100 characters.",
+                                            "name": "custom_id",
+                                            "type": "text",
+                                            "label": "Custom ID",
+                                            "required": true
+                                          }
+                                        ]
+                                      },
+                                      {
+                                        "label": "Success (green)",
+                                        "value": 3,
+                                        "nested": [
+                                          {
+                                            "help": "A developer-defined identifier for the button, max 100 characters.",
+                                            "name": "custom_id",
+                                            "type": "text",
+                                            "label": "Custom ID",
+                                            "required": true
+                                          }
+                                        ]
+                                      },
+                                      {
+                                        "label": "Danger (red)",
+                                        "value": 4,
+                                        "nested": [
+                                          {
+                                            "help": "A developer-defined identifier for the button, max 100 characters.",
+                                            "name": "custom_id",
+                                            "type": "text",
+                                            "label": "Custom ID",
+                                            "required": true
+                                          }
+                                        ]
+                                      },
+                                      {
+                                        "label": "Link (grey)",
+                                        "value": 5,
+                                        "nested": [
+                                          {
+                                            "help": "A URL for link-style buttons.",
+                                            "name": "url",
+                                            "type": "url",
+                                            "label": "URL",
+                                            "required": true
+                                          }
+                                        ]
+                                      }
+                                    ],
+                                    "required": true
+                                  },
+                                  {
+                                    "help": "Text that appears on the button, max 80 characters.",
+                                    "name": "label",
+                                    "type": "text",
+                                    "label": "Label"
+                                  },
+                                  {
+                                    "name": "disabled",
+                                    "type": "boolean",
+                                    "label": "Disabled"
+                                  }
+                                ]
+                              },
+                              {
+                                "label": "Select Menu",
+                                "value": 3,
+                                "nested": [
+                                  {
+                                    "help": "A developer-defined identifier for the button, max 100 characters.",
+                                    "name": "custom_id",
+                                    "type": "text",
+                                    "label": "Custom ID",
+                                    "required": true
+                                  },
+                                  {
+                                    "name": "options",
+                                    "spec": [
+                                      {
+                                        "help": "The user-facing name of the option, max 100 characters.",
+                                        "name": "label",
+                                        "type": "text",
+                                        "label": "Label",
+                                        "required": true
+                                      },
+                                      {
+                                        "help": "The dev-defined value of the option, max 100 characters.",
+                                        "name": "value",
+                                        "type": "text",
+                                        "label": "Value",
+                                        "required": true
+                                      },
+                                      {
+                                        "help": "An additional description of the option, max 100 characters.",
+                                        "name": "description",
+                                        "type": "text",
+                                        "label": "Description"
+                                      },
+                                      {
+                                        "name": "default",
+                                        "type": "boolean",
+                                        "label": "Default"
+                                      }
+                                    ],
+                                    "type": "array",
+                                    "label": "Options",
+                                    "required": true,
+                                    "validate": {
+                                      "maxItems": 25
+                                    }
+                                  },
+                                  {
+                                    "help": "Custom placeholder text if nothing is selected, max 150 characters.",
+                                    "name": "placeholder",
+                                    "type": "text",
+                                    "label": "Placeholder"
+                                  },
+                                  {
+                                    "help": "The minimum number of items that must be chosen; default 1, min 0, max 2.",
+                                    "name": "min_values",
+                                    "type": "uinteger",
+                                    "label": "Minimum values"
+                                  },
+                                  {
+                                    "help": "The maximum number of items that must be chosen; default 1, max 25.",
+                                    "name": "max_values",
+                                    "type": "uinteger",
+                                    "label": "Maximum values"
+                                  },
+                                  {
+                                    "name": "disabled",
+                                    "type": "boolean",
+                                    "label": "Disabled"
+                                  }
+                                ]
+                              }
+                            ],
+                            "required": true
+                          }
+                        ],
+                        "type": "array",
+                        "label": "Row Components",
+                        "required": true
+                      }
+                    ]
+                  }
+                ],
+                "required": true
+              }
+            ],
+            "type": "array",
+            "label": "Components"
+          },
+          {
+            "name": "files",
+            "spec": [
+              {
+                "name": "filename",
+                "type": "filename",
+                "label": "File Name",
+                "required": true,
+                "semantic": "file:name"
+              },
+              {
+                "name": "data",
+                "type": "buffer",
+                "label": "Data",
+                "required": true,
+                "semantic": "file:data"
+              }
+            ],
+            "type": "array",
+            "label": "Files"
+          },
+          {
+            "name": "username",
+            "type": "text",
+            "label": "Username"
+          },
+          {
+            "name": "avatar_url",
+            "type": "url",
+            "label": "Avatar URL"
+          },
+          {
+            "name": "moduleWebhookUrl",
+            "type": "url",
+            "label": "Custom Webhook URL"
+          },
+          {
+            "name": "content",
+            "type": "text",
+            "label": "Message"
+          },
+          {
+            "name": "waitForMessageBody",
+            "type": "boolean",
+            "label": "Wait for Message Body"
+          },
+          {
+            "name": "tts",
+            "type": "boolean",
+            "label": "Is TTS message"
+          },
+          {
+            "name": "embeds",
+            "spec": [
+              {
+                "name": "title",
+                "type": "text",
+                "label": "Title"
+              },
+              {
+                "name": "type",
+                "type": "text",
+                "label": "Type"
+              },
+              {
+                "name": "description",
+                "type": "text",
+                "label": "Description"
+              },
+              {
+                "name": "url",
+                "type": "url",
+                "label": "URL"
+              },
+              {
+                "name": "timestamp",
+                "type": "date",
+                "label": "Timestamp"
+              },
+              {
+                "name": "color",
+                "type": "uinteger",
+                "label": "Color"
+              },
+              {
+                "name": "footer",
+                "spec": [
+                  {
+                    "name": "text",
+                    "type": "text",
+                    "label": "Text"
+                  },
+                  {
+                    "name": "icon_url",
+                    "type": "url",
+                    "label": "Icon URL"
+                  },
+                  {
+                    "name": "proxy_icon_url",
+                    "type": "url",
+                    "label": "Proxy Icon URL"
+                  }
+                ],
+                "type": "collection",
+                "label": "Footer"
+              },
+              {
+                "name": "image",
+                "spec": [
+                  {
+                    "name": "url",
+                    "type": "url",
+                    "label": "URL"
+                  },
+                  {
+                    "name": "proxy_url",
+                    "type": "url",
+                    "label": "Proxy URL"
+                  },
+                  {
+                    "name": "height",
+                    "type": "uinteger",
+                    "label": "Height"
+                  },
+                  {
+                    "name": "width",
+                    "type": "uinteger",
+                    "label": "Width"
+                  }
+                ],
+                "type": "collection",
+                "label": "Image"
+              },
+              {
+                "name": "thumbnail",
+                "spec": [
+                  {
+                    "name": "url",
+                    "type": "url",
+                    "label": "URL"
+                  },
+                  {
+                    "name": "proxy_url",
+                    "type": "url",
+                    "label": "Proxy URL"
+                  },
+                  {
+                    "name": "height",
+                    "type": "uinteger",
+                    "label": "Height"
+                  },
+                  {
+                    "name": "width",
+                    "type": "uinteger",
+                    "label": "Width"
+                  }
+                ],
+                "type": "collection",
+                "label": "Thumbnail"
+              },
+              {
+                "name": "video",
+                "spec": [
+                  {
+                    "name": "url",
+                    "type": "url",
+                    "label": "URL"
+                  },
+                  {
+                    "name": "height",
+                    "type": "uinteger",
+                    "label": "Height"
+                  },
+                  {
+                    "name": "width",
+                    "type": "uinteger",
+                    "label": "Width"
+                  }
+                ],
+                "type": "collection",
+                "label": "Video"
+              },
+              {
+                "name": "provider",
+                "spec": [
+                  {
+                    "name": "name",
+                    "type": "text",
+                    "label": "Name"
+                  },
+                  {
+                    "name": "url",
+                    "type": "url",
+                    "label": "URL"
+                  }
+                ],
+                "type": "collection",
+                "label": "Provider"
+              },
+              {
+                "name": "author",
+                "spec": [
+                  {
+                    "name": "name",
+                    "type": "text",
+                    "label": "Name"
+                  },
+                  {
+                    "name": "url",
+                    "type": "url",
+                    "label": "URL"
+                  },
+                  {
+                    "name": "icon_url",
+                    "type": "url",
+                    "label": "Icon URL"
+                  },
+                  {
+                    "name": "proxy_icon_url",
+                    "type": "url",
+                    "label": "Proxy Icon URL"
+                  }
+                ],
+                "type": "collection",
+                "label": "Author"
+              },
+              {
+                "name": "fields",
+                "spec": [
+                  {
+                    "name": "name",
+                    "type": "text",
+                    "label": "Name"
+                  },
+                  {
+                    "name": "value",
+                    "type": "text",
+                    "label": "Value"
+                  },
+                  {
+                    "name": "inline",
+                    "type": "boolean",
+                    "label": "Inline Flag"
+                  }
+                ],
+                "type": "array",
+                "label": "Fields"
+              }
+            ],
+            "type": "array",
+            "label": "Embeds"
+          },
+          {
+            "name": "components",
+            "spec": [
+              {
+                "name": "type",
+                "type": "select",
+                "label": "Component Type",
+                "options": [
+                  {
+                    "label": "A New Row",
+                    "value": 1,
+                    "nested": [
+                      {
+                        "name": "components",
+                        "spec": [
+                          {
+                            "name": "type",
+                            "type": "select",
+                            "label": "Row Component Type",
+                            "options": [
+                              {
+                                "label": "Button",
+                                "value": 2,
+                                "nested": [
+                                  {
+                                    "name": "style",
+                                    "type": "select",
+                                    "label": "Style",
+                                    "options": [
+                                      {
+                                        "label": "Primary (blurple)",
+                                        "value": 1,
+                                        "nested": [
+                                          {
+                                            "help": "A developer-defined identifier for the button, max 100 characters.",
+                                            "name": "custom_id",
+                                            "type": "text",
+                                            "label": "Custom ID",
+                                            "required": true
+                                          }
+                                        ]
+                                      },
+                                      {
+                                        "label": "Secondary (grey)",
+                                        "value": 2,
+                                        "nested": [
+                                          {
+                                            "help": "A developer-defined identifier for the button, max 100 characters.",
+                                            "name": "custom_id",
+                                            "type": "text",
+                                            "label": "Custom ID",
+                                            "required": true
+                                          }
+                                        ]
+                                      },
+                                      {
+                                        "label": "Success (green)",
+                                        "value": 3,
+                                        "nested": [
+                                          {
+                                            "help": "A developer-defined identifier for the button, max 100 characters.",
+                                            "name": "custom_id",
+                                            "type": "text",
+                                            "label": "Custom ID",
+                                            "required": true
+                                          }
+                                        ]
+                                      },
+                                      {
+                                        "label": "Danger (red)",
+                                        "value": 4,
+                                        "nested": [
+                                          {
+                                            "help": "A developer-defined identifier for the button, max 100 characters.",
+                                            "name": "custom_id",
+                                            "type": "text",
+                                            "label": "Custom ID",
+                                            "required": true
+                                          }
+                                        ]
+                                      },
+                                      {
+                                        "label": "Link (grey)",
+                                        "value": 5,
+                                        "nested": [
+                                          {
+                                            "help": "A URL for link-style buttons.",
+                                            "name": "url",
+                                            "type": "url",
+                                            "label": "URL",
+                                            "required": true
+                                          }
+                                        ]
+                                      }
+                                    ],
+                                    "required": true
+                                  },
+                                  {
+                                    "help": "Text that appears on the button, max 80 characters.",
+                                    "name": "label",
+                                    "type": "text",
+                                    "label": "Label"
+                                  },
+                                  {
+                                    "name": "disabled",
+                                    "type": "boolean",
+                                    "label": "Disabled"
+                                  }
+                                ]
+                              },
+                              {
+                                "label": "Select Menu",
+                                "value": 3,
+                                "nested": [
+                                  {
+                                    "help": "A developer-defined identifier for the button, max 100 characters.",
+                                    "name": "custom_id",
+                                    "type": "text",
+                                    "label": "Custom ID",
+                                    "required": true
+                                  },
+                                  {
+                                    "name": "options",
+                                    "spec": [
+                                      {
+                                        "help": "The user-facing name of the option, max 100 characters.",
+                                        "name": "label",
+                                        "type": "text",
+                                        "label": "Label",
+                                        "required": true
+                                      },
+                                      {
+                                        "help": "The dev-defined value of the option, max 100 characters.",
+                                        "name": "value",
+                                        "type": "text",
+                                        "label": "Value",
+                                        "required": true
+                                      },
+                                      {
+                                        "help": "An additional description of the option, max 100 characters.",
+                                        "name": "description",
+                                        "type": "text",
+                                        "label": "Description"
+                                      },
+                                      {
+                                        "name": "default",
+                                        "type": "boolean",
+                                        "label": "Default"
+                                      }
+                                    ],
+                                    "type": "array",
+                                    "label": "Options",
+                                    "required": true,
+                                    "validate": {
+                                      "maxItems": 25
+                                    }
+                                  },
+                                  {
+                                    "help": "Custom placeholder text if nothing is selected, max 150 characters.",
+                                    "name": "placeholder",
+                                    "type": "text",
+                                    "label": "Placeholder"
+                                  },
+                                  {
+                                    "help": "The minimum number of items that must be chosen; default 1, min 0, max 2.",
+                                    "name": "min_values",
+                                    "type": "uinteger",
+                                    "label": "Minimum values"
+                                  },
+                                  {
+                                    "help": "The maximum number of items that must be chosen; default 1, max 25.",
+                                    "name": "max_values",
+                                    "type": "uinteger",
+                                    "label": "Maximum values"
+                                  },
+                                  {
+                                    "name": "disabled",
+                                    "type": "boolean",
+                                    "label": "Disabled"
+                                  }
+                                ]
+                              }
+                            ],
+                            "required": true
+                          }
+                        ],
+                        "type": "array",
+                        "label": "Row Components",
+                        "required": true
+                      }
+                    ]
+                  }
+                ],
+                "required": true
+              }
+            ],
+            "type": "array",
+            "label": "Components"
+          },
+          {
+            "name": "files",
+            "spec": [
+              {
+                "name": "filename",
+                "type": "filename",
+                "label": "File Name",
+                "required": true,
+                "semantic": "file:name"
+              },
+              {
+                "name": "data",
+                "type": "buffer",
+                "label": "Data",
+                "required": true,
+                "semantic": "file:data"
+              }
+            ],
+            "type": "array",
+            "label": "Files"
+          },
+          {
+            "name": "username",
+            "type": "text",
+            "label": "Username"
+          },
+          {
+            "name": "avatar_url",
+            "type": "url",
+            "label": "Avatar URL"
+          },
+          {
+            "name": "moduleWebhookUrl",
+            "type": "url",
+            "label": "Custom Webhook URL"
+          }
+        ]
+      }
+    }
+  ],
+  "metadata": {
+    "instant": false,
+    "version": 1,
+    "scenario": {
+      "roundtrips": 1,
+      "maxErrors": 3,
+      "autoCommit": true,
+      "autoCommitTriggerLast": true,
+      "sequential": false,
+      "slots": null,
+      "confidential": false,
+      "dataloss": false,
+      "dlq": false,
+      "freshVariables": false
+    },
+    "designer": {
+      "orphans": []
+    },
+    "zone": "eu1.make.com",
+    "notes": [
+      {
+        "moduleIds": [
+          6
+        ],
+        "content": "<p><strong>BRIEFING:</strong> </p><p>Postet den morgendlichen CEO-Report.</p>",
+        "isFilterNote": false,
+        "metadata": {
+          "color": "#9138FE"
+        }
+      },
+      {
+        "moduleIds": [
+          5
+        ],
+        "content": "<p><strong>BERATER:</strong> </p><p>Bewertet die Zahlen (Gut/Schlecht) und gibt eine strategische Empfehlung.</p><p>Ändere gerne deinen Namen als CEO</p>",
+        "isFilterNote": false,
+        "metadata": {
+          "color": "#9138FE"
+        }
+      },
+      {
+        "moduleIds": [
+          4
+        ],
+        "content": "<p><strong>LEADS:</strong> </p><p>Zählt, wie viele Abonnenten aktuell im Newsletter sind.</p>",
+        "isFilterNote": false,
+        "metadata": {
+          "color": "#9138FE"
+        }
+      },
+      {
+        "moduleIds": [
+          3
+        ],
+        "content": "<p><strong>ANALYTICS:</strong> </p><p>Holt die Besucherzahlen (Active Users &amp; Views) von gestern.</p>",
+        "isFilterNote": false,
+        "metadata": {
+          "color": "#9138FE"
+        }
+      },
+      {
+        "moduleIds": [
+          2
+        ],
+        "content": "<p><strong>LOGBUCH:</strong> </p><p>Erstellt eine saubere Liste aller Bot-Statusmeldungen.</p>",
+        "isFilterNote": false,
+        "metadata": {
+          "color": "#9138FE"
+        }
+      },
+      {
+        "moduleIds": [
+          1
+        ],
+        "content": "<p><strong>SCANNER:</strong> </p><p>Listet alle deine Szenarien auf und prüft, ob eines \"Pausiert\" oder \"Fehlerhaft\" ist.</p>",
+        "isFilterNote": false,
+        "metadata": {
+          "color": "#9138FE"
+        }
+      }
+    ]
+  }
+}

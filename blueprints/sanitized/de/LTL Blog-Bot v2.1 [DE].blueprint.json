@@ -1,0 +1,4758 @@
+{
+  "name": "LTL Blog-Bot v2.1 [DE]",
+  "flow": [
+    {
+      "id": 2,
+      "module": "rss:TriggerNewArticle",
+      "version": 4,
+      "parameters": {
+        "url": "https://www.tomshardware.com/feeds/all",
+        "gzip": true,
+        "include": [],
+        "password": "REDACTED",
+        "username": "",
+        "maxResults": 1
+      },
+      "mapper": {},
+      "metadata": {
+        "designer": {
+          "x": 0,
+          "y": 750,
+          "name": "📡 Trend-Radar (Quelle)"
+        },
+        "restore": {},
+        "parameters": [
+          {
+            "name": "url",
+            "type": "url",
+            "label": "URL",
+            "required": true
+          },
+          {
+            "name": "maxResults",
+            "type": "number",
+            "label": "Maximum number of returned items",
+            "required": true
+          },
+          {
+            "name": "username",
+            "type": "text",
+            "label": "User name"
+          },
+          {
+            "name": "password",
+            "type": "text",
+            "label": "Password"
+          },
+          {
+            "name": "include",
+            "type": "select",
+            "label": "Process RSS fields",
+            "multiple": true,
+            "validate": {
+              "enum": [
+                "google-merchant-center",
+                "itunes"
+              ]
+            }
+          },
+          {
+            "name": "gzip",
+            "type": "boolean",
+            "label": "Request compressed content",
+            "required": true
+          }
+        ],
+        "interface": [
+          {
+            "name": "title",
+            "type": "text",
+            "label": "Title"
+          },
+          {
+            "name": "description",
+            "type": "text",
+            "label": "Description"
+          },
+          {
+            "name": "summary",
+            "type": "text",
+            "label": "Summary"
+          },
+          {
+            "name": "author",
+            "type": "text",
+            "label": "Author"
+          },
+          {
+            "name": "url",
+            "type": "url",
+            "label": "URL"
+          },
+          {
+            "name": "dateUpdated",
+            "type": "date",
+            "label": "Date updated"
+          },
+          {
+            "name": "dateCreated",
+            "type": "date",
+            "label": "Date created"
+          },
+          {
+            "name": "comments",
+            "type": "url",
+            "label": "Comments"
+          },
+          {
+            "name": "image",
+            "spec": [
+              {
+                "name": "title",
+                "type": "text",
+                "label": "Name"
+              },
+              {
+                "name": "url",
+                "type": "url",
+                "label": "URL"
+              }
+            ],
+            "type": "collection",
+            "label": "Image"
+          },
+          {
+            "name": "categories",
+            "spec": {
+              "type": "text"
+            },
+            "type": "array",
+            "label": "Categories"
+          },
+          {
+            "name": "source",
+            "spec": [
+              {
+                "name": "title",
+                "type": "text",
+                "label": "Name"
+              },
+              {
+                "name": "url",
+                "type": "url",
+                "label": "URL"
+              }
+            ],
+            "type": "collection",
+            "label": "Source"
+          },
+          {
+            "name": "enclosures",
+            "spec": [
+              {
+                "name": "url",
+                "type": "url",
+                "label": "URL"
+              },
+              {
+                "name": "type",
+                "type": "text",
+                "label": "Type"
+              },
+              {
+                "name": "length",
+                "type": "number",
+                "label": "Length"
+              }
+            ],
+            "type": "array",
+            "label": "Enclosures"
+          },
+          {
+            "help": "Other RSS fields. All values are in text format.",
+            "name": "rssFields",
+            "spec": [
+              {
+                "name": "title",
+                "type": "text",
+                "label": "title"
+              },
+              {
+                "name": "link",
+                "type": "text",
+                "label": "link"
+              },
+              {
+                "name": "description",
+                "type": "text",
+                "label": "description"
+              },
+              {
+                "name": "guid",
+                "type": "text",
+                "label": "guid"
+              },
+              {
+                "name": "enclosure",
+                "type": "text",
+                "label": "enclosure"
+              },
+              {
+                "name": "pubdate",
+                "type": "text",
+                "label": "pubdate"
+              },
+              {
+                "name": "category",
+                "type": "text",
+                "label": "category"
+              },
+              {
+                "name": "media:content",
+                "spec": [
+                  {
+                    "name": "props",
+                    "spec": [
+                      {
+                        "name": "type",
+                        "type": "text",
+                        "label": "type"
+                      },
+                      {
+                        "name": "url",
+                        "type": "text",
+                        "label": "url"
+                      }
+                    ],
+                    "type": "collection",
+                    "label": "Properties"
+                  },
+                  {
+                    "name": "value",
+                    "type": "text",
+                    "label": "Value"
+                  },
+                  {
+                    "name": "media:credit",
+                    "spec": [
+                      {
+                        "name": "props",
+                        "spec": [],
+                        "type": "collection",
+                        "label": "Properties"
+                      },
+                      {
+                        "name": "value",
+                        "type": "text",
+                        "label": "Value"
+                      }
+                    ],
+                    "type": "collection",
+                    "label": "media:credit"
+                  },
+                  {
+                    "name": "media:text",
+                    "spec": [
+                      {
+                        "name": "props",
+                        "spec": [],
+                        "type": "collection",
+                        "label": "Properties"
+                      },
+                      {
+                        "name": "value",
+                        "type": "text",
+                        "label": "Value"
+                      }
+                    ],
+                    "type": "collection",
+                    "label": "media:text"
+                  },
+                  {
+                    "name": "media:title",
+                    "spec": [
+                      {
+                        "name": "props",
+                        "spec": [
+                          {
+                            "name": "type",
+                            "type": "text",
+                            "label": "type"
+                          }
+                        ],
+                        "type": "collection",
+                        "label": "Properties"
+                      },
+                      {
+                        "name": "value",
+                        "type": "text",
+                        "label": "Value"
+                      }
+                    ],
+                    "type": "collection",
+                    "label": "media:title"
+                  }
+                ],
+                "type": "collection",
+                "label": "media:content"
+              },
+              {
+                "name": "media:thumbnail",
+                "spec": [
+                  {
+                    "name": "props",
+                    "spec": [
+                      {
+                        "name": "url",
+                        "type": "text",
+                        "label": "url"
+                      }
+                    ],
+                    "type": "collection",
+                    "label": "Properties"
+                  },
+                  {
+                    "name": "value",
+                    "type": "text",
+                    "label": "Value"
+                  }
+                ],
+                "type": "collection",
+                "label": "media:thumbnail"
+              },
+              {
+                "name": "author",
+                "type": "text",
+                "label": "author"
+              }
+            ],
+            "type": "collection",
+            "label": "RSS fields"
+          }
+        ]
+      }
+    },
+    {
+      "id": 6,
+      "module": "gemini-ai:createACompletionGeminiPro",
+      "version": 1,
+      "parameters": {
+        "__IMTCONN__": 0
+      },
+      "mapper": {
+        "model": "gemini-2.5-pro",
+        "contents": [
+          {
+            "role": "user",
+            "parts": [
+              {
+                "text": "Du bist der leitende Chefredakteur von LazyTechLab.\r\nDeine Mission: Kuratiere Tech-News, die SEO-technisch perfekt sind, viral gehen und visuell beeindrucken.\r\n\r\nInput Titel: {{2.title}}\r\nInput Inhalt: {{2.description}}\r\nURL: {{2.url}}\r\n\r\n### SYSTEM-ANWEISUNGEN ###\r\n\r\nANTWORT-FORMAT:\r\nAntworte AUSSCHLIESSLICH mit einem validen JSON-Objekt. Kein Markdown, kein Intro, kein Outro.\r\nWICHTIG: Escape alle doppelten Anführungszeichen innerhalb von Texten mit einem Backslash (\\\").\r\n\r\nREGELN FÜR DIE ANALYSE:\r\n\r\n1. SCORE (Qualitäts-Filter):\r\n   - < 70: Langweiliges Zeug, Nischenthemen ohne breites Interesse -> Weg damit.\r\n   - > 85: Relevante Tech-News (OpenAI, Google, Apple, Major Hardware Releases).\r\n   - 100: \"Cash Cow\" Deals (Black Friday, Preisfehler, Major Leaks).\r\n\r\n2. FOCUS KEYWORD (SEO):\r\n   Wähle das suchstärkste Haupt-Suchwort. (z.B. \"OpenAI\", \"Google Pixel 9\", \"RTX 5090\").\r\n\r\n3. HEADLINE (RankMath Optimiert):\r\n   Baue die Headline STRIKT nach dieser Formel für maximalen CTR:\r\n   Formel: \"[Focus Keyword]: [Power Word] [Rest der Headline]\"\r\n   \r\n   Falls der Input keine Liste ist, erfinde einen passenden Rahmen (z.B. \"3 Fakten zu...\", \"1 Grund für...\").\r\n   \r\n   PFLICHT: Nutze MINDESTENS eines dieser Power Words:\r\n   Genial, Brutal, Dramatisch, Wichtig, Endlich, Enthüllt, Sensation, Verrückt, Mächtig, Geheim, Sofort, Warnung, Ultimativ, Schockierend.\r\n   \r\n   Währung: Immer $ in € umrechnen (grobe Schätzung reicht).\r\n\r\n4. META DESCRIPTION:\r\n   Max 145 Zeichen (für Mobile-Optimierung). MUSS zwingend mit dem Focus Keyword beginnen!\r\n   Beispiel: \"OpenAI ruft Alarmstufe Rot aus...\" (Wenn Focus Keyword = OpenAI).\r\n\r\n5. IMAGE_PROMPT Du bist ein KI-Prompt-Engineer für Produktfotografie.\r\n\r\nAnalysiere den Input und erstelle eine präzise, englische Beschreibung des physischen Hauptobjekts.\r\n\r\n6. VIDEO_POTENTIAL (Der virale Trigger):\r\n   - HIGH: Wenn das Thema visuell explodiert, Kontroverse bietet oder starke Emotionen weckt (Wut, Lachen, Wow).\r\n   - LOW: Wenn es trockene Business-Zahlen oder reine Text-News sind.\r\n\r\n7. KATEGORIE:\r\n   Wähle exakt EINE aus dieser Liste: \r\n   [Gaming, Hardware, Software, Mobile, Smart Home, Business, Security, Deals, AI & Future, Science].\r\n\r\n8. TAGS:\r\n   Erstelle 3-5 relevante Tags als JSON Array (z.B. [\"AI\", \"Google\", \"Tech\"]).\r\n\r\n### JSON OUTPUT START ###\r\n{\r\n  \"score\": 0,\r\n  \"headline\": \"String\",\r\n  \"focus_keyword\": \"String\",\r\n  \"meta_description\": \"String\",\r\n  \"kategorie\": \"String\",\r\n  \"image_prompt\": \"String\",\r\n  \"video_potential\": \"HIGH/LOW\",\r\n  \"tags\": [\"Tag1\", \"Tag2\"]\r\n}",
+                "type": "text"
+              }
+            ]
+          }
+        ],
+        "generationConfig": {
+          "thinkingConfig": {},
+          "responseMimeType": "application/json"
+        },
+        "system_instruction": {}
+      },
+      "metadata": {
+        "designer": {
+          "x": 300,
+          "y": 750,
+          "name": "🧠 Das Gehirn (SEO & Analyse)"
+        },
+        "restore": {
+          "expect": {
+            "model": {
+              "mode": "chose",
+              "label": "Gemini 2.5 Pro"
+            },
+            "contents": {
+              "mode": "chose",
+              "items": [
+                {
+                  "role": {
+                    "mode": "chose",
+                    "label": "User"
+                  },
+                  "parts": {
+                    "mode": "chose",
+                    "items": [
+                      {
+                        "type": {
+                          "mode": "chose",
+                          "label": "Text",
+                          "collapsed": true
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            "url_context": {
+              "mode": "chose"
+            },
+            "code_execution": {
+              "mode": "chose"
+            },
+            "safetySettings": {
+              "mode": "chose"
+            },
+            "generationConfig": {
+              "nested": {
+                "stopSequences": {
+                  "mode": "chose"
+                },
+                "thinkingConfig": {
+                  "nested": {
+                    "thinking_level": {
+                      "mode": "chose",
+                      "label": "Empty"
+                    },
+                    "include_thoughts": {
+                      "mode": "chose"
+                    }
+                  }
+                },
+                "mediaResolution": {
+                  "mode": "chose",
+                  "label": "Empty"
+                },
+                "responseMimeType": {
+                  "mode": "chose",
+                  "label": "JSON Output"
+                },
+                "new_responseSchema": {
+                  "mode": "chose"
+                },
+                "responseModalities": {
+                  "mode": "chose"
+                }
+              }
+            },
+            "system_instruction": {
+              "nested": {
+                "parts": {
+                  "mode": "chose"
+                }
+              }
+            },
+            "google_maps_context": {
+              "mode": "chose"
+            },
+            "google_search_context": {
+              "mode": "chose"
+            },
+            "file_search_store_context": {
+              "mode": "chose"
+            },
+            "function_declarations_context": {
+              "mode": "chose"
+            }
+          },
+          "parameters": {
+            "__IMTCONN__": {
+              "data": {
+                "scoped": "true",
+                "connection": "gemini-ai-q9zyjp"
+              },
+              "label": "My Gemini AI connection"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "__IMTCONN__",
+            "type": "account:gemini-ai-q9zyjp",
+            "label": "Connection",
+            "required": true
+          }
+        ],
+        "expect": [
+          {
+            "name": "model",
+            "type": "select",
+            "label": "AI Model",
+            "required": true
+          },
+          {
+            "name": "contents",
+            "spec": [
+              {
+                "name": "role",
+                "type": "select",
+                "label": "Role",
+                "options": [
+                  {
+                    "label": "User",
+                    "value": "user"
+                  },
+                  {
+                    "label": "Model",
+                    "value": "model"
+                  }
+                ]
+              },
+              {
+                "name": "parts",
+                "spec": [
+                  {
+                    "name": "type",
+                    "type": "select",
+                    "label": "Message Type",
+                    "options": [
+                      {
+                        "label": "Text",
+                        "value": "text",
+                        "nested": [
+                          {
+                            "name": "text",
+                            "type": "text",
+                            "label": "Text",
+                            "required": false
+                          }
+                        ]
+                      },
+                      {
+                        "label": "File",
+                        "value": "file",
+                        "nested": [
+                          {
+                            "name": "file_data",
+                            "spec": [
+                              {
+                                "name": "mime_type",
+                                "type": "text",
+                                "label": "Mime Type",
+                                "required": false
+                              },
+                              {
+                                "help": "You get this from the 'Upload a File' module.",
+                                "name": "file_uri",
+                                "type": "text",
+                                "label": "File URI",
+                                "required": false
+                              }
+                            ],
+                            "type": "collection",
+                            "label": "File Data",
+                            "required": false
+                          }
+                        ]
+                      },
+                      {
+                        "label": "Function Call",
+                        "value": "functionCall",
+                        "nested": [
+                          {
+                            "name": "functionCall",
+                            "spec": [
+                              {
+                                "help": "The name of the function to call.",
+                                "name": "name",
+                                "type": "text",
+                                "label": "Name",
+                                "required": true,
+                                "validate": {
+                                  "max": 64
+                                }
+                              },
+                              {
+                                "help": "The function parameters and values in JSON object format.",
+                                "name": "args",
+                                "type": "json",
+                                "label": "Arguments"
+                              },
+                              {
+                                "help": "The unique ID of the function call.",
+                                "name": "id",
+                                "type": "text",
+                                "label": "Function Call ID"
+                              }
+                            ],
+                            "type": "collection",
+                            "label": "Function Call"
+                          }
+                        ]
+                      },
+                      {
+                        "label": "Function Response",
+                        "value": "functionResponse",
+                        "nested": [
+                          {
+                            "name": "functionResponse",
+                            "spec": [
+                              {
+                                "help": "The name of the function to call.",
+                                "name": "name",
+                                "type": "text",
+                                "label": "Name",
+                                "required": true,
+                                "validate": {
+                                  "max": 64
+                                }
+                              },
+                              {
+                                "help": "The function response in JSON object format.",
+                                "name": "response",
+                                "type": "json",
+                                "label": "Response",
+                                "required": true
+                              }
+                            ],
+                            "type": "collection",
+                            "label": "Function Response"
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "name": "thoughtSignature",
+                    "type": "text",
+                    "label": "Thought Signature"
+                  }
+                ],
+                "type": "array",
+                "label": "Parts"
+              }
+            ],
+            "type": "array",
+            "label": "Messages",
+            "required": true
+          },
+          {
+            "name": "system_instruction",
+            "spec": [
+              {
+                "name": "parts",
+                "spec": {
+                  "name": "value",
+                  "spec": [
+                    {
+                      "name": "text",
+                      "type": "text",
+                      "label": "Value"
+                    }
+                  ],
+                  "type": "collection",
+                  "label": "Prompt"
+                },
+                "type": "array",
+                "label": "Prompts"
+              }
+            ],
+            "type": "collection",
+            "label": "System Instructions"
+          },
+          {
+            "name": "safetySettings",
+            "spec": [
+              {
+                "name": "category",
+                "type": "select",
+                "label": "Category",
+                "options": [
+                  {
+                    "label": "Harassment content",
+                    "value": "HARM_CATEGORY_HARASSMENT"
+                  },
+                  {
+                    "label": "Hate speech and content",
+                    "value": "HARM_CATEGORY_HATE_SPEECH"
+                  },
+                  {
+                    "label": "Sexually explicit content.",
+                    "value": "HARM_CATEGORY_SEXUALLY_EXPLICIT"
+                  },
+                  {
+                    "label": "Dangerous content:",
+                    "value": "HARM_CATEGORY_DANGEROUS_CONTENT"
+                  }
+                ]
+              },
+              {
+                "name": "threshold",
+                "type": "select",
+                "label": "Threshold",
+                "options": [
+                  {
+                    "label": "Block low and above.",
+                    "value": "BLOCK_LOW_AND_ABOVE"
+                  },
+                  {
+                    "label": "Block medium and above.",
+                    "value": "BLOCK_MEDIUM_AND_ABOVE"
+                  },
+                  {
+                    "label": "Block only high.",
+                    "value": "BLOCK_ONLY_HIGH"
+                  },
+                  {
+                    "label": "Block none.",
+                    "value": "BLOCK_NONE"
+                  }
+                ]
+              }
+            ],
+            "type": "array",
+            "label": "Safety Settings"
+          },
+          {
+            "name": "generationConfig",
+            "spec": [
+              {
+                "name": "stopSequences",
+                "spec": {
+                  "name": "value",
+                  "type": "text",
+                  "label": "Stop Sequence"
+                },
+                "type": "array",
+                "label": "Stop Sequences"
+              },
+              {
+                "name": "responseModalities",
+                "type": "select",
+                "label": "Response Modalities",
+                "multiple": true,
+                "validate": {
+                  "enum": [
+                    "text",
+                    "image"
+                  ]
+                }
+              },
+              {
+                "name": "maxOutputTokens",
+                "type": "number",
+                "label": "Max Output Tokens"
+              },
+              {
+                "name": "temperature",
+                "type": "number",
+                "label": "Temperature",
+                "validate": {
+                  "max": 1,
+                  "min": 0
+                }
+              },
+              {
+                "name": "topP",
+                "type": "number",
+                "label": "Top P",
+                "validate": {
+                  "max": 1,
+                  "min": 0
+                }
+              },
+              {
+                "name": "topK",
+                "type": "number",
+                "label": "Top K"
+              },
+              {
+                "name": "thinkingConfig",
+                "spec": [
+                  {
+                    "name": "thinkingBudget",
+                    "type": "number",
+                    "label": "Thinking Budget"
+                  },
+                  {
+                    "name": "include_thoughts",
+                    "type": "boolean",
+                    "label": "Include Thoughts"
+                  },
+                  {
+                    "name": "thinking_level",
+                    "type": "select",
+                    "label": "Thinking Level",
+                    "validate": {
+                      "enum": [
+                        "low",
+                        "high"
+                      ]
+                    }
+                  }
+                ],
+                "type": "collection",
+                "label": "Thinking Config"
+              },
+              {
+                "name": "mediaResolution",
+                "type": "select",
+                "label": "Media Resolution",
+                "validate": {
+                  "enum": [
+                    "media_resolution_low",
+                    "media_resolution_medium",
+                    "media_resolution_high"
+                  ]
+                }
+              },
+              {
+                "name": "responseMimeType",
+                "type": "select",
+                "label": "Response Format"
+              },
+              {
+                "name": "responseSchema",
+                "type": "any",
+                "label": "Response Schema (Deprecated)"
+              },
+              {
+                "name": "new_responseSchema",
+                "spec": [
+                  {
+                    "name": "type",
+                    "type": "select",
+                    "label": "Value Type",
+                    "options": [
+                      {
+                        "label": "String",
+                        "value": "string",
+                        "nested": "rpc://gemini-ai/1/createResponseSchema?type=string"
+                      },
+                      {
+                        "label": "Enum",
+                        "value": "enum",
+                        "nested": "rpc://gemini-ai/1/createResponseSchema?type=enum"
+                      },
+                      {
+                        "label": "Number",
+                        "value": "number",
+                        "nested": "rpc://gemini-ai/1/createResponseSchema?type=number"
+                      },
+                      {
+                        "label": "Integer",
+                        "value": "integer",
+                        "nested": "rpc://gemini-ai/1/createResponseSchema?type=integer"
+                      },
+                      {
+                        "label": "Boolean",
+                        "value": "boolean",
+                        "nested": "rpc://gemini-ai/1/createResponseSchema?type=boolean"
+                      },
+                      {
+                        "label": "Object",
+                        "value": "object",
+                        "nested": "rpc://gemini-ai/1/createResponseSchema?type=object"
+                      }
+                    ]
+                  }
+                ],
+                "type": "array",
+                "label": "Response Schema"
+              }
+            ],
+            "type": "collection",
+            "label": "Generation configurations"
+          },
+          {
+            "name": "tools",
+            "type": "any",
+            "label": "Tools"
+          },
+          {
+            "name": "tool_config",
+            "type": "any",
+            "label": "Tool Config"
+          },
+          {
+            "name": "function_declarations_context",
+            "type": "boolean",
+            "label": "Function Declarations Grounding"
+          },
+          {
+            "name": "url_context",
+            "type": "boolean",
+            "label": "URL Context"
+          },
+          {
+            "name": "google_search_context",
+            "type": "boolean",
+            "label": "Google Search Grounding"
+          },
+          {
+            "name": "code_execution",
+            "type": "boolean",
+            "label": "Code Execution"
+          },
+          {
+            "name": "google_maps_context",
+            "type": "boolean",
+            "label": "Google Maps Grounding"
+          },
+          {
+            "name": "file_search_store_context",
+            "type": "boolean",
+            "label": "File Search Store Context"
+          }
+        ],
+        "advanced": true
+      }
+    },
+    {
+      "id": 15,
+      "module": "json:ParseJSON",
+      "version": 1,
+      "parameters": {
+        "type": ""
+      },
+      "mapper": {
+        "json": "{{6.candidates[].content.parts[].text}}"
+      },
+      "metadata": {
+        "designer": {
+          "x": 600,
+          "y": 750,
+          "name": "🔧 Daten-Wandler (JSON)"
+        },
+        "restore": {
+          "parameters": {
+            "type": {
+              "label": "Choose a data structure"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "type",
+            "type": "udt",
+            "label": "Data structure"
+          }
+        ],
+        "expect": [
+          {
+            "name": "json",
+            "type": "text",
+            "label": "JSON string",
+            "required": true
+          }
+        ]
+      }
+    },
+    {
+      "id": 12,
+      "module": "gemini-ai:createAnImage",
+      "version": 1,
+      "parameters": {
+        "__IMTCONN__": 0
+      },
+      "filter": {
+        "name": "Nur Top-News (Score > 70)",
+        "conditions": [
+          [
+            {
+              "a": "{{15.score}}",
+              "b": "70",
+              "o": "number:greaterorequal"
+            }
+          ]
+        ]
+      },
+      "mapper": {
+        "model": "imagen-4.0-fast-generate-001",
+        "prompt": "{{15.image_prompt}}, award winning product photography, 8k resolution, unreal engine 5 render, cinematic lighting, futuristic tech atmosphere, highly detailed, depth of field. --no text --no cars --no watermark",
+        "aspectRatio": "16:9",
+        "personGeneration": "ALLOW_ADULT"
+      },
+      "metadata": {
+        "designer": {
+          "x": 900,
+          "y": 750,
+          "name": "🎨 Der Designer (8K Visuals)"
+        },
+        "restore": {
+          "expect": {
+            "model": {
+              "mode": "chose",
+              "label": "Imagen 4 Fast"
+            },
+            "aspectRatio": {
+              "mode": "chose",
+              "label": "16:9"
+            },
+            "personGeneration": {
+              "mode": "chose",
+              "label": "Allow Adults"
+            }
+          },
+          "parameters": {
+            "__IMTCONN__": {
+              "data": {
+                "scoped": "true",
+                "connection": "gemini-ai-q9zyjp"
+              },
+              "label": "My Gemini AI connection"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "__IMTCONN__",
+            "type": "account:gemini-ai-q9zyjp",
+            "label": "Connection",
+            "required": true
+          }
+        ],
+        "expect": [
+          {
+            "name": "model",
+            "type": "select",
+            "label": "Model",
+            "required": true
+          },
+          {
+            "name": "prompt",
+            "type": "text",
+            "label": "Image Prompt",
+            "required": true
+          },
+          {
+            "name": "personGeneration",
+            "type": "select",
+            "label": "Person Generation Rules",
+            "validate": {
+              "enum": [
+                "ALLOW_ADULT",
+                "DONT_ALLOW"
+              ]
+            }
+          },
+          {
+            "name": "aspectRatio",
+            "type": "select",
+            "label": "Aspect Ratio",
+            "validate": {
+              "enum": [
+                "1:1",
+                "3:4",
+                "4:3",
+                "9:16",
+                "16:9"
+              ]
+            }
+          }
+        ]
+      },
+      "onerror": [
+        {
+          "id": 13,
+          "module": "http:ActionGetFile",
+          "version": 3,
+          "parameters": {
+            "handleErrors": false
+          },
+          "mapper": {
+            "url": "https://images.unsplash.com/photo-1518770660439-4636190af475?q=80&w=1920&auto=format&fit=crop",
+            "method": "get",
+            "serializeUrl": false,
+            "shareCookies": 0
+          },
+          "metadata": {
+            "designer": {
+              "x": 1200,
+              "y": 1500,
+              "name": "🛡️ Notfall-Bild (Unsplash)"
+            },
+            "restore": {},
+            "parameters": [
+              {
+                "name": "handleErrors",
+                "type": "boolean",
+                "label": "Evaluate all states as errors (except for 2xx and 3xx )",
+                "required": true
+              }
+            ],
+            "expect": [
+              {
+                "name": "url",
+                "type": "url",
+                "label": "URL",
+                "required": true
+              },
+              {
+                "name": "serializeUrl",
+                "type": "boolean",
+                "label": "Serialize URL",
+                "required": true
+              },
+              {
+                "name": "method",
+                "type": "hidden",
+                "label": "Method"
+              },
+              {
+                "name": "shareCookies",
+                "type": "boolean",
+                "label": "Share cookies with other HTTP modules",
+                "required": true
+              }
+            ]
+          }
+        },
+        {
+          "id": 14,
+          "module": "builtin:Resume",
+          "version": 1,
+          "parameters": {},
+          "mapper": {
+            "data": "{{13.data}}",
+            "fileName": "fallback_image.jpg"
+          },
+          "metadata": {
+            "designer": {
+              "x": 1500,
+              "y": 1500,
+              "name": "🔄 Notfall-Bild (Resume)"
+            },
+            "restore": {},
+            "expect": [
+              {
+                "name": "data",
+                "type": "buffer",
+                "label": "Data"
+              },
+              {
+                "name": "fileName",
+                "type": "text",
+                "label": "File Name"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "module": "wordpress:createMediaItem",
+      "version": 3,
+      "parameters": {
+        "__IMTCONN__": 0
+      },
+      "mapper": {
+        "data": "{{12.data}}",
+        "altText": "{{15.focus_keyword}}",
+        "fileName": "image_{{now}}.png"
+      },
+      "metadata": {
+        "designer": {
+          "x": 1200,
+          "y": 600,
+          "name": "☁️ Medien-Upload"
+        },
+        "restore": {
+          "parameters": {
+            "__IMTCONN__": {
+              "data": {
+                "scoped": "true",
+                "connection": "wordpress4"
+              },
+              "label": "Mein LazyTechLab Blog ([NAME] Sonntag)"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "__IMTCONN__",
+            "type": "account:wordpress4",
+            "label": "Connection",
+            "required": true
+          }
+        ],
+        "expect": [
+          {
+            "name": "data",
+            "type": "buffer",
+            "label": "Data",
+            "required": true
+          },
+          {
+            "name": "fileName",
+            "type": "filename",
+            "label": "File name",
+            "required": true
+          },
+          {
+            "name": "title",
+            "type": "text",
+            "label": "Title"
+          },
+          {
+            "name": "altText",
+            "type": "text",
+            "label": "Alternative text"
+          },
+          {
+            "name": "caption",
+            "type": "text",
+            "label": "Caption"
+          },
+          {
+            "name": "description",
+            "type": "text",
+            "label": "Description"
+          },
+          {
+            "name": "post",
+            "type": "number",
+            "label": "Post ID"
+          }
+        ]
+      },
+      "onerror": [
+        {
+          "id": 55,
+          "module": "http:ActionGetFile",
+          "version": 3,
+          "parameters": {
+            "handleErrors": false
+          },
+          "mapper": {
+            "url": "https://images.unsplash.com/photo-1518770660439-4636190af475?q=80&w=1920&auto=format&fit=crop",
+            "method": "get",
+            "serializeUrl": false,
+            "shareCookies": 0
+          },
+          "metadata": {
+            "designer": {
+              "x": 1500,
+              "y": 1200,
+              "name": "🛡️ Notfall-Bild (Unsplash) 2"
+            },
+            "restore": {},
+            "parameters": [
+              {
+                "name": "handleErrors",
+                "type": "boolean",
+                "label": "Evaluate all states as errors (except for 2xx and 3xx )",
+                "required": true
+              }
+            ],
+            "expect": [
+              {
+                "name": "url",
+                "type": "url",
+                "label": "URL",
+                "required": true
+              },
+              {
+                "name": "serializeUrl",
+                "type": "boolean",
+                "label": "Serialize URL",
+                "required": true
+              },
+              {
+                "name": "method",
+                "type": "hidden",
+                "label": "Method"
+              },
+              {
+                "name": "shareCookies",
+                "type": "boolean",
+                "label": "Share cookies with other HTTP modules",
+                "required": true
+              }
+            ]
+          }
+        },
+        {
+          "id": 59,
+          "module": "wordpress:createMediaItem",
+          "version": 3,
+          "parameters": {
+            "__IMTCONN__": 0
+          },
+          "mapper": {
+            "data": "{{55.data}}",
+            "altText": "{{15.focus_keyword}}",
+            "fileName": "{{55.fileName}}"
+          },
+          "metadata": {
+            "designer": {
+              "x": 1800,
+              "y": 1200,
+              "name": "🛡️ Notfall-Medien-Upload"
+            },
+            "restore": {
+              "parameters": {
+                "__IMTCONN__": {
+                  "data": {
+                    "scoped": "true",
+                    "connection": "wordpress4"
+                  },
+                  "label": "Mein LazyTechLab Blog ([NAME] Sonntag)"
+                }
+              }
+            },
+            "parameters": [
+              {
+                "name": "__IMTCONN__",
+                "type": "account:wordpress4",
+                "label": "Connection",
+                "required": true
+              }
+            ],
+            "expect": [
+              {
+                "name": "data",
+                "type": "buffer",
+                "label": "Data",
+                "required": true
+              },
+              {
+                "name": "fileName",
+                "type": "filename",
+                "label": "File name",
+                "required": true
+              },
+              {
+                "name": "title",
+                "type": "text",
+                "label": "Title"
+              },
+              {
+                "name": "altText",
+                "type": "text",
+                "label": "Alternative text"
+              },
+              {
+                "name": "caption",
+                "type": "text",
+                "label": "Caption"
+              },
+              {
+                "name": "description",
+                "type": "text",
+                "label": "Description"
+              },
+              {
+                "name": "post",
+                "type": "number",
+                "label": "Post ID"
+              }
+            ]
+          }
+        },
+        {
+          "id": 60,
+          "module": "builtin:Resume",
+          "version": 1,
+          "parameters": {},
+          "mapper": {
+            "ID": "{{59.ID}}",
+            "file": "",
+            "guid": "",
+            "sizes": {
+              "medium": {
+                "file": "",
+                "width": "",
+                "height": "",
+                "mime-type": ""
+              },
+              "thumbnail": {
+                "file": "",
+                "width": "",
+                "height": "",
+                "mime-type": ""
+              }
+            },
+            "width": "",
+            "filter": "",
+            "height": "",
+            "pinged": "",
+            "to_ping": "",
+            "post_date": "",
+            "post_name": "",
+            "post_type": "",
+            "image_meta": {
+              "iso": "",
+              "title": "",
+              "camera": "",
+              "credit": "",
+              "caption": "",
+              "aperture": "",
+              "keywords": [],
+              "copyright": "",
+              "orientation": "",
+              "focal_length": "",
+              "shutter_speed": "",
+              "created_timestamp": ""
+            },
+            "menu_order": "",
+            "post_title": "",
+            "ping_status": "",
+            "post_author": "REDACTED",
+            "post_parent": "",
+            "post_status": "",
+            "post_content": "",
+            "post_excerpt": "",
+            "comment_count": "",
+            "post_date_gmt": "",
+            "post_modified": "",
+            "post_password": "REDACTED",
+            "comment_status": "",
+            "post_mime_type": "",
+            "post_modified_gmt": "",
+            "post_content_filtered": ""
+          },
+          "metadata": {
+            "designer": {
+              "x": 2100,
+              "y": 1200,
+              "name": "🔄 Notfall-Bild (Resume) 2"
+            },
+            "restore": {},
+            "expect": [
+              {
+                "name": "ID",
+                "type": "number",
+                "label": "Media Item ID"
+              },
+              {
+                "name": "width",
+                "type": "number",
+                "label": "Width"
+              },
+              {
+                "name": "height",
+                "type": "number",
+                "label": "Height"
+              },
+              {
+                "name": "file",
+                "type": "text",
+                "label": "File"
+              },
+              {
+                "name": "sizes",
+                "spec": [
+                  {
+                    "name": "medium",
+                    "spec": [
+                      {
+                        "name": "file",
+                        "type": "text",
+                        "label": "File"
+                      },
+                      {
+                        "name": "width",
+                        "type": "number",
+                        "label": "Width"
+                      },
+                      {
+                        "name": "height",
+                        "type": "number",
+                        "label": "Height"
+                      },
+                      {
+                        "name": "mime-type",
+                        "type": "text",
+                        "label": "Mime Type"
+                      }
+                    ],
+                    "type": "collection",
+                    "label": "Medium"
+                  },
+                  {
+                    "name": "thumbnail",
+                    "spec": [
+                      {
+                        "name": "file",
+                        "type": "text",
+                        "label": "File"
+                      },
+                      {
+                        "name": "width",
+                        "type": "number",
+                        "label": "Width"
+                      },
+                      {
+                        "name": "height",
+                        "type": "number",
+                        "label": "Height"
+                      },
+                      {
+                        "name": "mime-type",
+                        "type": "text",
+                        "label": "Mime Type"
+                      }
+                    ],
+                    "type": "collection",
+                    "label": "Thumbnail"
+                  }
+                ],
+                "type": "collection",
+                "label": "Sizes"
+              },
+              {
+                "name": "image_meta",
+                "spec": [
+                  {
+                    "name": "aperture",
+                    "type": "text",
+                    "label": "Aperture"
+                  },
+                  {
+                    "name": "credit",
+                    "type": "text",
+                    "label": "Credit"
+                  },
+                  {
+                    "name": "camera",
+                    "type": "text",
+                    "label": "Camera"
+                  },
+                  {
+                    "name": "caption",
+                    "type": "text",
+                    "label": "Caption"
+                  },
+                  {
+                    "name": "created_timestamp",
+                    "type": "text",
+                    "label": "Created Timestamp"
+                  },
+                  {
+                    "name": "copyright",
+                    "type": "text",
+                    "label": "Copyright"
+                  },
+                  {
+                    "name": "focal_length",
+                    "type": "text",
+                    "label": "Focal Length"
+                  },
+                  {
+                    "name": "iso",
+                    "type": "text",
+                    "label": "Iso"
+                  },
+                  {
+                    "name": "shutter_speed",
+                    "type": "text",
+                    "label": "Shutter Speed"
+                  },
+                  {
+                    "name": "title",
+                    "type": "text",
+                    "label": "Title"
+                  },
+                  {
+                    "name": "orientation",
+                    "type": "text",
+                    "label": "Orientation"
+                  },
+                  {
+                    "name": "keywords",
+                    "spec": {
+                      "name": "value",
+                      "type": "text"
+                    },
+                    "type": "array",
+                    "label": "Keywords"
+                  }
+                ],
+                "type": "collection",
+                "label": "Image Meta"
+              },
+              {
+                "name": "post_author",
+                "type": "text",
+                "label": "Post Author"
+              },
+              {
+                "name": "post_date",
+                "type": "date",
+                "label": "Post Date"
+              },
+              {
+                "name": "post_date_gmt",
+                "type": "date",
+                "label": "Post Date GMT"
+              },
+              {
+                "name": "post_content",
+                "type": "text",
+                "label": "Post Content"
+              },
+              {
+                "name": "post_title",
+                "type": "text",
+                "label": "Post Title"
+              },
+              {
+                "name": "post_excerpt",
+                "type": "text",
+                "label": "Post Excerpt"
+              },
+              {
+                "name": "post_status",
+                "type": "text",
+                "label": "Post Status"
+              },
+              {
+                "name": "comment_status",
+                "type": "text",
+                "label": "Comment Status"
+              },
+              {
+                "name": "ping_status",
+                "type": "text",
+                "label": "Ping Status"
+              },
+              {
+                "name": "post_password",
+                "type": "text",
+                "label": "Post Password"
+              },
+              {
+                "name": "post_name",
+                "type": "text",
+                "label": "Post Name"
+              },
+              {
+                "name": "to_ping",
+                "type": "text",
+                "label": "To Ping"
+              },
+              {
+                "name": "pinged",
+                "type": "text",
+                "label": "Pinged"
+              },
+              {
+                "name": "post_modified",
+                "type": "date",
+                "label": "Post Modified"
+              },
+              {
+                "name": "post_modified_gmt",
+                "type": "date",
+                "label": "Post Modified Gmt"
+              },
+              {
+                "name": "post_content_filtered",
+                "type": "text",
+                "label": "Post Content Filtered"
+              },
+              {
+                "name": "post_parent",
+                "type": "number",
+                "label": "Post Parent"
+              },
+              {
+                "name": "guid",
+                "type": "text",
+                "label": "Guid"
+              },
+              {
+                "name": "menu_order",
+                "type": "number",
+                "label": "Menu Order"
+              },
+              {
+                "name": "post_type",
+                "type": "text",
+                "label": "Post Type"
+              },
+              {
+                "name": "post_mime_type",
+                "type": "text",
+                "label": "Post Mime Type"
+              },
+              {
+                "name": "comment_count",
+                "type": "text",
+                "label": "Comment Count"
+              },
+              {
+                "name": "filter",
+                "type": "text",
+                "label": "Filter"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "module": "gemini-ai:createACompletionGeminiPro",
+      "version": 1,
+      "parameters": {
+        "__IMTCONN__": 0
+      },
+      "mapper": {
+        "model": "gemini-3-pro-preview",
+        "contents": [
+          {
+            "role": "user",
+            "parts": [
+              {
+                "text": "Du bist der leitende Tech-Redakteur von LazyTechLab.de.\r\nWir sind KEIN 08/15 News-Portal. Wir sind die ehrliche, ungefilterte Stimme im Tech-Dschungel.\r\n\r\nZEIT-SYNCHRONISATION:\r\nEs ist heute: {{formatDate(now; \"DD.MM.YYYY\")}}\r\nWICHTIG: Deine Trainingsdaten sind veraltet. Der INPUTtext enthält die NEUESTEN Fakten. Vertraue dem Input!\r\n\r\nINPUT:\r\nTitel: {{15.headline}}\r\nFacts: {{2.summary}}\r\nURL: {{2.url}}\r\nKeyword: {{15.focus_keyword}}\r\n\r\nSEO-VORGABEN (RankMath 100/100):\r\n1.  **KEYWORD-DICHTE:** Nutze das Focus Keyword \"{{15.focus_keyword}}\" MINDESTENS 6 bis 8 Mal im gesamten Text.\r\n    - Verteilung: 1x im ersten Satz, 2x in H2-Überschriften, 4-5x natürlich im Fließtext, 1x im Fazit.\r\n2.  **LÄNGE:** Schreibe MINDESTENS 600 Wörter - MAXIMAL 1000 Wörter (Deep Dive).\r\n3.  **ABSÄTZE:** Mache nach MAXIMAL 3 Sätzen einen Absatz. Leser hassen Textwände. Halte es luftig (\"Snackable\").\r\n\r\nHTML-STRUKTUR (Magazine Design - DARK MODE):\r\n\r\n1.  **Die \"In aller Kürze\" Box:**\r\n    <div style=\"background-color: #1e293b; border-left: 4px solid #3b82f6; padding: 25px; margin-bottom: 30px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.2);\">\r\n    <h4 style=\"margin-top:0; color: #3b82f6; text-transform: uppercase; font-size: 0.9em; letter-spacing: 1px;\">⚡ Quick Facts</h4>\r\n    <ul style=\"margin-bottom:0; padding-left: 20px; color: #cbd5e1;\">\r\n    <li>Fakt 1</li>\r\n    <li>Fakt 2</li>\r\n    <li>Fakt 3</li>\r\n    </ul>\r\n    </div>\r\n\r\n2.  **Intro (Ausführlich):**\r\n    Starte mit einem Knall. Das Keyword **{{15.focus_keyword}}** muss im ersten Satz fett (<strong>) sein.\r\n    Erzähle die Vorgeschichte (mind. 150 Wörter), um die Keyword-Dichte natürlich zu erhöhen.\r\n\r\n3.  <h2>Was ist passiert? ({{15.focus_keyword}} Update)</h2>\r\n    Die Fakten im Detail.\r\n    **WICHTIG:** Wenn du Daten vergleichst, nutze diese gestylte Tabelle (Dark Mode):\r\n    <div style=\"overflow-x:auto;\">\r\n  <table style=\"width:100%; border-collapse: collapse; margin: 20px 0; font-size: 0.9em; color: #cbd5e1; border: 1px solid #334155;\">\r\n    <thead>\r\n      <tr style=\"background-color: #0f172a; color: white;\">\r\n        <th style=\"padding: 12px; text-align: left; border: 1px solid #334155;\">Merkmal</th>\r\n        <th style=\"padding: 12px; text-align: left; border: 1px solid #334155;\">Detail</th>\r\n      </tr>\r\n    </thead>\r\n    <tbody style=\"background-color: #0b1120;\">\r\n      <tr>\r\n        <td style=\"padding: 12px; font-weight:bold; color: #f8fafc; border: 1px solid #334155;\">Punkt A</td>\r\n        <td style=\"padding: 12px; border: 1px solid #334155;\">Wert A</td>\r\n      </tr>\r\n      <tr>\r\n        <td style=\"padding: 12px; font-weight:bold; color: #f8fafc; border: 1px solid #334155;\">Punkt B</td>\r\n        <td style=\"padding: 12px; border: 1px solid #334155;\">Wert B</td>\r\n      </tr>\r\n    </tbody>\r\n  </table>\r\n</div>\r\n\r\n\r\n4.  <h2>Der LazyTechLab Check</h2>\r\n    Deine ehrliche Analyse. Schreibe hier sehr ausführlich (für die Wortanzahl).\r\n    **Pro & Contra (Dark Mode Cards):**\r\n    <div style=\"display: flex; gap: 20px; flex-wrap: wrap; margin: 30px 0;\">\r\n      <div style=\"flex: 1; min-width: 280px; background: #1e293b; padding: 25px; border-radius: 12px; border: 1px solid #22c55e;\">\r\n        <strong style=\"color: #22c55e; display: block; margin-bottom: 10px;\">✅ Das gefällt uns</strong>\r\n        <ul style=\"margin: 0; padding-left: 20px; color: #cbd5e1;\">\r\n          <li>Pluspunkt 1</li>\r\n          <li>Pluspunkt 2</li>\r\n        </ul>\r\n      </div>\r\n      <div style=\"flex: 1; min-width: 280px; background: #1e293b; padding: 25px; border-radius: 12px; border: 1px solid #ef4444;\">\r\n        <strong style=\"color: #ef4444; display: block; margin-bottom: 10px;\">❌ Das nervt</strong>\r\n        <ul style=\"margin: 0; padding-left: 20px; color: #cbd5e1;\">\r\n          <li>Minuspunkt 1</li>\r\n          <li>Minuspunkt 2</li>\r\n        </ul>\r\n      </div>\r\n    </div>\r\n\r\n5.  <h2>💡 Unsere Einschätzung zu {{15.focus_keyword}}</h2>\r\n    Hier kommt deine Meinung.\r\n\r\n    **Affiliate-Card (PFLICHT):**\r\n    Erstelle IMMER diesen Block. Wir wollen dem Leser das passende Gear zum Thema anbieten.\r\n\r\n    **Logik für die Produktwahl:**\r\n    1.  **Ist es Hardware?** (z.B. \"RTX 5090\") -> Nimm exakt dieses Produkt als [Produkt Name].\r\n        * Wähle als [Satz]: \"Hier kannst du die Verfügbarkeit und den Preis prüfen.\"\r\n    2.  **Ist es Software/AI/Gaming?** (z.B. \"GTA 6\", \"Windows 12\") -> Wähle das *perfekte Device* dafür als [Produkt Name].\r\n        * Wähle als [Satz]: \"Unsere Hardware-Empfehlung, um {{15.focus_keyword}} optimal zu nutzen.\"\r\n\r\n    Nutze für [Produkt Name] eine präzise Bezeichnung für die Amazon-Suche.\r\n\r\n    <div style=\"border: 1px solid #3b82f6; border-radius: 12px; padding: 30px; text-align: center; background: linear-gradient(to bottom, #0f172a, #1e293b); box-shadow: 0 4px 15px rgba(59, 130, 246, 0.15); margin: 40px 0;\">\r\n      <p style=\"text-transform: uppercase; font-size: 0.8em; color: #94a3b8; margin-bottom: 10px; letter-spacing: 1px;\">Perfektes Setup zum Thema</p>\r\n      <h3 style=\"margin: 0 0 15px 0; color: #f8fafc;\">[Produkt Name]</h3>\r\n      <p style=\"font-size: 0.95em; color: #cbd5e1; margin-bottom: 25px;\">[Satz]</p>\r\n      <a href=\"https://www.amazon.de/s?k=[Produkt Name]&tag=bivoly-21\" target=\"_blank\" rel=\"nofollow noopener sponsored\" style=\"display: inline-block; background-color: #3b82f6; color: white; padding: 12px 30px; border-radius: 50px; text-decoration: none; font-weight: bold; transition: background 0.3s; box-shadow: 0 4px 10px rgba(59, 130, 246, 0.3);\">👉 Preis prüfen & Verfügbarkeit</a>\r\n    </div>\r\n\r\n6.  **Das Fazit:**\r\n    <div style=\"border-left: 5px solid #3b82f6; padding-left: 20px; margin-top: 40px;\">\r\n    <h3 style=\"margin-top:0; color: #f8fafc;\">🏁 Fazit</h3>\r\n    <p style=\"font-size: 1.1em; line-height: 1.6; color: #cbd5e1;\">Dein ausführliches Fazit zum Thema {{15.focus_keyword}}.</p>\r\n    <p style=\"color: #94a3b8;\">Willst du noch tiefer in die Materie einsteigen? Dann check unbedingt <a href=\"https://lazytechlab.de/news/\" title=\"Unsere Tech-News\" style=\"color: #3b82f6;\">unseren News-Radar</a> für mehr Expertenwissen.</p>\r\n    </div>\r\n\r\n7.  **Quellen:**\r\n    <p style=\"font-size: 0.8em; color: #64748b; margin-top: 40px; border-top: 1px solid #334155; padding-top: 20px;\">\r\n    Quelle: <a href=\"{{2.url}}\" target=\"_blank\" rel=\"noopener\" style=\"color: #94a3b8; text-decoration: underline;\">Originalbericht lesen</a>\r\n    </p>\r\n\r\nTECHNISCHE REGELN:\r\n- Ausgabe: NUR HTML Body.\r\n- Keine ```html Marker.\r\n- Keine H1 am Anfang.\r\n\r\nSTART OUTPUT:",
+                "type": "text"
+              }
+            ]
+          }
+        ],
+        "generationConfig": {
+          "temperature": "0.7",
+          "thinkingConfig": {}
+        },
+        "system_instruction": {}
+      },
+      "metadata": {
+        "designer": {
+          "x": 1500,
+          "y": 450,
+          "name": "📝 Chefredakteur (Artikel & Sales)"
+        },
+        "restore": {
+          "expect": {
+            "model": {
+              "mode": "chose",
+              "label": "Gemini 3 Pro Preview"
+            },
+            "contents": {
+              "mode": "chose",
+              "items": [
+                {
+                  "role": {
+                    "mode": "chose",
+                    "label": "User"
+                  },
+                  "parts": {
+                    "mode": "chose",
+                    "items": [
+                      {
+                        "type": {
+                          "mode": "chose",
+                          "label": "Text"
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            "url_context": {
+              "mode": "chose"
+            },
+            "code_execution": {
+              "mode": "chose"
+            },
+            "safetySettings": {
+              "mode": "chose"
+            },
+            "generationConfig": {
+              "nested": {
+                "stopSequences": {
+                  "mode": "chose"
+                },
+                "thinkingConfig": {
+                  "nested": {
+                    "thinking_level": {
+                      "mode": "chose",
+                      "label": "Empty"
+                    },
+                    "include_thoughts": {
+                      "mode": "chose"
+                    }
+                  }
+                },
+                "mediaResolution": {
+                  "mode": "chose",
+                  "label": "Empty"
+                },
+                "responseMimeType": {
+                  "mode": "chose",
+                  "label": "Empty"
+                },
+                "responseModalities": {
+                  "mode": "chose"
+                }
+              }
+            },
+            "system_instruction": {
+              "nested": {
+                "parts": {
+                  "mode": "chose"
+                }
+              }
+            },
+            "google_maps_context": {
+              "mode": "chose"
+            },
+            "google_search_context": {
+              "mode": "chose"
+            },
+            "file_search_store_context": {
+              "mode": "chose"
+            },
+            "function_declarations_context": {
+              "mode": "chose"
+            }
+          },
+          "parameters": {
+            "__IMTCONN__": {
+              "data": {
+                "scoped": "true",
+                "connection": "gemini-ai-q9zyjp"
+              },
+              "label": "My Gemini AI connection"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "__IMTCONN__",
+            "type": "account:gemini-ai-q9zyjp",
+            "label": "Connection",
+            "required": true
+          }
+        ],
+        "expect": [
+          {
+            "name": "model",
+            "type": "select",
+            "label": "AI Model",
+            "required": true
+          },
+          {
+            "name": "contents",
+            "spec": [
+              {
+                "name": "role",
+                "type": "select",
+                "label": "Role",
+                "options": [
+                  {
+                    "label": "User",
+                    "value": "user"
+                  },
+                  {
+                    "label": "Model",
+                    "value": "model"
+                  }
+                ]
+              },
+              {
+                "name": "parts",
+                "spec": [
+                  {
+                    "name": "type",
+                    "type": "select",
+                    "label": "Message Type",
+                    "options": [
+                      {
+                        "label": "Text",
+                        "value": "text",
+                        "nested": [
+                          {
+                            "name": "text",
+                            "type": "text",
+                            "label": "Text",
+                            "required": false
+                          }
+                        ]
+                      },
+                      {
+                        "label": "File",
+                        "value": "file",
+                        "nested": [
+                          {
+                            "name": "file_data",
+                            "spec": [
+                              {
+                                "name": "mime_type",
+                                "type": "text",
+                                "label": "Mime Type",
+                                "required": false
+                              },
+                              {
+                                "help": "You get this from the 'Upload a File' module.",
+                                "name": "file_uri",
+                                "type": "text",
+                                "label": "File URI",
+                                "required": false
+                              }
+                            ],
+                            "type": "collection",
+                            "label": "File Data",
+                            "required": false
+                          }
+                        ]
+                      },
+                      {
+                        "label": "Function Call",
+                        "value": "functionCall",
+                        "nested": [
+                          {
+                            "name": "functionCall",
+                            "spec": [
+                              {
+                                "help": "The name of the function to call.",
+                                "name": "name",
+                                "type": "text",
+                                "label": "Name",
+                                "required": true,
+                                "validate": {
+                                  "max": 64
+                                }
+                              },
+                              {
+                                "help": "The function parameters and values in JSON object format.",
+                                "name": "args",
+                                "type": "json",
+                                "label": "Arguments"
+                              },
+                              {
+                                "help": "The unique ID of the function call.",
+                                "name": "id",
+                                "type": "text",
+                                "label": "Function Call ID"
+                              }
+                            ],
+                            "type": "collection",
+                            "label": "Function Call"
+                          }
+                        ]
+                      },
+                      {
+                        "label": "Function Response",
+                        "value": "functionResponse",
+                        "nested": [
+                          {
+                            "name": "functionResponse",
+                            "spec": [
+                              {
+                                "help": "The name of the function to call.",
+                                "name": "name",
+                                "type": "text",
+                                "label": "Name",
+                                "required": true,
+                                "validate": {
+                                  "max": 64
+                                }
+                              },
+                              {
+                                "help": "The function response in JSON object format.",
+                                "name": "response",
+                                "type": "json",
+                                "label": "Response",
+                                "required": true
+                              }
+                            ],
+                            "type": "collection",
+                            "label": "Function Response"
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "name": "thoughtSignature",
+                    "type": "text",
+                    "label": "Thought Signature"
+                  }
+                ],
+                "type": "array",
+                "label": "Parts"
+              }
+            ],
+            "type": "array",
+            "label": "Messages",
+            "required": true
+          },
+          {
+            "name": "system_instruction",
+            "spec": [
+              {
+                "name": "parts",
+                "spec": {
+                  "name": "value",
+                  "spec": [
+                    {
+                      "name": "text",
+                      "type": "text",
+                      "label": "Value"
+                    }
+                  ],
+                  "type": "collection",
+                  "label": "Prompt"
+                },
+                "type": "array",
+                "label": "Prompts"
+              }
+            ],
+            "type": "collection",
+            "label": "System Instructions"
+          },
+          {
+            "name": "safetySettings",
+            "spec": [
+              {
+                "name": "category",
+                "type": "select",
+                "label": "Category",
+                "options": [
+                  {
+                    "label": "Harassment content",
+                    "value": "HARM_CATEGORY_HARASSMENT"
+                  },
+                  {
+                    "label": "Hate speech and content",
+                    "value": "HARM_CATEGORY_HATE_SPEECH"
+                  },
+                  {
+                    "label": "Sexually explicit content.",
+                    "value": "HARM_CATEGORY_SEXUALLY_EXPLICIT"
+                  },
+                  {
+                    "label": "Dangerous content:",
+                    "value": "HARM_CATEGORY_DANGEROUS_CONTENT"
+                  }
+                ]
+              },
+              {
+                "name": "threshold",
+                "type": "select",
+                "label": "Threshold",
+                "options": [
+                  {
+                    "label": "Block low and above.",
+                    "value": "BLOCK_LOW_AND_ABOVE"
+                  },
+                  {
+                    "label": "Block medium and above.",
+                    "value": "BLOCK_MEDIUM_AND_ABOVE"
+                  },
+                  {
+                    "label": "Block only high.",
+                    "value": "BLOCK_ONLY_HIGH"
+                  },
+                  {
+                    "label": "Block none.",
+                    "value": "BLOCK_NONE"
+                  }
+                ]
+              }
+            ],
+            "type": "array",
+            "label": "Safety Settings"
+          },
+          {
+            "name": "generationConfig",
+            "spec": [
+              {
+                "name": "stopSequences",
+                "spec": {
+                  "name": "value",
+                  "type": "text",
+                  "label": "Stop Sequence"
+                },
+                "type": "array",
+                "label": "Stop Sequences"
+              },
+              {
+                "name": "responseModalities",
+                "type": "select",
+                "label": "Response Modalities",
+                "multiple": true,
+                "validate": {
+                  "enum": [
+                    "text",
+                    "image"
+                  ]
+                }
+              },
+              {
+                "name": "maxOutputTokens",
+                "type": "number",
+                "label": "Max Output Tokens"
+              },
+              {
+                "name": "temperature",
+                "type": "number",
+                "label": "Temperature",
+                "validate": {
+                  "max": 1,
+                  "min": 0
+                }
+              },
+              {
+                "name": "topP",
+                "type": "number",
+                "label": "Top P",
+                "validate": {
+                  "max": 1,
+                  "min": 0
+                }
+              },
+              {
+                "name": "topK",
+                "type": "number",
+                "label": "Top K"
+              },
+              {
+                "name": "thinkingConfig",
+                "spec": [
+                  {
+                    "name": "thinkingBudget",
+                    "type": "number",
+                    "label": "Thinking Budget"
+                  },
+                  {
+                    "name": "include_thoughts",
+                    "type": "boolean",
+                    "label": "Include Thoughts"
+                  },
+                  {
+                    "name": "thinking_level",
+                    "type": "select",
+                    "label": "Thinking Level",
+                    "validate": {
+                      "enum": [
+                        "low",
+                        "high"
+                      ]
+                    }
+                  }
+                ],
+                "type": "collection",
+                "label": "Thinking Config"
+              },
+              {
+                "name": "mediaResolution",
+                "type": "select",
+                "label": "Media Resolution",
+                "validate": {
+                  "enum": [
+                    "media_resolution_low",
+                    "media_resolution_medium",
+                    "media_resolution_high"
+                  ]
+                }
+              },
+              {
+                "name": "responseMimeType",
+                "type": "select",
+                "label": "Response Format"
+              }
+            ],
+            "type": "collection",
+            "label": "Generation configurations"
+          },
+          {
+            "name": "tools",
+            "type": "any",
+            "label": "Tools"
+          },
+          {
+            "name": "tool_config",
+            "type": "any",
+            "label": "Tool Config"
+          },
+          {
+            "name": "function_declarations_context",
+            "type": "boolean",
+            "label": "Function Declarations Grounding"
+          },
+          {
+            "name": "url_context",
+            "type": "boolean",
+            "label": "URL Context"
+          },
+          {
+            "name": "google_search_context",
+            "type": "boolean",
+            "label": "Google Search Grounding"
+          },
+          {
+            "name": "code_execution",
+            "type": "boolean",
+            "label": "Code Execution"
+          },
+          {
+            "name": "google_maps_context",
+            "type": "boolean",
+            "label": "Google Maps Grounding"
+          },
+          {
+            "name": "file_search_store_context",
+            "type": "boolean",
+            "label": "File Search Store Context"
+          }
+        ],
+        "advanced": true
+      },
+      "onerror": [
+        {
+          "id": 62,
+          "module": "gemini-ai:createACompletionGeminiPro",
+          "version": 1,
+          "parameters": {
+            "__IMTCONN__": 0
+          },
+          "mapper": {
+            "model": "gemini-2.5-pro",
+            "contents": [
+              {
+                "role": "user",
+                "parts": [
+                  {
+                    "text": "Du bist der leitende Tech-Redakteur von LazyTechLab.de.\r\nWir sind KEIN 08/15 News-Portal. Wir sind die ehrliche, ungefilterte Stimme im Tech-Dschungel.\r\n\r\nZEIT-SYNCHRONISATION:\r\nEs ist heute: {{formatDate(now; \"DD.MM.YYYY\")}}\r\nWICHTIG: Deine Trainingsdaten sind veraltet. Der INPUTtext enthält die NEUESTEN Fakten. Vertraue dem Input!\r\n\r\nINPUT:\r\nTitel: {{15.headline}}\r\nFacts: {{2.summary}}\r\nURL: {{2.url}}\r\nKeyword: {{15.focus_keyword}}\r\n\r\nSEO-VORGABEN (RankMath 100/100):\r\n1.  **KEYWORD-DICHTE:** Nutze das Focus Keyword \"{{15.focus_keyword}}\" MINDESTENS 6 bis 8 Mal im gesamten Text.\r\n    - Verteilung: 1x im ersten Satz, 2x in H2-Überschriften, 4-5x natürlich im Fließtext, 1x im Fazit.\r\n2.  **LÄNGE:** Schreibe MINDESTENS 600 Wörter - MAXIMAL 1000 Wörter (Deep Dive).\r\n3.  **ABSÄTZE:** Mache nach MAXIMAL 3 Sätzen einen Absatz. Leser hassen Textwände. Halte es luftig (\"Snackable\").\r\n\r\nHTML-STRUKTUR (Magazine Design - DARK MODE):\r\n\r\n1.  **Die \"In aller Kürze\" Box:**\r\n    <div style=\"background-color: #1e293b; border-left: 4px solid #3b82f6; padding: 25px; margin-bottom: 30px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.2);\">\r\n    <h4 style=\"margin-top:0; color: #3b82f6; text-transform: uppercase; font-size: 0.9em; letter-spacing: 1px;\">⚡ Quick Facts</h4>\r\n    <ul style=\"margin-bottom:0; padding-left: 20px; color: #cbd5e1;\">\r\n    <li>Fakt 1</li>\r\n    <li>Fakt 2</li>\r\n    <li>Fakt 3</li>\r\n    </ul>\r\n    </div>\r\n\r\n2.  **Intro (Ausführlich):**\r\n    Starte mit einem Knall. Das Keyword **{{15.focus_keyword}}** muss im ersten Satz fett (<strong>) sein.\r\n    Erzähle die Vorgeschichte (mind. 150 Wörter), um die Keyword-Dichte natürlich zu erhöhen.\r\n\r\n3.  <h2>Was ist passiert? ({{15.focus_keyword}} Update)</h2>\r\n    Die Fakten im Detail.\r\n    **WICHTIG:** Wenn du Daten vergleichst, nutze diese gestylte Tabelle (Dark Mode):\r\n    <div style=\"overflow-x:auto;\">\r\n  <table style=\"width:100%; border-collapse: collapse; margin: 20px 0; font-size: 0.9em; color: #cbd5e1; border: 1px solid #334155;\">\r\n    <thead>\r\n      <tr style=\"background-color: #0f172a; color: white;\">\r\n        <th style=\"padding: 12px; text-align: left; border: 1px solid #334155;\">Merkmal</th>\r\n        <th style=\"padding: 12px; text-align: left; border: 1px solid #334155;\">Detail</th>\r\n      </tr>\r\n    </thead>\r\n    <tbody style=\"background-color: #0b1120;\">\r\n      <tr>\r\n        <td style=\"padding: 12px; font-weight:bold; color: #f8fafc; border: 1px solid #334155;\">Punkt A</td>\r\n        <td style=\"padding: 12px; border: 1px solid #334155;\">Wert A</td>\r\n      </tr>\r\n      <tr>\r\n        <td style=\"padding: 12px; font-weight:bold; color: #f8fafc; border: 1px solid #334155;\">Punkt B</td>\r\n        <td style=\"padding: 12px; border: 1px solid #334155;\">Wert B</td>\r\n      </tr>\r\n    </tbody>\r\n  </table>\r\n</div>\r\n\r\n\r\n4.  <h2>Der LazyTechLab Check</h2>\r\n    Deine ehrliche Analyse. Schreibe hier sehr ausführlich (für die Wortanzahl).\r\n    **Pro & Contra (Dark Mode Cards):**\r\n    <div style=\"display: flex; gap: 20px; flex-wrap: wrap; margin: 30px 0;\">\r\n      <div style=\"flex: 1; min-width: 280px; background: #1e293b; padding: 25px; border-radius: 12px; border: 1px solid #22c55e;\">\r\n        <strong style=\"color: #22c55e; display: block; margin-bottom: 10px;\">✅ Das gefällt uns</strong>\r\n        <ul style=\"margin: 0; padding-left: 20px; color: #cbd5e1;\">\r\n          <li>Pluspunkt 1</li>\r\n          <li>Pluspunkt 2</li>\r\n        </ul>\r\n      </div>\r\n      <div style=\"flex: 1; min-width: 280px; background: #1e293b; padding: 25px; border-radius: 12px; border: 1px solid #ef4444;\">\r\n        <strong style=\"color: #ef4444; display: block; margin-bottom: 10px;\">❌ Das nervt</strong>\r\n        <ul style=\"margin: 0; padding-left: 20px; color: #cbd5e1;\">\r\n          <li>Minuspunkt 1</li>\r\n          <li>Minuspunkt 2</li>\r\n        </ul>\r\n      </div>\r\n    </div>\r\n\r\n5.  <h2>💡 Unsere Einschätzung zu {{15.focus_keyword}}</h2>\r\n    Hier kommt deine Meinung.\r\n\r\n    **Affiliate-Card (PFLICHT):**\r\n    Erstelle IMMER diesen Block. Wir wollen dem Leser das passende Gear zum Thema anbieten.\r\n\r\n    **Logik für die Produktwahl:**\r\n    1.  **Ist es Hardware?** (z.B. \"RTX 5090\") -> Nimm exakt dieses Produkt als [Produkt Name].\r\n        * Wähle als [Satz]: \"Hier kannst du die Verfügbarkeit und den Preis prüfen.\"\r\n    2.  **Ist es Software/AI/Gaming?** (z.B. \"GTA 6\", \"Windows 12\") -> Wähle das *perfekte Device* dafür als [Produkt Name].\r\n        * Wähle als [Satz]: \"Unsere Hardware-Empfehlung, um {{15.focus_keyword}} optimal zu nutzen.\"\r\n\r\n    Nutze für [Produkt Name] eine präzise Bezeichnung für die Amazon-Suche.\r\n\r\n    <div style=\"border: 1px solid #3b82f6; border-radius: 12px; padding: 30px; text-align: center; background: linear-gradient(to bottom, #0f172a, #1e293b); box-shadow: 0 4px 15px rgba(59, 130, 246, 0.15); margin: 40px 0;\">\r\n      <p style=\"text-transform: uppercase; font-size: 0.8em; color: #94a3b8; margin-bottom: 10px; letter-spacing: 1px;\">Perfektes Setup zum Thema</p>\r\n      <h3 style=\"margin: 0 0 15px 0; color: #f8fafc;\">[Produkt Name]</h3>\r\n      <p style=\"font-size: 0.95em; color: #cbd5e1; margin-bottom: 25px;\">[Satz]</p>\r\n      <a href=\"https://www.amazon.de/s?k=[Produkt Name]&tag=bivoly-21\" target=\"_blank\" rel=\"nofollow noopener sponsored\" style=\"display: inline-block; background-color: #3b82f6; color: white; padding: 12px 30px; border-radius: 50px; text-decoration: none; font-weight: bold; transition: background 0.3s; box-shadow: 0 4px 10px rgba(59, 130, 246, 0.3);\">👉 Preis prüfen & Verfügbarkeit</a>\r\n    </div>\r\n\r\n6.  **Das Fazit:**\r\n    <div style=\"border-left: 5px solid #3b82f6; padding-left: 20px; margin-top: 40px;\">\r\n    <h3 style=\"margin-top:0; color: #f8fafc;\">🏁 Fazit</h3>\r\n    <p style=\"font-size: 1.1em; line-height: 1.6; color: #cbd5e1;\">Dein ausführliches Fazit zum Thema {{15.focus_keyword}}.</p>\r\n    <p style=\"color: #94a3b8;\">Willst du noch tiefer in die Materie einsteigen? Dann check unbedingt <a href=\"https://lazytechlab.de/news/\" title=\"Unsere Tech-News\" style=\"color: #3b82f6;\">unseren News-Radar</a> für mehr Expertenwissen.</p>\r\n    </div>\r\n\r\n7.  **Quellen:**\r\n    <p style=\"font-size: 0.8em; color: #64748b; margin-top: 40px; border-top: 1px solid #334155; padding-top: 20px;\">\r\n    Quelle: <a href=\"{{2.url}}\" target=\"_blank\" rel=\"noopener\" style=\"color: #94a3b8; text-decoration: underline;\">Originalbericht lesen</a>\r\n    </p>\r\n\r\nTECHNISCHE REGELN:\r\n- Ausgabe: NUR HTML Body.\r\n- Keine ```html Marker.\r\n- Keine H1 am Anfang.\r\n\r\nSTART OUTPUT:",
+                    "type": "text"
+                  }
+                ]
+              }
+            ],
+            "generationConfig": {
+              "temperature": "0.7",
+              "thinkingConfig": {}
+            },
+            "system_instruction": {}
+          },
+          "metadata": {
+            "designer": {
+              "x": 1800,
+              "y": 900,
+              "name": "🛡️ Notfall-Chefredakteur"
+            },
+            "restore": {
+              "expect": {
+                "model": {
+                  "mode": "chose",
+                  "label": "Gemini 2.5 Pro"
+                },
+                "contents": {
+                  "mode": "chose",
+                  "items": [
+                    {
+                      "role": {
+                        "mode": "chose",
+                        "label": "User"
+                      },
+                      "parts": {
+                        "mode": "chose",
+                        "items": [
+                          {
+                            "type": {
+                              "mode": "chose",
+                              "label": "Text"
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                },
+                "url_context": {
+                  "mode": "chose"
+                },
+                "code_execution": {
+                  "mode": "chose"
+                },
+                "safetySettings": {
+                  "mode": "chose"
+                },
+                "generationConfig": {
+                  "nested": {
+                    "stopSequences": {
+                      "mode": "chose"
+                    },
+                    "thinkingConfig": {
+                      "nested": {
+                        "thinking_level": {
+                          "mode": "chose",
+                          "label": "Empty"
+                        },
+                        "include_thoughts": {
+                          "mode": "chose"
+                        }
+                      }
+                    },
+                    "mediaResolution": {
+                      "mode": "chose",
+                      "label": "Empty"
+                    },
+                    "responseMimeType": {
+                      "mode": "chose",
+                      "label": "Empty"
+                    },
+                    "responseModalities": {
+                      "mode": "chose"
+                    }
+                  }
+                },
+                "system_instruction": {
+                  "nested": {
+                    "parts": {
+                      "mode": "chose"
+                    }
+                  }
+                },
+                "google_maps_context": {
+                  "mode": "chose"
+                },
+                "google_search_context": {
+                  "mode": "chose"
+                },
+                "file_search_store_context": {
+                  "mode": "chose"
+                },
+                "function_declarations_context": {
+                  "mode": "chose"
+                }
+              },
+              "parameters": {
+                "__IMTCONN__": {
+                  "data": {
+                    "scoped": "true",
+                    "connection": "gemini-ai-q9zyjp"
+                  },
+                  "label": "My Gemini AI connection"
+                }
+              }
+            },
+            "parameters": [
+              {
+                "name": "__IMTCONN__",
+                "type": "account:gemini-ai-q9zyjp",
+                "label": "Connection",
+                "required": true
+              }
+            ],
+            "expect": [
+              {
+                "name": "model",
+                "type": "select",
+                "label": "AI Model",
+                "required": true
+              },
+              {
+                "name": "contents",
+                "spec": [
+                  {
+                    "name": "role",
+                    "type": "select",
+                    "label": "Role",
+                    "options": [
+                      {
+                        "label": "User",
+                        "value": "user"
+                      },
+                      {
+                        "label": "Model",
+                        "value": "model"
+                      }
+                    ]
+                  },
+                  {
+                    "name": "parts",
+                    "spec": [
+                      {
+                        "name": "type",
+                        "type": "select",
+                        "label": "Message Type",
+                        "options": [
+                          {
+                            "label": "Text",
+                            "value": "text",
+                            "nested": [
+                              {
+                                "name": "text",
+                                "type": "text",
+                                "label": "Text",
+                                "required": false
+                              }
+                            ]
+                          },
+                          {
+                            "label": "File",
+                            "value": "file",
+                            "nested": [
+                              {
+                                "name": "file_data",
+                                "spec": [
+                                  {
+                                    "name": "mime_type",
+                                    "type": "text",
+                                    "label": "Mime Type",
+                                    "required": false
+                                  },
+                                  {
+                                    "help": "You get this from the 'Upload a File' module.",
+                                    "name": "file_uri",
+                                    "type": "text",
+                                    "label": "File URI",
+                                    "required": false
+                                  }
+                                ],
+                                "type": "collection",
+                                "label": "File Data",
+                                "required": false
+                              }
+                            ]
+                          },
+                          {
+                            "label": "Function Call",
+                            "value": "functionCall",
+                            "nested": [
+                              {
+                                "name": "functionCall",
+                                "spec": [
+                                  {
+                                    "help": "The name of the function to call.",
+                                    "name": "name",
+                                    "type": "text",
+                                    "label": "Name",
+                                    "required": true,
+                                    "validate": {
+                                      "max": 64
+                                    }
+                                  },
+                                  {
+                                    "help": "The function parameters and values in JSON object format.",
+                                    "name": "args",
+                                    "type": "json",
+                                    "label": "Arguments"
+                                  },
+                                  {
+                                    "help": "The unique ID of the function call.",
+                                    "name": "id",
+                                    "type": "text",
+                                    "label": "Function Call ID"
+                                  }
+                                ],
+                                "type": "collection",
+                                "label": "Function Call"
+                              }
+                            ]
+                          },
+                          {
+                            "label": "Function Response",
+                            "value": "functionResponse",
+                            "nested": [
+                              {
+                                "name": "functionResponse",
+                                "spec": [
+                                  {
+                                    "help": "The name of the function to call.",
+                                    "name": "name",
+                                    "type": "text",
+                                    "label": "Name",
+                                    "required": true,
+                                    "validate": {
+                                      "max": 64
+                                    }
+                                  },
+                                  {
+                                    "help": "The function response in JSON object format.",
+                                    "name": "response",
+                                    "type": "json",
+                                    "label": "Response",
+                                    "required": true
+                                  }
+                                ],
+                                "type": "collection",
+                                "label": "Function Response"
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "name": "thoughtSignature",
+                        "type": "text",
+                        "label": "Thought Signature"
+                      }
+                    ],
+                    "type": "array",
+                    "label": "Parts"
+                  }
+                ],
+                "type": "array",
+                "label": "Messages",
+                "required": true
+              },
+              {
+                "name": "system_instruction",
+                "spec": [
+                  {
+                    "name": "parts",
+                    "spec": {
+                      "name": "value",
+                      "spec": [
+                        {
+                          "name": "text",
+                          "type": "text",
+                          "label": "Value"
+                        }
+                      ],
+                      "type": "collection",
+                      "label": "Prompt"
+                    },
+                    "type": "array",
+                    "label": "Prompts"
+                  }
+                ],
+                "type": "collection",
+                "label": "System Instructions"
+              },
+              {
+                "name": "safetySettings",
+                "spec": [
+                  {
+                    "name": "category",
+                    "type": "select",
+                    "label": "Category",
+                    "options": [
+                      {
+                        "label": "Harassment content",
+                        "value": "HARM_CATEGORY_HARASSMENT"
+                      },
+                      {
+                        "label": "Hate speech and content",
+                        "value": "HARM_CATEGORY_HATE_SPEECH"
+                      },
+                      {
+                        "label": "Sexually explicit content.",
+                        "value": "HARM_CATEGORY_SEXUALLY_EXPLICIT"
+                      },
+                      {
+                        "label": "Dangerous content:",
+                        "value": "HARM_CATEGORY_DANGEROUS_CONTENT"
+                      }
+                    ]
+                  },
+                  {
+                    "name": "threshold",
+                    "type": "select",
+                    "label": "Threshold",
+                    "options": [
+                      {
+                        "label": "Block low and above.",
+                        "value": "BLOCK_LOW_AND_ABOVE"
+                      },
+                      {
+                        "label": "Block medium and above.",
+                        "value": "BLOCK_MEDIUM_AND_ABOVE"
+                      },
+                      {
+                        "label": "Block only high.",
+                        "value": "BLOCK_ONLY_HIGH"
+                      },
+                      {
+                        "label": "Block none.",
+                        "value": "BLOCK_NONE"
+                      }
+                    ]
+                  }
+                ],
+                "type": "array",
+                "label": "Safety Settings"
+              },
+              {
+                "name": "generationConfig",
+                "spec": [
+                  {
+                    "name": "stopSequences",
+                    "spec": {
+                      "name": "value",
+                      "type": "text",
+                      "label": "Stop Sequence"
+                    },
+                    "type": "array",
+                    "label": "Stop Sequences"
+                  },
+                  {
+                    "name": "responseModalities",
+                    "type": "select",
+                    "label": "Response Modalities",
+                    "multiple": true,
+                    "validate": {
+                      "enum": [
+                        "text",
+                        "image"
+                      ]
+                    }
+                  },
+                  {
+                    "name": "maxOutputTokens",
+                    "type": "number",
+                    "label": "Max Output Tokens"
+                  },
+                  {
+                    "name": "temperature",
+                    "type": "number",
+                    "label": "Temperature",
+                    "validate": {
+                      "max": 1,
+                      "min": 0
+                    }
+                  },
+                  {
+                    "name": "topP",
+                    "type": "number",
+                    "label": "Top P",
+                    "validate": {
+                      "max": 1,
+                      "min": 0
+                    }
+                  },
+                  {
+                    "name": "topK",
+                    "type": "number",
+                    "label": "Top K"
+                  },
+                  {
+                    "name": "thinkingConfig",
+                    "spec": [
+                      {
+                        "name": "thinkingBudget",
+                        "type": "number",
+                        "label": "Thinking Budget"
+                      },
+                      {
+                        "name": "include_thoughts",
+                        "type": "boolean",
+                        "label": "Include Thoughts"
+                      },
+                      {
+                        "name": "thinking_level",
+                        "type": "select",
+                        "label": "Thinking Level",
+                        "validate": {
+                          "enum": [
+                            "low",
+                            "high"
+                          ]
+                        }
+                      }
+                    ],
+                    "type": "collection",
+                    "label": "Thinking Config"
+                  },
+                  {
+                    "name": "mediaResolution",
+                    "type": "select",
+                    "label": "Media Resolution",
+                    "validate": {
+                      "enum": [
+                        "media_resolution_low",
+                        "media_resolution_medium",
+                        "media_resolution_high"
+                      ]
+                    }
+                  },
+                  {
+                    "name": "responseMimeType",
+                    "type": "select",
+                    "label": "Response Format"
+                  }
+                ],
+                "type": "collection",
+                "label": "Generation configurations"
+              },
+              {
+                "name": "tools",
+                "type": "any",
+                "label": "Tools"
+              },
+              {
+                "name": "tool_config",
+                "type": "any",
+                "label": "Tool Config"
+              },
+              {
+                "name": "function_declarations_context",
+                "type": "boolean",
+                "label": "Function Declarations Grounding"
+              },
+              {
+                "name": "url_context",
+                "type": "boolean",
+                "label": "URL Context"
+              },
+              {
+                "name": "google_search_context",
+                "type": "boolean",
+                "label": "Google Search Grounding"
+              },
+              {
+                "name": "code_execution",
+                "type": "boolean",
+                "label": "Code Execution"
+              },
+              {
+                "name": "google_maps_context",
+                "type": "boolean",
+                "label": "Google Maps Grounding"
+              },
+              {
+                "name": "file_search_store_context",
+                "type": "boolean",
+                "label": "File Search Store Context"
+              }
+            ],
+            "advanced": true
+          }
+        },
+        {
+          "id": 63,
+          "module": "builtin:Resume",
+          "version": 1,
+          "parameters": {},
+          "mapper": {
+            "result": {},
+            "candidates": [
+              {
+                "index": "",
+                "content": {
+                  "role": "",
+                  "parts": [
+                    {
+                      "text": "{{62.candidates[].content.parts[].text}}",
+                      "functionCall": {
+                        "args": {},
+                        "name": ""
+                      },
+                      "thoughtSignature": ""
+                    }
+                  ]
+                },
+                "finishReason": "",
+                "safetyRatings": []
+              }
+            ],
+            "responseId": "",
+            "modelVersion": "",
+            "usageMetadata": {
+              "totalTokenCount": "REDACTED",
+              "promptTokenCount": "REDACTED",
+              "thoughtsTokenCount": "REDACTED",
+              "promptTokensDetails": [],
+              "candidatesTokenCount": "REDACTED"
+            }
+          },
+          "metadata": {
+            "designer": {
+              "x": 2100,
+              "y": 900,
+              "name": "🔄 Notfall-Artikel (Resume)"
+            },
+            "restore": {
+              "expect": {
+                "result": {
+                  "collapsed": true
+                },
+                "candidates": {
+                  "items": [
+                    {
+                      "content": {
+                        "nested": {
+                          "parts": {
+                            "mode": "chose",
+                            "items": [
+                              null
+                            ]
+                          }
+                        }
+                      },
+                      "safetyRatings": {
+                        "mode": "chose"
+                      }
+                    }
+                  ]
+                }
+              }
+            },
+            "expect": [
+              {
+                "name": "result",
+                "spec": [],
+                "type": "collection",
+                "label": "Result"
+              },
+              {
+                "name": "candidates",
+                "spec": {
+                  "name": "value",
+                  "spec": [
+                    {
+                      "name": "content",
+                      "spec": [
+                        {
+                          "name": "parts",
+                          "spec": {
+                            "spec": [
+                              {
+                                "name": "text",
+                                "type": "text",
+                                "label": "Text"
+                              },
+                              {
+                                "name": "thoughtSignature",
+                                "type": "text",
+                                "label": "Thought Signature"
+                              },
+                              {
+                                "name": "functionCall",
+                                "spec": [
+                                  {
+                                    "name": "name",
+                                    "type": "text",
+                                    "label": "Name"
+                                  },
+                                  {
+                                    "name": "args",
+                                    "type": "collection",
+                                    "label": "Arguments"
+                                  }
+                                ],
+                                "type": "collection",
+                                "label": "Function Call"
+                              }
+                            ],
+                            "type": "collection"
+                          },
+                          "type": "array",
+                          "label": "Parts"
+                        },
+                        {
+                          "name": "role",
+                          "type": "text",
+                          "label": "Role"
+                        }
+                      ],
+                      "type": "collection",
+                      "label": "Content"
+                    },
+                    {
+                      "name": "finishReason",
+                      "type": "text",
+                      "label": "Finish Reason"
+                    },
+                    {
+                      "name": "index",
+                      "type": "number",
+                      "label": "Index"
+                    },
+                    {
+                      "name": "safetyRatings",
+                      "spec": {
+                        "spec": [
+                          {
+                            "name": "category",
+                            "type": "text",
+                            "label": "Category"
+                          },
+                          {
+                            "name": "probability",
+                            "type": "text",
+                            "label": "Probability"
+                          }
+                        ],
+                        "type": "collection"
+                      },
+                      "type": "array",
+                      "label": "Safety Ratings"
+                    }
+                  ],
+                  "type": "collection"
+                },
+                "type": "array",
+                "label": "Candidates"
+              },
+              {
+                "name": "usageMetadata",
+                "spec": [
+                  {
+                    "name": "promptTokenCount",
+                    "type": "number",
+                    "label": "Prompt Token Count"
+                  },
+                  {
+                    "name": "candidatesTokenCount",
+                    "type": "number",
+                    "label": "Candidates Token Count"
+                  },
+                  {
+                    "name": "totalTokenCount",
+                    "type": "number",
+                    "label": "Total Token Count"
+                  },
+                  {
+                    "name": "promptTokensDetails",
+                    "spec": {
+                      "name": "value",
+                      "spec": [
+                        {
+                          "name": "modality",
+                          "type": "text",
+                          "label": "Modality"
+                        },
+                        {
+                          "name": "tokenCount",
+                          "type": "number",
+                          "label": "Token Count"
+                        }
+                      ],
+                      "type": "collection"
+                    },
+                    "type": "array",
+                    "label": "Prompt Tokens Details"
+                  },
+                  {
+                    "name": "thoughtsTokenCount",
+                    "type": "number",
+                    "label": "Thoughts Token Count"
+                  }
+                ],
+                "type": "collection",
+                "label": "Usage Metadata"
+              },
+              {
+                "name": "modelVersion",
+                "type": "text",
+                "label": "Model Version"
+              },
+              {
+                "name": "responseId",
+                "type": "text",
+                "label": "Response ID"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": 22,
+      "module": "wordpress:createCategory",
+      "version": 3,
+      "parameters": {
+        "__IMTCONN__": 0
+      },
+      "mapper": {
+        "name": "{{15.kategorie}}"
+      },
+      "metadata": {
+        "designer": {
+          "x": 1800,
+          "y": 300,
+          "name": "🆕 Category-Manager (Self-Healing)"
+        },
+        "restore": {
+          "expect": {
+            "meta": {
+              "mode": "chose"
+            }
+          },
+          "parameters": {
+            "__IMTCONN__": {
+              "data": {
+                "scoped": "true",
+                "connection": "wordpress4"
+              },
+              "label": "Mein LazyTechLab Blog ([NAME] Sonntag)"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "__IMTCONN__",
+            "type": "account:wordpress4",
+            "label": "Connection",
+            "required": true
+          }
+        ],
+        "expect": [
+          {
+            "name": "name",
+            "type": "text",
+            "label": "Name",
+            "required": true
+          },
+          {
+            "name": "description",
+            "type": "text",
+            "label": "Description"
+          },
+          {
+            "name": "slug",
+            "type": "text",
+            "label": "Slug"
+          },
+          {
+            "name": "parent",
+            "type": "number",
+            "label": "Parent category ID"
+          },
+          {
+            "name": "meta",
+            "spec": [
+              {
+                "name": "name",
+                "type": "text",
+                "label": "Name",
+                "required": true
+              },
+              {
+                "name": "value",
+                "type": "text",
+                "label": "Value",
+                "required": true
+              }
+            ],
+            "type": "array",
+            "label": "Metadata (custom fields)"
+          }
+        ]
+      },
+      "onerror": [
+        {
+          "id": 47,
+          "module": "wordpress:searchCategories",
+          "version": 3,
+          "parameters": {
+            "__IMTCONN__": 0
+          },
+          "mapper": {
+            "limit": "1",
+            "order": {},
+            "search": "{{15.kategorie}}",
+            "hideEmpty": false,
+            "relatedPost": {}
+          },
+          "metadata": {
+            "designer": {
+              "x": 2100,
+              "y": 600,
+              "name": "🆕 Category-Manager (Self-Healing)"
+            },
+            "restore": {
+              "expect": {
+                "order": {
+                  "nested": {
+                    "field": {
+                      "mode": "chose",
+                      "label": "Empty"
+                    },
+                    "order": {
+                      "mode": "chose"
+                    }
+                  }
+                },
+                "exclude": {
+                  "mode": "chose"
+                },
+                "include": {
+                  "mode": "chose"
+                },
+                "parentId": {
+                  "mode": "chose"
+                },
+                "hideEmpty": {
+                  "mode": "chose"
+                },
+                "relatedPost": {
+                  "nested": {
+                    "type": {
+                      "label": "Empty"
+                    }
+                  }
+                }
+              },
+              "parameters": {
+                "__IMTCONN__": {
+                  "data": {
+                    "scoped": "true",
+                    "connection": "wordpress4"
+                  },
+                  "label": "Mein LazyTechLab Blog ([NAME] Sonntag)"
+                }
+              }
+            },
+            "parameters": [
+              {
+                "name": "__IMTCONN__",
+                "type": "account:wordpress4",
+                "label": "Connection",
+                "required": true
+              }
+            ],
+            "expect": [
+              {
+                "name": "search",
+                "type": "text",
+                "label": "Search"
+              },
+              {
+                "name": "parentId",
+                "type": "select",
+                "label": "Parent Category"
+              },
+              {
+                "name": "relatedPost",
+                "spec": [
+                  {
+                    "name": "type",
+                    "type": "select",
+                    "label": "Post Type"
+                  }
+                ],
+                "type": "collection",
+                "label": "Related Post"
+              },
+              {
+                "name": "order",
+                "spec": [
+                  {
+                    "name": "field",
+                    "type": "select",
+                    "label": "Field",
+                    "validate": {
+                      "enum": [
+                        "id",
+                        "name",
+                        "include",
+                        "slug",
+                        "include_slugs",
+                        "term_group",
+                        "description",
+                        "count"
+                      ]
+                    }
+                  },
+                  {
+                    "name": "order",
+                    "type": "select",
+                    "label": "Order"
+                  }
+                ],
+                "type": "collection",
+                "label": "Order By"
+              },
+              {
+                "name": "limit",
+                "type": "uinteger",
+                "label": "Limit"
+              },
+              {
+                "name": "slug",
+                "type": "text",
+                "label": "Slug"
+              },
+              {
+                "name": "hideEmpty",
+                "type": "boolean",
+                "label": "Hide Empty",
+                "required": true
+              },
+              {
+                "name": "include",
+                "spec": {
+                  "name": "value",
+                  "type": "number",
+                  "label": "Category ID"
+                },
+                "type": "array",
+                "label": "Include"
+              },
+              {
+                "name": "exclude",
+                "spec": {
+                  "name": "value",
+                  "type": "number",
+                  "label": "Category ID"
+                },
+                "type": "array",
+                "label": "Exclude"
+              }
+            ]
+          }
+        },
+        {
+          "id": 48,
+          "module": "builtin:Resume",
+          "version": 1,
+          "parameters": {},
+          "mapper": {
+            "id": "{{47.id}}"
+          },
+          "metadata": {
+            "designer": {
+              "x": 2400,
+              "y": 600,
+              "name": "🆕 Category-Manager (Self-Healing)"
+            },
+            "restore": {},
+            "expect": [
+              {
+                "name": "id",
+                "type": "uinteger",
+                "label": "Category ID"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": 23,
+      "module": "util:SetVariable2",
+      "version": 1,
+      "parameters": {},
+      "mapper": {
+        "name": "category_id",
+        "scope": "roundtrip",
+        "value": "{{22.id}}"
+      },
+      "metadata": {
+        "designer": {
+          "x": 2100,
+          "y": 150,
+          "name": "💾 Category-ID Merken"
+        },
+        "restore": {
+          "expect": {
+            "scope": {
+              "label": "One cycle"
+            }
+          }
+        },
+        "expect": [
+          {
+            "name": "name",
+            "type": "text",
+            "label": "Variable name",
+            "required": true
+          },
+          {
+            "name": "scope",
+            "type": "select",
+            "label": "Variable lifetime",
+            "required": true,
+            "validate": {
+              "enum": [
+                "roundtrip",
+                "execution"
+              ]
+            }
+          },
+          {
+            "name": "value",
+            "type": "any",
+            "label": "Variable value"
+          }
+        ],
+        "interface": [
+          {
+            "name": "category_id",
+            "type": "any",
+            "label": "category_id"
+          }
+        ]
+      }
+    },
+    {
+      "id": 49,
+      "module": "builtin:BasicFeeder",
+      "version": 1,
+      "parameters": {},
+      "mapper": {
+        "array": "{{15.tags}}"
+      },
+      "metadata": {
+        "designer": {
+          "x": 2400,
+          "y": 150,
+          "name": "🔄 Tag-Manager (Loop)"
+        },
+        "restore": {
+          "expect": {
+            "array": {
+              "mode": "edit"
+            }
+          }
+        },
+        "expect": [
+          {
+            "mode": "edit",
+            "name": "array",
+            "spec": [],
+            "type": "array",
+            "label": "Array"
+          }
+        ]
+      }
+    },
+    {
+      "id": 50,
+      "module": "wordpress:createTag",
+      "version": 3,
+      "parameters": {
+        "__IMTCONN__": 0
+      },
+      "mapper": {
+        "name": "{{49.value}}"
+      },
+      "metadata": {
+        "designer": {
+          "x": 2700,
+          "y": 150,
+          "name": "🔄 Tag-Manager (Loop)"
+        },
+        "restore": {
+          "expect": {
+            "meta": {
+              "mode": "chose"
+            }
+          },
+          "parameters": {
+            "__IMTCONN__": {
+              "data": {
+                "scoped": "true",
+                "connection": "wordpress4"
+              },
+              "label": "Mein LazyTechLab Blog ([NAME] Sonntag)"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "__IMTCONN__",
+            "type": "account:wordpress4",
+            "label": "Connection",
+            "required": true
+          }
+        ],
+        "expect": [
+          {
+            "name": "name",
+            "type": "text",
+            "label": "Name",
+            "required": true
+          },
+          {
+            "name": "description",
+            "type": "text",
+            "label": "Description"
+          },
+          {
+            "name": "slug",
+            "type": "text",
+            "label": "Slug"
+          },
+          {
+            "name": "meta",
+            "spec": [
+              {
+                "name": "name",
+                "type": "text",
+                "label": "Name",
+                "required": true
+              },
+              {
+                "name": "value",
+                "type": "text",
+                "label": "Value",
+                "required": true
+              }
+            ],
+            "type": "array",
+            "label": "Metadata (custom fields)"
+          }
+        ]
+      },
+      "onerror": [
+        {
+          "id": 54,
+          "module": "wordpress:searchTags",
+          "version": 3,
+          "parameters": {
+            "__IMTCONN__": 0
+          },
+          "mapper": {
+            "limit": "1",
+            "search": "{{49.value}}"
+          },
+          "metadata": {
+            "designer": {
+              "x": 3000,
+              "y": 300,
+              "name": "🔄 Tag-Manager (Loop)"
+            },
+            "restore": {
+              "expect": {
+                "post": {
+                  "mode": "chose"
+                },
+                "exclude": {
+                  "mode": "chose"
+                },
+                "include": {
+                  "mode": "chose"
+                },
+                "hide_empty": {
+                  "mode": "chose"
+                }
+              },
+              "parameters": {
+                "__IMTCONN__": {
+                  "data": {
+                    "scoped": "true",
+                    "connection": "wordpress4"
+                  },
+                  "label": "Mein LazyTechLab Blog ([NAME] Sonntag)"
+                }
+              }
+            },
+            "parameters": [
+              {
+                "name": "__IMTCONN__",
+                "type": "account:wordpress4",
+                "label": "Connection",
+                "required": true
+              }
+            ],
+            "expect": [
+              {
+                "name": "search",
+                "type": "text",
+                "label": "Search"
+              },
+              {
+                "name": "post",
+                "type": "select",
+                "label": "Post ID"
+              },
+              {
+                "name": "limit",
+                "type": "uinteger",
+                "label": "Limit"
+              },
+              {
+                "name": "include",
+                "spec": {
+                  "name": "value",
+                  "type": "select",
+                  "label": "Tag ID",
+                  "dynamic": true,
+                  "options": []
+                },
+                "type": "array",
+                "label": "Include"
+              },
+              {
+                "name": "exclude",
+                "spec": {
+                  "name": "value",
+                  "type": "select",
+                  "label": "Tag ID",
+                  "dynamic": true,
+                  "options": []
+                },
+                "type": "array",
+                "label": "Exclude"
+              },
+              {
+                "name": "slug",
+                "type": "text",
+                "label": "Slug"
+              },
+              {
+                "name": "hide_empty",
+                "type": "boolean",
+                "label": "Hide Empty"
+              }
+            ]
+          }
+        },
+        {
+          "id": 52,
+          "module": "builtin:Resume",
+          "version": 1,
+          "parameters": {},
+          "mapper": {
+            "id": "{{54.id}}"
+          },
+          "metadata": {
+            "designer": {
+              "x": 3300,
+              "y": 300,
+              "name": "✅ Tags Fix (Resume)"
+            },
+            "restore": {},
+            "expect": [
+              {
+                "name": "id",
+                "type": "uinteger",
+                "label": "Tag ID"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": 53,
+      "module": "builtin:BasicAggregator",
+      "version": 1,
+      "parameters": {
+        "feeder": 49
+      },
+      "mapper": {
+        "id": "{{50.id}}"
+      },
+      "metadata": {
+        "designer": {
+          "x": 3000,
+          "y": 0,
+          "name": "📦 Tags-Paket (Ende)"
+        },
+        "restore": {
+          "extra": {
+            "feeder": {
+              "label": "🔄 Tag-Loop (Start) [49]"
+            },
+            "target": {
+              "label": "Custom"
+            }
+          }
+        },
+        "advanced": true
+      },
+      "flags": {
+        "stopIfEmpty": true
+      }
+    },
+    {
+      "id": 1,
+      "module": "wordpress:createPost",
+      "version": 3,
+      "parameters": {
+        "__IMTCONN__": 0
+      },
+      "mapper": {
+        "meta": [
+          {
+            "name": "rank_math_focus_keyword",
+            "value": "{{15.focus_keyword}}"
+          },
+          {
+            "name": "rank_math_description",
+            "value": "{{15.meta_description}}"
+          },
+          {
+            "name": "lazy_video_trigger",
+            "value": "{{15.score}}"
+          }
+        ],
+        "slug": "{{15.focus_keyword}}",
+        "tags": "{{map(53.array; \"id\")}}",
+        "type": "posts",
+        "title": "{{15.headline}}",
+        "status": "publish",
+        "content": "{{replace(replace(4.candidates[].content.parts[].text; \"```html\"; ); \"```\"; )}}\r\n\r\n{{if(15.video_potential = \"HIGH\"; \"<!-- VIDEO_TRIGGER_ACTIVE -->\"; )}}",
+        "excerpt": "{{15.meta_description}}",
+        "categories": "{{23.category_id}}",
+        "featuredMedia": "{{10.ID}}"
+      },
+      "metadata": {
+        "designer": {
+          "x": 3300,
+          "y": 0,
+          "name": "🚀 Publisher (Veröffentlichung)"
+        },
+        "restore": {
+          "expect": {
+            "meta": {
+              "mode": "chose",
+              "items": [
+                null,
+                null,
+                null
+              ]
+            },
+            "tags": {
+              "mode": "edit"
+            },
+            "type": {
+              "mode": "chose",
+              "label": "Beiträge"
+            },
+            "author": {
+              "mode": "chose"
+            },
+            "format": {
+              "mode": "chose"
+            },
+            "status": {
+              "mode": "chose",
+              "label": "Publish"
+            },
+            "sticky": {
+              "mode": "chose"
+            },
+            "taxonomy": {
+              "mode": "chose"
+            },
+            "categories": {
+              "mode": "edit"
+            },
+            "pingStatus": {
+              "mode": "chose",
+              "label": "Empty"
+            },
+            "commentStatus": {
+              "mode": "chose",
+              "label": "Empty"
+            }
+          },
+          "parameters": {
+            "__IMTCONN__": {
+              "data": {
+                "scoped": "true",
+                "connection": "wordpress4"
+              },
+              "label": "Mein LazyTechLab Blog ([NAME] Sonntag)"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "__IMTCONN__",
+            "type": "account:wordpress4",
+            "label": "Connection",
+            "required": true
+          }
+        ],
+        "expect": [
+          {
+            "name": "title",
+            "type": "text",
+            "label": "Title",
+            "required": true
+          },
+          {
+            "name": "content",
+            "type": "text",
+            "label": "Content",
+            "required": true
+          },
+          {
+            "name": "type",
+            "type": "select",
+            "label": "Type",
+            "required": true
+          },
+          {
+            "name": "excerpt",
+            "type": "text",
+            "label": "Excerpt"
+          },
+          {
+            "name": "date",
+            "type": "date",
+            "label": "Date"
+          },
+          {
+            "name": "slug",
+            "type": "text",
+            "label": "Slug"
+          },
+          {
+            "name": "status",
+            "type": "select",
+            "label": "Status"
+          },
+          {
+            "name": "format",
+            "type": "select",
+            "label": "Format"
+          },
+          {
+            "name": "parent",
+            "type": "number",
+            "label": "Parent object ID"
+          },
+          {
+            "name": "categories",
+            "type": "select",
+            "label": "Categories",
+            "multiple": true
+          },
+          {
+            "name": "tags",
+            "type": "select",
+            "label": "Tags",
+            "multiple": true
+          },
+          {
+            "name": "author",
+            "type": "select",
+            "label": "Author"
+          },
+          {
+            "name": "featuredMedia",
+            "type": "number",
+            "label": "Featured media ID"
+          },
+          {
+            "name": "template",
+            "type": "text",
+            "label": "Template"
+          },
+          {
+            "name": "password",
+            "type": "text",
+            "label": "Password"
+          },
+          {
+            "name": "sticky",
+            "type": "boolean",
+            "label": "Sticky"
+          },
+          {
+            "name": "commentStatus",
+            "type": "select",
+            "label": "Comment status",
+            "validate": {
+              "enum": [
+                "open",
+                "closed"
+              ]
+            }
+          },
+          {
+            "name": "pingStatus",
+            "type": "select",
+            "label": "Ping status",
+            "validate": {
+              "enum": [
+                "open",
+                "closed"
+              ]
+            }
+          },
+          {
+            "name": "taxonomy",
+            "spec": [
+              {
+                "name": "name",
+                "type": "text",
+                "label": "Name",
+                "required": true
+              },
+              {
+                "name": "values",
+                "type": "array",
+                "label": "Values",
+                "required": true
+              }
+            ],
+            "type": "array",
+            "label": "Additional fields"
+          },
+          {
+            "name": "meta",
+            "spec": [
+              {
+                "name": "name",
+                "type": "text",
+                "label": "Name",
+                "required": true
+              },
+              {
+                "name": "value",
+                "type": "text",
+                "label": "Value"
+              }
+            ],
+            "type": "array",
+            "label": "Metadata (custom fields)"
+          }
+        ],
+        "advanced": true
+      }
+    },
+    {
+      "id": 68,
+      "module": "wordpress:getPost",
+      "version": 3,
+      "parameters": {
+        "__IMTCONN__": 0
+      },
+      "mapper": {
+        "id": "{{1.id}}",
+        "type": "posts"
+      },
+      "metadata": {
+        "designer": {
+          "x": 3600,
+          "y": 0,
+          "name": "🔍 URL-Verifizierung (Permalink) READ NOTE"
+        },
+        "restore": {
+          "expect": {
+            "type": {
+              "mode": "chose",
+              "label": "Beiträge"
+            }
+          },
+          "parameters": {
+            "__IMTCONN__": {
+              "data": {
+                "scoped": "true",
+                "connection": "wordpress4"
+              },
+              "label": "Mein LazyTechLab Blog ([NAME] Sonntag)"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "__IMTCONN__",
+            "type": "account:wordpress4",
+            "label": "Connection",
+            "required": true
+          }
+        ],
+        "expect": [
+          {
+            "name": "type",
+            "type": "select",
+            "label": "Type",
+            "required": true
+          },
+          {
+            "name": "id",
+            "type": "number",
+            "label": "Post ID",
+            "required": true
+          }
+        ],
+        "interface": [
+          {
+            "name": "id",
+            "type": "uinteger",
+            "label": "Post ID"
+          },
+          {
+            "name": "author",
+            "type": "uinteger",
+            "label": "Author ID"
+          },
+          {
+            "name": "content",
+            "type": "text",
+            "label": "Content"
+          },
+          {
+            "name": "excerpt",
+            "type": "text",
+            "label": "Excerpt"
+          },
+          {
+            "name": "featuredMedia",
+            "type": "number",
+            "label": "Featured media ID"
+          },
+          {
+            "name": "date",
+            "type": "text",
+            "label": "Date"
+          },
+          {
+            "name": "date_gmt",
+            "type": "text",
+            "label": "Date GMT"
+          },
+          {
+            "name": "modified",
+            "type": "text",
+            "label": "Modified"
+          },
+          {
+            "name": "comment_status",
+            "type": "text",
+            "label": "Comment Status"
+          },
+          {
+            "name": "ping_status",
+            "type": "text",
+            "label": "Ping Status"
+          },
+          {
+            "name": "modified_gmt",
+            "type": "text",
+            "label": "Modified GMT"
+          },
+          {
+            "name": "password",
+            "type": "text",
+            "label": "Password"
+          },
+          {
+            "name": "slug",
+            "type": "text",
+            "label": "Slug"
+          },
+          {
+            "name": "status",
+            "type": "text",
+            "label": "Status"
+          },
+          {
+            "name": "title",
+            "type": "text",
+            "label": "Title"
+          },
+          {
+            "name": "sticky",
+            "type": "boolean",
+            "label": "Sticky"
+          },
+          {
+            "name": "categories",
+            "type": "array",
+            "label": "Categories"
+          },
+          {
+            "name": "tags",
+            "type": "array",
+            "label": "Tags"
+          },
+          {
+            "name": "guid",
+            "type": "text",
+            "label": "Guid"
+          },
+          {
+            "name": "type",
+            "type": "text",
+            "label": "Type"
+          },
+          {
+            "name": "type_for_mapping",
+            "type": "text",
+            "label": "Type for Mapping"
+          },
+          {
+            "name": "link",
+            "type": "url",
+            "label": "Link"
+          },
+          {
+            "name": "featured_media",
+            "type": "number",
+            "label": "Featured media"
+          },
+          {
+            "name": "template",
+            "type": "text",
+            "label": "Template"
+          },
+          {
+            "name": "format",
+            "type": "text",
+            "label": "Format"
+          },
+          {
+            "name": "permalink_template",
+            "type": "text",
+            "label": "Permalink template"
+          },
+          {
+            "name": "generated_slug",
+            "type": "text",
+            "label": "Generated slug"
+          },
+          {
+            "name": "_links",
+            "spec": [
+              {
+                "name": "self",
+                "spec": {
+                  "spec": [
+                    {
+                      "name": "href",
+                      "type": "text",
+                      "label": "Href"
+                    }
+                  ],
+                  "type": "collection"
+                },
+                "type": "array",
+                "label": "Self"
+              },
+              {
+                "name": "collection",
+                "spec": {
+                  "spec": [
+                    {
+                      "name": "href",
+                      "type": "text",
+                      "label": "Href"
+                    }
+                  ],
+                  "type": "collection"
+                },
+                "type": "array",
+                "label": "Collection"
+              },
+              {
+                "name": "about",
+                "spec": {
+                  "spec": [
+                    {
+                      "name": "href",
+                      "type": "text",
+                      "label": "Href"
+                    }
+                  ],
+                  "type": "collection"
+                },
+                "type": "array",
+                "label": "About"
+              },
+              {
+                "name": "author",
+                "spec": {
+                  "spec": [
+                    {
+                      "name": "embeddable",
+                      "type": "boolean",
+                      "label": "Embeddable"
+                    },
+                    {
+                      "name": "href",
+                      "type": "text",
+                      "label": "Href"
+                    }
+                  ],
+                  "type": "collection"
+                },
+                "type": "array",
+                "label": "Author"
+              },
+              {
+                "name": "replies",
+                "spec": {
+                  "spec": [
+                    {
+                      "name": "embeddable",
+                      "type": "boolean",
+                      "label": "Embeddable"
+                    },
+                    {
+                      "name": "href",
+                      "type": "text",
+                      "label": "Href"
+                    }
+                  ],
+                  "type": "collection"
+                },
+                "type": "array",
+                "label": "Replies"
+              },
+              {
+                "name": "version-history",
+                "spec": {
+                  "spec": [
+                    {
+                      "name": "count",
+                      "type": "number",
+                      "label": "Count"
+                    },
+                    {
+                      "name": "href",
+                      "type": "text",
+                      "label": "Href"
+                    }
+                  ],
+                  "type": "collection"
+                },
+                "type": "array",
+                "label": "Version History"
+              },
+              {
+                "name": "predecessor-version",
+                "spec": {
+                  "spec": [
+                    {
+                      "name": "id",
+                      "type": "number",
+                      "label": "ID"
+                    },
+                    {
+                      "name": "href",
+                      "type": "text",
+                      "label": "Href"
+                    }
+                  ],
+                  "type": "collection"
+                },
+                "type": "array",
+                "label": "Predecessor Version"
+              },
+              {
+                "name": "wp:attachment",
+                "spec": {
+                  "spec": [
+                    {
+                      "name": "href",
+                      "type": "text",
+                      "label": "Href"
+                    }
+                  ],
+                  "type": "collection"
+                },
+                "type": "array",
+                "label": "Wp:Attachment"
+              },
+              {
+                "name": "wp:term",
+                "spec": {
+                  "spec": [
+                    {
+                      "name": "taxonomy",
+                      "type": "text",
+                      "label": "Taxonomy"
+                    },
+                    {
+                      "name": "embeddable",
+                      "type": "boolean",
+                      "label": "Embeddable"
+                    },
+                    {
+                      "name": "href",
+                      "type": "text",
+                      "label": "Href"
+                    }
+                  ],
+                  "type": "collection"
+                },
+                "type": "array",
+                "label": "Wp:Term"
+              },
+              {
+                "name": "curies",
+                "spec": {
+                  "spec": [
+                    {
+                      "name": "name",
+                      "type": "text",
+                      "label": "Name"
+                    },
+                    {
+                      "name": "href",
+                      "type": "text",
+                      "label": "Href"
+                    },
+                    {
+                      "name": "templated",
+                      "type": "boolean",
+                      "label": "Templated"
+                    }
+                  ],
+                  "type": "collection"
+                },
+                "type": "array",
+                "label": "Curies"
+              }
+            ],
+            "type": "collection",
+            "label": " Links"
+          }
+        ]
+      }
+    },
+    {
+      "id": 67,
+      "module": "http:MakeRequest",
+      "version": 4,
+      "parameters": {
+        "tlsType": "",
+        "oAuthAccount": 0,
+        "proxyKeychain": "",
+        "authenticationType": "REDACTED"
+      },
+      "mapper": {
+        "url": "https://indexing.googleapis.com/v3/urlNotifications:publish",
+        "method": "post",
+        "contentType": "json",
+        "inputMethod": "jsonString",
+        "shareCookies": 0,
+        "parseResponse": true,
+        "allowRedirects": true,
+        "stopOnHttpError": true,
+        "jsonStringBodyContent": "{\n  \"url\": \"{{68.link}}\",\n  \"type\": \"URL_UPDATED\"\n}",
+        "requestCompressedContent": true
+      },
+      "metadata": {
+        "designer": {
+          "x": 3900,
+          "y": 0,
+          "name": "⚡ SEO-Booster (Google Indexing API)"
+        },
+        "restore": {
+          "expect": {
+            "method": {
+              "mode": "chose",
+              "label": "POST"
+            },
+            "headers": {
+              "mode": "chose"
+            },
+            "contentType": {
+              "label": "application/jsonEnter data in the JSON format, as a string or using a data structure."
+            },
+            "inputMethod": {
+              "label": "JSON stringEnter the JSON body as a raw text string. If values contain JSON reserved characters, you must escape them manually."
+            },
+            "shareCookies": {
+              "mode": "chose"
+            },
+            "parseResponse": {
+              "mode": "chose"
+            },
+            "allowRedirects": {
+              "mode": "chose"
+            },
+            "paginationType": {
+              "label": "Empty"
+            },
+            "queryParameters": {
+              "mode": "chose"
+            },
+            "stopOnHttpError": {
+              "mode": "chose"
+            },
+            "requestCompressedContent": {
+              "mode": "chose"
+            }
+          },
+          "parameters": {
+            "tlsType": {
+              "label": "Empty"
+            },
+            "oAuthAccount": {
+              "data": {
+                "scoped": "true",
+                "connection": "oauth2"
+              },
+              "label": "My HTTP OAuth 2.0 connection"
+            },
+            "proxyKeychain": {
+              "label": "Choose a key"
+            },
+            "authenticationType": {
+              "label": "OAuth 2.0Use when the service requires client credentials (Client ID and Secret)."
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "authenticationType",
+            "type": "select",
+            "label": "Authentication type",
+            "required": true,
+            "validate": {
+              "enum": [
+                "noAuth",
+                "apiKey",
+                "basicAuth",
+                "oAuth"
+              ]
+            }
+          },
+          {
+            "name": "tlsType",
+            "type": "select",
+            "label": "Transport layer security (TLS)",
+            "validate": {
+              "enum": [
+                "mTls",
+                "tls"
+              ]
+            }
+          },
+          {
+            "name": "proxyKeychain",
+            "type": "keychain:proxy",
+            "label": "Proxy"
+          },
+          {
+            "name": "oAuthAccount",
+            "type": "account:oauth2",
+            "label": "Credentials",
+            "required": true
+          }
+        ],
+        "expect": [
+          {
+            "name": "url",
+            "type": "url",
+            "label": "URL",
+            "required": true
+          },
+          {
+            "name": "method",
+            "type": "select",
+            "label": "Method",
+            "required": true,
+            "validate": {
+              "enum": [
+                "get",
+                "head",
+                "post",
+                "put",
+                "patch",
+                "delete",
+                "options"
+              ]
+            }
+          },
+          {
+            "name": "headers",
+            "spec": {
+              "name": "value",
+              "spec": [
+                {
+                  "name": "name",
+                  "type": "text",
+                  "label": "Name",
+                  "required": true,
+                  "validate": {
+                    "pattern": "^[-!#$%&'*+.^_`|~0-9A-Za-z]+$"
+                  }
+                },
+                {
+                  "name": "value",
+                  "type": "text",
+                  "label": "Value"
+                }
+              ],
+              "type": "collection",
+              "label": "Header"
+            },
+            "type": "array",
+            "label": "Headers"
+          },
+          {
+            "name": "queryParameters",
+            "spec": {
+              "name": "value",
+              "spec": [
+                {
+                  "name": "name",
+                  "type": "text",
+                  "label": "Name",
+                  "required": true
+                },
+                {
+                  "name": "value",
+                  "type": "text",
+                  "label": "Value"
+                }
+              ],
+              "type": "collection",
+              "label": "Parameter"
+            },
+            "type": "array",
+            "label": "Query parameters"
+          },
+          {
+            "name": "contentType",
+            "type": "select",
+            "label": "Body content type",
+            "validate": {
+              "enum": [
+                "json",
+                "multipart",
+                "urlEncoded",
+                "custom"
+              ]
+            }
+          },
+          {
+            "name": "parseResponse",
+            "type": "boolean",
+            "label": "Parse response",
+            "required": true
+          },
+          {
+            "name": "stopOnHttpError",
+            "type": "boolean",
+            "label": "Return error if HTTP request fails",
+            "required": true
+          },
+          {
+            "name": "timeout",
+            "type": "uinteger",
+            "label": "Timeout",
+            "validate": {
+              "max": 300,
+              "min": 1
+            }
+          },
+          {
+            "name": "allowRedirects",
+            "type": "boolean",
+            "label": "Allow redirects",
+            "required": true
+          },
+          {
+            "name": "shareCookies",
+            "type": "boolean",
+            "label": "Share cookies with other HTTP modules",
+            "required": true
+          },
+          {
+            "name": "requestCompressedContent",
+            "type": "boolean",
+            "label": "Request compressed content",
+            "required": true
+          },
+          {
+            "name": "inputMethod",
+            "type": "select",
+            "label": "Body input method",
+            "required": true,
+            "validate": {
+              "enum": [
+                "dataStructure",
+                "jsonString"
+              ]
+            }
+          },
+          {
+            "name": "jsonStringBodyContent",
+            "type": "text",
+            "label": "Body content",
+            "required": true
+          },
+          {
+            "name": "paginationType",
+            "type": "select",
+            "label": "Pagination type",
+            "validate": {
+              "enum": [
+                "offsetBased",
+                "pageBased",
+                "urlBased",
+                "tokenBased"
+              ]
+            }
+          }
+        ],
+        "interface": [
+          {
+            "name": "data",
+            "type": "any",
+            "label": "Data"
+          },
+          {
+            "name": "statusCode",
+            "type": "number",
+            "label": "Status Code"
+          },
+          {
+            "name": "headers",
+            "spec": [
+              {
+                "name": "content-length",
+                "type": "text",
+                "label": "Content-Length"
+              },
+              {
+                "name": "content-encoding",
+                "type": "text",
+                "label": "Content-Encoding"
+              },
+              {
+                "name": "content-type",
+                "type": "text",
+                "label": "Content-Type"
+              },
+              {
+                "name": "server",
+                "type": "text",
+                "label": "Server"
+              },
+              {
+                "name": "cache-control",
+                "type": "text",
+                "label": "Cache-Control"
+              },
+              {
+                "name": "set-cookie",
+                "spec": {
+                  "type": "text"
+                },
+                "type": "array",
+                "label": "Set-Cookie"
+              }
+            ],
+            "type": "collection",
+            "label": "Headers"
+          }
+        ],
+        "advanced": true
+      }
+    }
+  ],
+  "metadata": {
+    "instant": false,
+    "version": 1,
+    "scenario": {
+      "roundtrips": 1,
+      "maxErrors": 3,
+      "autoCommit": true,
+      "autoCommitTriggerLast": true,
+      "sequential": false,
+      "slots": null,
+      "confidential": false,
+      "dataloss": false,
+      "dlq": false,
+      "freshVariables": false
+    },
+    "designer": {
+      "orphans": []
+    },
+    "zone": "eu1.make.com",
+    "notes": [
+      {
+        "moduleIds": [
+          59
+        ],
+        "content": "<pre>\n☁️ ZWEITER VERSUCH:\nLädt das Unsplash-Notfallbild hoch, damit der Artikel auf keinen Fall ohne Bild online geht.\n</pre><p></p>",
+        "isFilterNote": false,
+        "metadata": {
+          "color": "#9138FE"
+        }
+      },
+      {
+        "moduleIds": [
+          55
+        ],
+        "content": "<pre>\n🛡️ NOTFALL-EINSATZ:\nWenn der Upload des ersten Bildes (Modul 10) fehlschlägt (z.B. Dateigröße, Server-Timeout), laden wir hier schnell ein sicheres Stock-Foto von Unsplash herunter.\n</pre><p></p>",
+        "isFilterNote": false,
+        "metadata": {
+          "color": "#9138FE"
+        }
+      },
+      {
+        "moduleIds": [
+          53
+        ],
+        "content": "<pre>\n📦 ZUSAMMENFASSUNG:\nHier warten wir, bis ALLE Tags erstellt (oder gefunden) wurden.\nDann packen wir alle IDs (z.B. 12, 45, 99) in ein sauberes Paket, das wir gleich an das Publisher-Modul übergeben.\n</pre><p></p>",
+        "isFilterNote": false,
+        "metadata": {
+          "color": "#9138FE"
+        }
+      },
+      {
+        "moduleIds": [
+          50
+        ],
+        "content": "<pre>\n🏷️ SCHRITT-FÜR-SCHRITT:\nHier wird jeder einzelne Tag aus der KI-Analyse erstellt.\nFalls der Tag \"AI\" heißt, legen wir ihn hier in WordPress an.\n(Wenn Fehler -&gt; siehe grauer Pfad).\n</pre><p></p>",
+        "isFilterNote": false,
+        "metadata": {
+          "color": "#9138FE"
+        }
+      },
+      {
+        "moduleIds": [
+          54
+        ],
+        "content": "<pre>\n🔍 FEHLER-MANAGEMENT:\nGleiches Spiel wie bei den Kategorien:\nWenn wir versuchen, einen Tag zu erstellen, den es schon gibt, fängt dieses Modul den Fehler ab und sucht stattdessen die ID des alten Tags.\n</pre><p></p>",
+        "isFilterNote": false,
+        "metadata": {
+          "color": "#9138FE"
+        }
+      },
+      {
+        "moduleIds": [
+          47
+        ],
+        "content": "<pre>\n🔍 FEHLER-MANAGEMENT:\nDieses Modul springt NUR an, wenn Modul 22 scheitert (meistens, weil die Kategorie schon existiert).\nEs sucht dann einfach nach der existierenden Kategorie und holt sich deren ID. So läuft der Bot weiter, ohne rot zu blinken.\n</pre><p></p>",
+        "isFilterNote": false,
+        "metadata": {
+          "color": "#9138FE"
+        }
+      },
+      {
+        "moduleIds": [
+          1
+        ],
+        "content": "<pre>\n🚀 VERÖFFENTLICHUNG:\nBaut alles zusammen: Text, Bild-ID, Kategorie-ID, Tags und SEO-Metadaten (RankMath).\nErstellt den Entwurf oder veröffentlicht direkt (je nach Einstellung bei \"Status\").\n</pre>",
+        "isFilterNote": false,
+        "metadata": {
+          "color": "#9138FE"
+        }
+      },
+      {
+        "moduleIds": [
+          49
+        ],
+        "content": "<pre>\n🏷️ TAG-MASCHINE:\n1. Nimmt die Liste der Tags (aus Modul 15).\n2. Geht jeden Tag einzeln durch.\n3. Erstellt ihn in WordPress (oder sucht ihn, falls vorhanden).\n4. Schnürt am Ende (Modul 53) ein Paket mit allen Tag-IDs für den Artikel.\n</pre><p></p>",
+        "isFilterNote": false,
+        "metadata": {
+          "color": "#9138FE"
+        }
+      },
+      {
+        "moduleIds": [
+          23
+        ],
+        "content": "<pre>\n💾 SPEICHER:\nMerkt sich die ID der Kategorie (egal ob neu erstellt oder gefunden), damit wir sie gleich beim Artikel-Upload nutzen können.\n</pre><p></p>",
+        "isFilterNote": false,
+        "metadata": {
+          "color": "#9138FE"
+        }
+      },
+      {
+        "moduleIds": [
+          22
+        ],
+        "content": "<pre>\n📂 KATEGORIE-MANAGER (Self-Healing):\nVersucht, die von der KI vorgeschlagene Kategorie zu erstellen.\nWenn sie schon existiert (Fehler!), greift der graue Pfad (Modul 47) und sucht einfach die ID der existierenden Kategorie.\n</pre>",
+        "isFilterNote": false,
+        "metadata": {
+          "color": "#9138FE"
+        }
+      },
+      {
+        "moduleIds": [
+          62
+        ],
+        "content": "<pre>\n🛡️ FALLBACK:\nZweiter Versuch, falls das experimentelle Modell 3.0 einen Fehler wirft.\nEingestellt: \"Gemini 2.5 Pro\".\nDas ist der \"sichere Hafen\", der fast immer funktioniert und den Artikel rettet.\n</pre>",
+        "isFilterNote": false,
+        "metadata": {
+          "color": "#9138FE"
+        }
+      },
+      {
+        "moduleIds": [
+          10
+        ],
+        "content": "<pre>\n☁️ UPLOAD:\nLädt das generierte (oder Notfall-)Bild in deine WordPress-Mediathek hoch, damit wir es gleich als \"Beitragsbild\" setzen können.\n</pre>",
+        "isFilterNote": false,
+        "metadata": {
+          "color": "#9138FE"
+        }
+      },
+      {
+        "moduleIds": [
+          13
+        ],
+        "content": "<pre>\n🛡️ FALLBACK:\nWenn die KI kein Bild generieren kann (z.B. wegen Policy-Filtern bei Personen), springt dieses Modul ein und holt ein thematisch passendes Stock-Foto von Unsplash.\n</pre><p></p>",
+        "isFilterNote": false,
+        "metadata": {
+          "color": "#9138FE"
+        }
+      },
+      {
+        "moduleIds": [
+          12
+        ],
+        "content": "<pre>\n🎨 FUNKTION:\nGeneriert ein einzigartiges Beitragsbild basierend auf dem Prompt aus der Analyse.\n\n🤖 MODEL-EMPFEHLUNG:\nEingestellt: \"Imagen 4.0 Fast\".\nWarum? Erzeugt fotorealistische Bilder in Sekunden.\nUpgrade-Tipp: Wenn du noch höhere Qualität (aber langsamere Generierung) willst, wähle \"Imagen 4.0 Ultra\".\nWichtig: Seitenverhältnis 16:9 ist Pflicht für Blog-Header.\n</pre>",
+        "isFilterNote": false,
+        "metadata": {
+          "color": "#9138FE"
+        }
+      },
+      {
+        "moduleIds": [
+          15
+        ],
+        "content": "<pre>\nVerwandelt den Text vom \"Gehirn\" in strukturierte Datenpakete, damit wir die Headline, Keywords und Prompts einzeln nutzen können.\n</pre>",
+        "isFilterNote": false,
+        "metadata": {
+          "color": "#9138FE"
+        }
+      },
+      {
+        "moduleIds": [
+          6
+        ],
+        "content": "<pre>\n🧠 FUNKTION:\nLiest den Quell-Artikel und plant den neuen Beitrag. Erstellt Headline, SEO-Keywords, Tags und Bild-Prompts.\n\n🤖 MODEL-EMPFEHLUNG:\nEingestellt: \"Gemini 2.5 Pro\".\nWarum? Dieses Modell bietet die perfekte Balance aus Geschwindigkeit und JSON-Zuverlässigkeit. \"Gemini 2.5 Flash\" wäre eine günstigere Alternative, ist aber bei komplexen Anweisungen manchmal ungenau.\n</pre>",
+        "isFilterNote": false,
+        "metadata": {
+          "color": "#9138FE"
+        }
+      },
+      {
+        "moduleIds": [
+          2
+        ],
+        "content": "<pre>\n🔍 FUNKTION:\nDieses Modul überwacht deinen gewünschten RSS-Feed auf neue Artikel.\n\n⚙️ EINSTELLUNG:\nTrage bei \"URL\" den RSS-Feed deiner Quelle ein (z.B. Tom's Hardware, The Verge, oder deinen eigenen Nischen-Feed).\n</pre><p>Tipp: Setze \"Maximum number of returned items\" auf 1, damit der Bot nicht durchdreht, wenn du das Szenario testest.</p>",
+        "isFilterNote": false,
+        "metadata": {
+          "color": "#9138FE"
+        }
+      },
+      {
+        "moduleIds": [
+          67
+        ],
+        "content": "<pre>\n⚡ SEO-BOOSTER (Google Indexing API):\nSendet den neuen Link direkt an Google für sofortige Indexierung.\n\n🛠️ SETUP NÖTIG (Einmalig):\nDamit dieses Modul läuft, musst du eine Verbindung mit deinen eigenen Google Cloud Credentials herstellen.\n👉 Eine genaue Schritt-für-Schritt-Anleitung findest du im beiliegenden PDF/Guide unter \"SEO-Booster Einrichtung\".\n\n(Wenn du das nicht nutzen willst, kannst du dieses Modul einfach löschen oder die Verbindung trennen).\n</pre>",
+        "isFilterNote": false,
+        "metadata": {
+          "color": "#9138FE"
+        }
+      },
+      {
+        "moduleIds": [
+          68
+        ],
+        "content": "<pre>\n⚠️ WICHTIG - NICHT LÖSCHEN!\nWir holen den soeben erstellten Artikel erneut ab.\nGrund: WordPress braucht manchmal eine Sekunde, um den finalen \"Permalink\" zu generieren. Modul 1 gibt oft nur eine ID zurück. Dieser Schritt garantiert, dass wir den echten Link für Google haben.\n</pre>",
+        "isFilterNote": false,
+        "metadata": {
+          "color": "#9138FE"
+        }
+      },
+      {
+        "moduleIds": [
+          4
+        ],
+        "content": "<p><strong>TEXTER:</strong> </p><p>Schreibt den Artikel in HTML, inkl. \"Geld-Maschine\" (Affiliate-Platzierung).</p>",
+        "isFilterNote": false,
+        "metadata": {
+          "color": "#9138FE"
+        }
+      },
+      {
+        "moduleIds": [
+          4
+        ],
+        "content": "<p><strong>TEXTER:</strong> </p><p>Schreibt den Artikel in HTML, inkl. \"Geld-Maschine\" (Affiliate-Platzierung).</p>",
+        "isFilterNote": false,
+        "metadata": {
+          "color": "#9138FE"
+        }
+      },
+      {
+        "moduleIds": [
+          4
+        ],
+        "content": "<pre>\n📝 FUNKTION:\nSchreibt den kompletten Blogartikel in HTML-Formatierung.\nInkludiert: Intro, Hauptteil, Pro &amp; Contra Listen, Fazit und Affiliate-Boxen (wenn passend).\n\n🤖 MODEL-EMPFEHLUNG:\nEingestellt: \"Gemini 3 Pro Preview\" (Experimental).\nWarum? Das aktuell stärkste Modell für kreatives Schreiben und Nuancen.\nAlternative: Falls \"Preview\" instabil läuft, wechsle auf \"Gemini 2.5 Pro\" (Stable).\n</pre>",
+        "isFilterNote": false,
+        "metadata": {
+          "color": "#9138FE"
+        }
+      }
+    ]
+  }
+}
