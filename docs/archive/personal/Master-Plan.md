@@ -56,13 +56,6 @@
 ### Phase 0 — Launch Blockers (Billing + Plans + UX Contract)
 
 
-Task: Onboarding Wizard finalisieren (Issue #20)
-- Goal: Neukunde kommt ohne Support ans Ziel (Connect WP ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ RSS ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ First Run + Plan Status).
-- Files to touch: `wp-portal-plugin/ltl-saas-portal/includes/class-ltl-saas-portal.php`, `docs/product/onboarding.md`, `docs/product/onboarding-detailed.md`
-- DoD: (1) UI enthÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¤lt klare Schritt-fÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¼r-Schritt Hinweise + Link zu Onboarding Doc. (2) Setup Progress umfasst mindestens: Connection OK, RSS OK, Plan aktiv, letzter Run. (3) Smoke-Test-Anleitung im Onboarding ist mit UI deckungsgleich.
-- Impact: High
-- KomplexitÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¤t: M
-
 
 ### Phase 1 — Reliability & Abuse Hardening
 
