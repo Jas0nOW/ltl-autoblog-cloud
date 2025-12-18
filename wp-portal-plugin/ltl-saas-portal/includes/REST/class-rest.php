@@ -63,19 +63,44 @@ class LTL_SAAS_Portal_REST {
         // Auth/SSL handled in permission_callback
         global $wpdb;
         $conn_table = $wpdb->prefix . 'ltl_saas_connections';
-        $settings_table = $wpdb->prefix . 'ltl_saas_settings';
         require_once LTL_SAAS_PORTAL_PLUGIN_DIR . 'includes/class-ltl-saas-portal-crypto.php';
+        require_once LTL_SAAS_PORTAL_PLUGIN_DIR . 'includes/class-ltl-saas-portal.php';
         $users = $wpdb->get_results("SELECT * FROM $conn_table");
         $result = [];
         foreach ($users as $u) {
-            $settings = $wpdb->get_row($wpdb->prepare("SELECT * FROM $settings_table WHERE user_id = %d", $u->user_id), ARRAY_A);
-            $is_active = isset($settings['is_active']) ? (bool)$settings['is_active'] : true;
-            if (!$is_active) {
+            $state = ltl_saas_get_tenant_state($u->user_id);
+            if (!$state['is_active']) {
                 continue; // skip inactive tenants
+            }
+            // Reset-Check: If posts_period_start != current month start, reset posts_this_month and update posts_period_start
+            $current_month_start = date('Y-m-01');
+            if ($state['posts_period_start'] !== $current_month_start) {
+                $settings_table = $wpdb->prefix . 'ltl_saas_settings';
+                $wpdb->update(
+                    $settings_table,
+                    [
+                        'posts_this_month' => 0,
+                        'posts_period_start' => $current_month_start
+                    ],
+                    ['user_id' => $u->user_id]
+                );
+                $state['posts_this_month'] = 0;
+                $state['posts_period_start'] = $current_month_start;
+            }
+            // Enforce: skip if posts_this_month >= posts_limit_month
+            $skip = false;
+            $skip_reason = '';
+            $remaining = $state['posts_limit_month'] - $state['posts_this_month'];
+            if ($state['posts_this_month'] >= $state['posts_limit_month']) {
+                $skip = true;
+                $skip_reason = 'monthly_limit_reached';
+                $remaining = 0;
             }
             $decrypted = LTL_SAAS_Portal_Crypto::decrypt($u->wp_app_password_enc);
             // Sanitize outputs
             $site_url = esc_url_raw($u->wp_url);
+            $settings_table = $wpdb->prefix . 'ltl_saas_settings';
+            $settings = $wpdb->get_row($wpdb->prepare("SELECT * FROM $settings_table WHERE user_id = %d", $u->user_id), ARRAY_A);
             $rss_url = isset($settings['rss_url']) ? esc_url_raw($settings['rss_url']) : '';
             $language = isset($settings['language']) ? sanitize_text_field($settings['language']) : '';
             $tone = isset($settings['tone']) ? sanitize_text_field($settings['tone']) : '';
@@ -93,7 +118,13 @@ class LTL_SAAS_Portal_REST {
                 'publish_mode' => $publish_mode,
                 'frequency' => $frequency,
                 'plan' => $plan,
-                'is_active' => $is_active,
+                'is_active' => $state['is_active'],
+                'posts_this_month' => $state['posts_this_month'],
+                'posts_limit_month' => $state['posts_limit_month'],
+                'posts_period_start' => $state['posts_period_start'],
+                'skip' => $skip,
+                'skip_reason' => $skip ? $skip_reason : '',
+                'remaining' => $remaining,
             ];
             $result[] = $tenant;
         }
@@ -147,6 +178,8 @@ class LTL_SAAS_Portal_REST {
         }
         global $wpdb;
         $table = $wpdb->prefix . 'ltl_saas_runs';
+        $settings_table = $wpdb->prefix . 'ltl_saas_settings';
+        require_once LTL_SAAS_PORTAL_PLUGIN_DIR . 'includes/class-ltl-saas-portal.php';
         $params = $request->get_json_params();
         if (!is_array($params)) $params = [];
         $tenant_id = isset($params['tenant_id']) ? intval($params['tenant_id']) : 0;
@@ -163,6 +196,7 @@ class LTL_SAAS_Portal_REST {
         if (!$tenant_id || !$status) {
             return new WP_REST_Response(['error' => 'Missing tenant_id or status'], 400);
         }
+        // Insert run as before
         $row = [
             'tenant_id' => $tenant_id,
             'status' => $status,
@@ -174,6 +208,29 @@ class LTL_SAAS_Portal_REST {
             'created_at' => current_time('mysql'),
         ];
         $ok = $wpdb->insert($table, $row);
+        // --- Sprint 04: Increment posts_this_month for successful publish ---
+        if ($ok && $status === 'success') {
+            $state = ltl_saas_get_tenant_state($tenant_id);
+            $current_month_start = date('Y-m-01');
+            if ($state['posts_period_start'] !== $current_month_start) {
+                // Reset for new month
+                $wpdb->update(
+                    $settings_table,
+                    [
+                        'posts_this_month' => 1,
+                        'posts_period_start' => $current_month_start
+                    ],
+                    ['user_id' => $tenant_id]
+                );
+            } else {
+                // Normal increment
+                $wpdb->query($wpdb->prepare(
+                    "UPDATE $settings_table SET posts_this_month = posts_this_month + 1 WHERE user_id = %d",
+                    $tenant_id
+                ));
+            }
+            // Do NOT set is_active=0 if over limit; only limit enforcement applies
+        }
         if ($ok) {
             return ['success' => true, 'id' => $wpdb->insert_id];
         } else {

@@ -49,7 +49,12 @@ Header: X-LTL-SAAS-TOKEN: <token>
     "publish_mode": "draft",
     "frequency": "weekly",
     "plan": "basic",
-    "is_active": true
+    "is_active": true,
+    "skip": false,
+    "skip_reason": "",
+    "remaining": 20,
+    "posts_this_month": 0,
+    "posts_limit_month": 20
   },
   ...
 ]
@@ -64,14 +69,20 @@ Content-Type: application/json
 
 {
   "tenant_id": 123,
-  "status": "success", // oder "failed"
-  "started_at": "2025-12-18T10:00:00Z",
-  "finished_at": "2025-12-18T10:01:00Z",
+  "status": "success",
   "posts_created": 1,
-  "error_message": null,
-  "meta": { "post_id": 456, "title": "..." }
+  "started_at": "2025-12-18T10:00:00Z",
+  "finished_at": "2025-12-18T10:05:00Z"
 }
 ```
+**Response:**
+- 200 OK: {"success": true, "id": 456}
+- 401 Unauthorized
+- 400 Bad Request (e.g., missing tenant_id)
+
+**Hinweise:**
+- Neue Felder in `/make/tenants`: `skip`, `skip_reason`, `remaining`, `posts_this_month`, `posts_limit_month`.
+- Callback-Status: `success` oder `error`. Bei `success` wird `posts_this_month` inkrementiert.
 
 ---
 
