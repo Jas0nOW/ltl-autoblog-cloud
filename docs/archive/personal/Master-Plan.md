@@ -69,12 +69,6 @@ Task: Onboarding Wizard finalisieren (Issue #20)
 
 
 
-Task: Rate limiting / brute-force surface reduzieren
-- Goal: Schutz gegen API-Key/Token brute-force und DoS.
-- Files to touch: `wp-portal-plugin/ltl-saas-portal/includes/REST/class-rest.php`, `docs/ops/proxy-ssl.md` (falls WAF/Proxy genutzt)
-- DoD: Baseline-Schutz (z.B. IP allowlist am Reverse Proxy, oder WP transient based throttling) + Logging.
-- Impact: Med
-- KomplexitÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¤t: M
 
 ### Phase 2 — Production Readiness (Packaging, Docs, Repo Hygiene)
 
@@ -101,6 +95,13 @@ Task: Multi-Tenant Blueprint als Deliverable
 ---
 
 ## DONE LOG (Erledigte Task-Cluster mit PR-Links)
+
+### Rate Limiting / Brute-Force Protection (Issue #23) ✅
+- **Date**: 2025-12-18
+- **Branch**: `fix/rate-limiting` (commit: 65ae40b)
+- **Result**: WP Transient-based rate limiting implemented (10 failed auth attempts per 15-minute window per IP). Protects `/run-callback` and `/make/tenants` endpoints. Helper functions added: `check_rate_limit()`, `increment_rate_limit()`, `get_client_ip()` (supports X-Forwarded-For for proxy setups). Logging on activation ("Rate limit exceeded: IP=..., endpoint=..., attempts=...").
+- **Impact**: Phase 1 — Security & Abuse Hardening (prevents brute-force attacks, returns HTTP 429)
+- **Evidence**: class-rest.php (3 helper functions + endpoint checks), docs/ops/proxy-ssl.md (Rate Limiting section with examples)
 
 ### Month Rollover Atomic ✅
 - **Date**: 2025-12-18
