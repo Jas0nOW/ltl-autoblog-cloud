@@ -90,6 +90,85 @@ final class LTL_SAAS_Portal {
 
         add_shortcode( 'ltl_saas_dashboard', array( $this, 'shortcode_dashboard' ) );
         add_shortcode( 'ltl_saas_pricing', array( $this, 'shortcode_pricing' ) );
+
+        // Output custom colors on frontend
+        add_action( 'wp_head', array( $this, 'output_custom_colors_frontend' ) );
+    }
+
+    /**
+     * Enqueue frontend assets for shortcodes
+     */
+    private function enqueue_frontend_assets() {
+        static $enqueued = false;
+        if ( $enqueued ) {
+            return;
+        }
+
+        wp_enqueue_style(
+            'ltlb-frontend',
+            LTL_SAAS_PORTAL_PLUGIN_URL . 'assets/frontend.css',
+            array(),
+            LTL_SAAS_PORTAL_VERSION
+        );
+
+        $enqueued = true;
+    }
+
+    /**
+     * Output custom colors as inline CSS on frontend
+     */
+    public function output_custom_colors_frontend() {
+        $custom_colors = get_option( 'ltl_saas_custom_colors', array() );
+        if ( empty( $custom_colors ) ) {
+            return;
+        }
+
+        echo '<style id="ltlb-custom-colors-frontend">';
+        echo ':root {';
+
+        foreach ( $custom_colors as $key => $color ) {
+            if ( empty( $color ) ) {
+                continue;
+            }
+
+            echo '--ltlb-color-' . esc_attr( $key ) . ': ' . esc_attr( $color ) . ';';
+
+            // Auto-generate light variants
+            if ( in_array( $key, array( 'success', 'error', 'warning' ) ) ) {
+                $light = $this->adjust_color_brightness( $color, 80 );
+                echo '--ltlb-color-' . esc_attr( $key ) . '-light: ' . esc_attr( $light ) . ';';
+            }
+
+            // Auto-generate hover variant for primary
+            if ( $key === 'primary' ) {
+                $hover = $this->adjust_color_brightness( $color, -10 );
+                echo '--ltlb-color-primary-hover: ' . esc_attr( $hover ) . ';';
+            }
+        }
+
+        echo '}';
+        echo '</style>';
+    }
+
+    /**
+     * Adjust color brightness (helper for auto-generating variants)
+     */
+    private function adjust_color_brightness( $hex, $percent ) {
+        $hex = str_replace( '#', '', $hex );
+
+        if ( strlen( $hex ) !== 6 ) {
+            return '#' . $hex;
+        }
+
+        $r = hexdec( substr( $hex, 0, 2 ) );
+        $g = hexdec( substr( $hex, 2, 2 ) );
+        $b = hexdec( substr( $hex, 4, 2 ) );
+
+        $r = min( 255, max( 0, $r + ( $r * $percent / 100 ) ) );
+        $g = min( 255, max( 0, $g + ( $g * $percent / 100 ) ) );
+        $b = min( 255, max( 0, $b + ( $b * $percent / 100 ) ) );
+
+        return sprintf( '#%02x%02x%02x', round( $r ), round( $g ), round( $b ) );
     }
 
     /**
@@ -177,6 +256,9 @@ final class LTL_SAAS_Portal {
     }
 
     public function shortcode_dashboard( $atts = [] ) {
+        // Enqueue frontend assets
+        $this->enqueue_frontend_assets();
+
         if ( ! is_user_logged_in() ) {
             return '<p>Bitte einloggen.</p>';
         }
@@ -633,6 +715,9 @@ final class LTL_SAAS_Portal {
      * Usage: [ltl_saas_pricing] or [ltl_saas_pricing lang="en"]
      */
     public function shortcode_pricing( $atts = [] ) {
+        // Enqueue frontend assets
+        $this->enqueue_frontend_assets();
+
         $atts = shortcode_atts( array(
             'lang' => 'de',
         ), $atts );
