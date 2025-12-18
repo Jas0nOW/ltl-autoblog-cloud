@@ -66,12 +66,6 @@ Task: Onboarding Wizard finalisieren (Issue #20)
 
 ### Phase 1 Ã¢â‚¬â€ Reliability & Abuse Hardening
 
-Task: Callback Idempotency
-- Goal: Doppelte Callbacks dÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¼rfen Usage nicht doppelt zÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¤hlen.
-- Files to touch: `wp-portal-plugin/ltl-saas-portal/includes/REST/class-rest.php`, `wp-portal-plugin/ltl-saas-portal/includes/class-ltl-saas-portal.php`
-- DoD: (1) Callback akzeptiert `run_id`/`execution_id` und enforced uniqueness. (2) Usage increment ist idempotent. (3) Regression: Unknown tenant wird weiter abgewiesen.
-- Impact: High
-- KomplexitÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¤t: M
 
 Task: Retry/Backoff Telemetrie (Issue #17)
 - Goal: Nach Retry sauber loggen (mindestens in `raw_payload`, optional Spalten).
@@ -119,6 +113,13 @@ Task: Multi-Tenant Blueprint als Deliverable
 ---
 
 ## DONE LOG (Erledigte Task-Cluster mit PR-Links)
+
+### Callback Idempotency ✅
+- **Date**: 2025-12-18
+- **Branch**: `fix/callback-idempotency` (commit: e4ad187)
+- **Result**: Added `execution_id` field to runs table with UNIQUE index. Callback now detects duplicate execution IDs and returns idempotent response without double-incrementing usage. Backward compatible (execution_id optional).
+- **Impact**: Phase 1 — Reliability (prevents duplicate usage counting on retries)
+- **Evidence**: class-ltl-saas-portal.php (DB schema update), class-rest.php (idempotency logic), api.md (execution_id documented)
 
 ### API Contract & Smoke Tests konsolidieren ✅
 - **Date**: 2025-12-18
