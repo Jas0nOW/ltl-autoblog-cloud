@@ -62,6 +62,7 @@ Callback-Endpoint für Make.com, um Ergebnisse eines Runs zurückzumelden.
 ```json
 {
   "tenant_id": 123,
+  "execution_id": "make_exec_abc123_retry_1",
   "status": "success", // oder "failed"
   "started_at": "2025-12-18T10:00:00Z",
   "finished_at": "2025-12-18T10:01:00Z",
@@ -70,6 +71,11 @@ Callback-Endpoint für Make.com, um Ergebnisse eines Runs zurückzumelden.
   "meta": { "post_id": 456, "title": "..." }
 }
 ```
+
+**Idempotency (Issue #21):**
+- `execution_id` ist optional aber empfohlen: eindeutige Make.com Execution ID
+- Wenn derselbe `execution_id` zweimal gesendet wird (Retry/Fehlerfall): Portal antwortet mit 200 OK + `"idempotent": true`, inkrementiert Usage aber NICHT zweimal
+- Ohne `execution_id`: Callback wird mehrfach verarbeitet (altes Verhalten, für Backward Compat)
 
 **Response:**
 - 200 OK bei Erfolg

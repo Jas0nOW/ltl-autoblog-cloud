@@ -380,7 +380,9 @@ class LTL_SAAS_Portal_REST {
         require_once LTL_SAAS_PORTAL_PLUGIN_DIR . 'includes/class-ltl-saas-portal.php';
         $params = $request->get_json_params();
         if (!is_array($params)) $params = [];
+        
         $tenant_id = isset($params['tenant_id']) ? intval($params['tenant_id']) : 0;
+        $execution_id = isset($params['execution_id']) ? sanitize_text_field($params['execution_id']) : '';
         $status = isset($params['status']) ? sanitize_text_field($params['status']) : '';
         $started_at = isset($params['started_at']) ? sanitize_text_field($params['started_at']) : null;
         $finished_at = isset($params['finished_at']) ? sanitize_text_field($params['finished_at']) : null;
@@ -400,9 +402,26 @@ class LTL_SAAS_Portal_REST {
         if (!$exists) {
             return new WP_REST_Response(['ok'=>false, 'error'=>'unknown_tenant'], 400);
         }
-        // Insert run as before
+        
+        // === Idempotency Check: If execution_id is provided, check if already processed ===
+        $already_processed = false;
+        if ($execution_id) {
+            $existing_run = $wpdb->get_row($wpdb->prepare(
+                "SELECT id, status FROM $table WHERE execution_id = %s",
+                $execution_id
+            ));
+            if ($existing_run) {
+                // Already processed this execution - return success without double-incrementing
+                error_log('[LTL-SAAS] Callback: idempotent re-send detected, execution_id=' . $execution_id . ', status=' . $existing_run->status);
+                $already_processed = true;
+                return new WP_REST_Response(['ok'=>true, 'id'=>$existing_run->id, 'idempotent'=>true], 200);
+            }
+        }
+        
+        // Insert run
         $row = [
             'tenant_id' => $tenant_id,
+            'execution_id' => $execution_id ?: null,
             'status' => $status,
             'started_at' => $started_at,
             'finished_at' => $finished_at,
@@ -412,8 +431,9 @@ class LTL_SAAS_Portal_REST {
             'created_at' => current_time('mysql'),
         ];
         $ok = $wpdb->insert($table, $row);
-        // --- Sprint 04: Increment posts_this_month for successful publish ---
-        if ($ok && $status === 'success') {
+        
+        // === Increment usage ONLY on first successful processing (not on idempotent re-sends) ===
+        if ($ok && $status === 'success' && !$already_processed) {
             $state = ltl_saas_get_tenant_state($tenant_id);
             $current_month_start = date('Y-m-01');
             if ($state['posts_period_start'] !== $current_month_start) {
@@ -436,7 +456,7 @@ class LTL_SAAS_Portal_REST {
             // Do NOT set is_active=0 if over limit; only limit enforcement applies
         }
         if ($ok) {
-            return ['success' => true, 'id' => $wpdb->insert_id];
+            return new WP_REST_Response(['ok' => true, 'id' => $wpdb->insert_id], 200);
         } else {
             return new WP_REST_Response(['error' => 'DB insert failed'], 500);
         }

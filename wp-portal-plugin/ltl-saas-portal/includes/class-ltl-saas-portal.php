@@ -132,6 +132,7 @@ final class LTL_SAAS_Portal {
         $sql[] = "CREATE TABLE $runs (
             id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
             tenant_id BIGINT(20) UNSIGNED NOT NULL,
+            execution_id VARCHAR(255) NULL,
             status VARCHAR(32) NOT NULL,
             started_at DATETIME NULL,
             finished_at DATETIME NULL,
@@ -140,6 +141,7 @@ final class LTL_SAAS_Portal {
             raw_payload LONGTEXT NULL,
             created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
             PRIMARY KEY  (id),
+            UNIQUE KEY execution_id (execution_id),
             KEY tenant_id (tenant_id)
         ) $charset_collate;";
 
