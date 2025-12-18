@@ -10,7 +10,6 @@ class LTL_SAAS_Portal_REST {
     }
 
     public function register_routes() {
-
         register_rest_route( self::NAMESPACE, '/health', array(
             'methods'  => 'GET',
             'callback' => array( $this, 'health' ),
@@ -37,6 +36,48 @@ class LTL_SAAS_Portal_REST {
             'callback' => array( $this, 'get_make_tenants' ),
             'permission_callback' => array( $this, 'permission_make_tenants' ),
         ) );
+
+        // Sprint 07: Gumroad Billing Ping
+        register_rest_route( self::NAMESPACE, '/gumroad/ping', array(
+            'methods'  => 'POST',
+            'callback' => array( $this, 'gumroad_ping' ),
+            'permission_callback' => '__return_true',
+        ) );
+    }
+
+    /**
+     * POST /wp-json/ltl-saas/v1/gumroad/ping
+     * Gumroad sends application/x-www-form-urlencoded
+     * Required: secret (query or header), email, product_id, refunded
+     * Security: secret must match option, SSL required
+     * Response: always 200 {ok:true} if processed, else 4xx
+     */
+    public function gumroad_ping( $request ) {
+        require_once LTL_SAAS_PORTAL_PLUGIN_DIR . 'includes/class-ltl-saas-portal-secrets.php';
+        // Enforce SSL
+        if ( ! is_ssl() ) {
+            return new WP_REST_Response(['error' => 'HTTPS required'], 403);
+        }
+        // Secret: query param or header
+        $secret = $request->get_param('secret');
+        if (!$secret) {
+            $secret = $request->get_header('X-Gumroad-Secret');
+        }
+        $option_secret = LTL_SAAS_Portal_Secrets::get_gumroad_secret();
+        if (!$option_secret || !$secret || !hash_equals($option_secret, $secret)) {
+            return new WP_REST_Response(['error' => 'Forbidden'], 403);
+        }
+        // Parse form params
+        $params = $request->get_body_params();
+        $email = isset($params['email']) ? sanitize_email($params['email']) : '';
+        $product_id = isset($params['product_id']) ? sanitize_text_field($params['product_id']) : '';
+        $subscription_id = isset($params['subscription_id']) ? sanitize_text_field($params['subscription_id']) : '';
+        $recurrence = isset($params['recurrence']) ? sanitize_text_field($params['recurrence']) : '';
+        $refunded = isset($params['refunded']) ? $params['refunded'] : '';
+        $sale_id = isset($params['sale_id']) ? sanitize_text_field($params['sale_id']) : '';
+        // TODO: Provisioning logic in next prompt
+        // Respond quickly
+        return new WP_REST_Response(['ok' => true], 200);
     }
 
     /**
