@@ -66,13 +66,6 @@
 ### Phase 2 — Production Readiness (Packaging, Docs, Repo Hygiene)
 
 
-Task: Docs Cleanup (MOVE statt Delete)
-- Goal: Doppelte/obsolete Docs in `docs/archive/` verschieben, aktive Docs konsistent.
-- Files to touch: `docs/testing/smoke/sprint-04.md`, `docs/archive/**`, `docs/README.md`
-- DoD: Keine doppelten Sektionen; Examples stimmen; Archiv enthÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¤lt alte Varianten; `docs/README.md` bleibt Einstiegspunkt.
-- Impact: Low/Med
-- KomplexitÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¤t: S
-
 Task: Multi-Tenant Blueprint als Deliverable
 - Goal: Kunden-/Team-Deliverable: tatsÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¤chliches Multi-Tenant Make Scenario als sanitized blueprint.
 - Files to touch: `blueprints/**`, `scripts/sanitize_make_blueprints.py`, `docs/engineering/make/multi-tenant.md`
@@ -82,6 +75,13 @@ Task: Multi-Tenant Blueprint als Deliverable
 ---
 
 ## DONE LOG (Erledigte Task-Cluster mit PR-Links)
+
+### Docs Cleanup (Move statt Delete) ✅
+- **Date**: 2025-12-18
+- **Branch**: `fix/docs-cleanup` (commit: ce0cb4f)
+- **Result**: Enhanced sprint-04.md as canonical smoke test reference (added Phase 1 security tests, improved examples, verification checklist). Updated docs/README.md with comprehensive structure guide + PR review guidelines. Created docs/archive/README.md explaining archival rationale + index format. Eliminated duplication, clarified active vs archived docs.
+- **Impact**: Phase 2 — Repo Hygiene (maintainable docs structure, clear smoke test reference)
+- **Evidence**: docs/testing/smoke/sprint-04.md (120+ lines, Phase 0/1 tests), docs/README.md (enhanced structure), docs/archive/README.md (archive rationale + index)
 
 ### Release Pipeline verifizieren ✅
 - **Date**: 2025-12-18
