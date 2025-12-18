@@ -87,7 +87,14 @@
             switch(key) {
                 case 'primary':
                     previewArea.style.setProperty('--ltlb-color-primary' + suffix, color);
-                    previewArea.style.setProperty('--ltlb-color-primary-hover' + suffix, adjustColorBrightness(color, -10));
+                    const hoverColor = adjustColorBrightness(color, -10);
+                    const lightColor = adjustColorBrightness(color, 80);
+                    previewArea.style.setProperty('--ltlb-color-primary-hover' + suffix, hoverColor);
+                    previewArea.style.setProperty('--ltlb-color-primary-light' + suffix, lightColor);
+                    previewArea.style.setProperty('--ltlb-color-primary-gradient' + suffix, 'linear-gradient(135deg, ' + color + ' 0%, ' + hoverColor + ' 100%)');
+                    // Dynamic RGB components for rgba() based shadows
+                    const rgb = hexToRgbComponents(color);
+                    previewArea.style.setProperty('--ltlb-color-primary-rgb' + suffix, rgb);
                     break;
                 case 'success':
                     previewArea.style.setProperty('--ltlb-color-success' + suffix, color);
@@ -156,6 +163,21 @@
                 Math.round(r).toString(16).padStart(2, '0') +
                 Math.round(g).toString(16).padStart(2, '0') +
                 Math.round(b).toString(16).padStart(2, '0');
+        }
+
+        /**
+         * Convert hex color to RGB components string (e.g., "102, 126, 234")
+         * Used to build dynamic rgba() values in CSS
+         */
+        function hexToRgbComponents(hex) {
+            hex = hex.replace('#', '');
+            if (hex.length !== 6) {
+                return '102, 126, 234';
+            }
+            const r = parseInt(hex.substring(0, 2), 16);
+            const g = parseInt(hex.substring(2, 4), 16);
+            const b = parseInt(hex.substring(4, 6), 16);
+            return r + ', ' + g + ', ' + b;
         }
 
         // ============================================

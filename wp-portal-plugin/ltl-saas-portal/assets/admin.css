@@ -13,6 +13,8 @@
     /* Colors */
     --ltlb-color-primary: #667eea;
     --ltlb-color-primary-hover: #5568d3;
+    --ltlb-color-primary-light: #e8ebff;
+    --ltlb-color-primary-gradient: linear-gradient(135deg, #667eea 0%, #5568d3 100%);
     --ltlb-color-success: #28a745;
     --ltlb-color-success-light: #d4edda;
     --ltlb-color-error: #dc3545;
@@ -97,7 +99,7 @@
 
 .ltlb-lang-btn--active {
     border-color: var(--ltlb-color-primary);
-    background: linear-gradient(135deg, var(--ltlb-color-primary) 0%, #5568d3 100%);
+    background: var(--ltlb-color-primary-gradient);
     color: white;
     box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
 }
@@ -389,7 +391,7 @@
     font-size: 0.95rem !important;
     height: auto !important;
     border-radius: var(--ltlb-radius-sm) !important;
-    background: linear-gradient(135deg, var(--ltlb-color-primary) 0%, #4a4fdc 100%) !important;
+    background: var(--ltlb-color-primary-gradient) !important;
     border: none !important;
     box-shadow: 0 2px 8px rgba(92, 99, 243, 0.3) !important;
     transition: all 0.2s !important;
@@ -409,7 +411,7 @@
     display: flex;
     align-items: center;
     gap: var(--ltlb-gap-lg);
-    background: linear-gradient(135deg, var(--ltlb-color-primary) 0%, #1a1a3e 100%);
+    background: linear-gradient(135deg, var(--ltlb-color-primary) 0%, var(--ltlb-color-primary-hover) 50%, #1a1a3e 100%);
     color: white;
     padding: var(--ltlb-gap-xl);
     border-radius: var(--ltlb-radius-lg);
@@ -750,7 +752,7 @@
     font-size: 1rem !important;
     height: auto !important;
     border-radius: var(--ltlb-radius-sm) !important;
-    background: linear-gradient(135deg, var(--ltlb-color-primary) 0%, #4a4fdc 100%) !important;
+    background: var(--ltlb-color-primary-gradient) !important;
     border: none !important;
     box-shadow: 0 4px 15px rgba(92, 99, 243, 0.4) !important;
     transition: all 0.2s !important;

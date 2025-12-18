@@ -121,7 +121,31 @@ Ein Issue ist „Done“, wenn:
 - Issue automatisch geschlossen (`Closes #...`) oder manuell geschlossen
 
 ---
+## Quick Reference: Issue → Branch → Commit → Merge
 
+This is the smallest loop that keeps you organized:
+
+1) **Pick ONE issue** (e.g. #10)
+2) **Create branch** in VS Code: `feat/issue-10-wp-connect`
+3) **Do the work** in small commits
+
+**Commit message template:**
+- `feat(portal): wp connect form (refs #10)`
+- `feat(portal): add connection test endpoint (closes #10)`  ← this one closes the issue after merge
+
+**Why "closes #10"?**
+GitHub auto-closes issues when PR is merged if the PR description (or commit message) contains:
+`Closes #10`, `Fixes #10`, `Resolves #10`
+
+4) **Open PR**, paste short checklist in PR description, include:
+   - `Closes #10`
+   - Testing steps
+5) **Merge PR** → Issue closes automatically
+6) **Move to next issue**
+
+Labels & milestones help you filter and keep a "single source of truth".
+
+---
 ## Pro-Tipp: Saved Searches
 
 Lege in GitHub Saved Searches an:

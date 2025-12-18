@@ -17,6 +17,8 @@
     --ltlb-color-primary-hover: #5568d3;
     --ltlb-color-primary-light: #e8ebff;
     --ltlb-color-primary-gradient: linear-gradient(135deg, #667eea 0%, #5568d3 100%);
+    /* RGB components used for dynamic shadows */
+    --ltlb-color-primary-rgb: 102, 126, 234;
 
     /* Status Colors */
     --ltlb-color-success: #28a745;
@@ -56,7 +58,7 @@
     --ltlb-shadow-md: 0 4px 12px rgba(0,0,0,0.1);
     --ltlb-shadow-lg: 0 8px 30px rgba(0,0,0,0.12);
     --ltlb-shadow-xl: 0 16px 50px rgba(0,0,0,0.15);
-    --ltlb-shadow-glow: 0 4px 20px rgba(102, 126, 234, 0.25);
+    --ltlb-shadow-glow: 0 4px 20px rgba(var(--ltlb-color-primary-rgb), 0.25);
 
     /* Transitions */
     --ltlb-transition-fast: 0.15s ease;
@@ -95,6 +97,44 @@
     margin-bottom: var(--ltlb-gap-xl);
     padding-bottom: var(--ltlb-gap-lg);
     border-bottom: 2px solid var(--ltlb-color-border);
+}
+
+/* PHP uses .ltlb-header-content, .ltlb-header-actions */
+.ltlb-header-content {
+    flex: 1;
+}
+
+.ltlb-header-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--ltlb-gap-md);
+}
+
+/* PHP uses .ltlb-dashboard-title with gradient text */
+.ltlb-dashboard-title {
+    display: flex;
+    align-items: center;
+    gap: var(--ltlb-gap-sm);
+    margin: 0 0 var(--ltlb-gap-xs) 0;
+    font-size: 1.75rem;
+    font-weight: 700;
+    background: var(--ltlb-color-primary-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.ltlb-title-icon {
+    font-size: 1.5rem;
+    -webkit-text-fill-color: initial;
+    background: none;
+}
+
+/* PHP uses .ltlb-dashboard-subtitle */
+.ltlb-dashboard-subtitle {
+    margin: 0;
+    font-size: 1rem;
+    color: var(--ltlb-color-text-muted);
 }
 
 .ltlb-dashboard-header__title {
@@ -153,14 +193,16 @@
     box-shadow: var(--ltlb-shadow-sm);
 }
 
-.ltlb-lang-btn--active {
+.ltlb-lang-btn--active,
+.ltlb-lang-btn.active {
     border-color: var(--ltlb-color-primary);
     background: var(--ltlb-color-primary-gradient);
     color: white;
     box-shadow: var(--ltlb-shadow-glow);
 }
 
-.ltlb-lang-btn--active:hover {
+.ltlb-lang-btn--active:hover,
+.ltlb-lang-btn.active:hover {
     color: white;
     transform: translateY(-1px);
 }
@@ -189,29 +231,37 @@
     flex-shrink: 0;
 }
 
-.ltlb-alert--success {
+.ltlb-alert--success,
+.ltlb-alert-success {
     background: var(--ltlb-color-success-light);
     color: #155724;
     border-left: 4px solid var(--ltlb-color-success);
 }
 
-.ltlb-alert--error {
+.ltlb-alert--error,
+.ltlb-alert-error {
     background: var(--ltlb-color-error-light);
     color: #721c24;
     border-left: 4px solid var(--ltlb-color-error);
 }
 
-.ltlb-alert--warning {
+.ltlb-alert--warning,
+.ltlb-alert-warning {
     background: var(--ltlb-color-warning-light);
     color: #856404;
     border-left: 4px solid var(--ltlb-color-warning);
 }
 
-.ltlb-alert--info {
+.ltlb-alert--info,
+.ltlb-alert-info {
     background: var(--ltlb-color-info-light);
     color: #004085;
     border-left: 4px solid var(--ltlb-color-info);
 }
+
+/* PHP class aliases */
+.ltlb-alert-icon { font-size: 1.25rem; flex-shrink: 0; }
+.ltlb-alert-message { flex: 1; }
 
 /* ============================================
    Setup Progress Card
@@ -221,30 +271,49 @@
     background: var(--ltlb-color-bg);
     border-radius: var(--ltlb-radius-lg);
     border: 1px solid var(--ltlb-color-border);
-    padding: var(--ltlb-gap-xl);
     margin-bottom: var(--ltlb-gap-xl);
+    overflow: hidden;
+    box-shadow: var(--ltlb-shadow-sm);
+    transition: var(--ltlb-transition);
+}
+
+.ltlb-progress-card:hover {
     box-shadow: var(--ltlb-shadow-md);
 }
 
+/* PHP uses .ltlb-progress-header */
+.ltlb-progress-header,
+/* PHP uses .ltlb-progress-header */
+.ltlb-progress-header,
 .ltlb-progress-card__header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: var(--ltlb-gap-lg);
-    padding-bottom: var(--ltlb-gap-md);
-    border-bottom: 2px solid var(--ltlb-color-border);
+    padding: var(--ltlb-gap-lg);
+    background: var(--ltlb-color-bg-light);
+    border-bottom: 1px solid var(--ltlb-color-border);
 }
 
+/* PHP uses .ltlb-progress-title */
+.ltlb-progress-title,
+/* PHP uses .ltlb-progress-title */
+.ltlb-progress-title,
 .ltlb-progress-card__title {
     display: flex;
     align-items: center;
     gap: var(--ltlb-gap-sm);
     margin: 0;
-    font-size: 1.25rem;
+    font-size: 1.15rem;
     font-weight: 700;
     color: var(--ltlb-color-text);
 }
 
+.ltlb-progress-icon {
+    font-size: 1.25rem;
+}
+
+/* PHP uses .ltlb-help-link */
+.ltlb-help-link,
 .ltlb-progress-card__help {
     display: inline-flex;
     align-items: center;
@@ -259,9 +328,26 @@
     transition: var(--ltlb-transition);
 }
 
+.ltlb-help-link:hover,
 .ltlb-progress-card__help:hover {
     background: var(--ltlb-color-primary);
     color: white;
+}
+
+/* Progress Steps Container - add padding like form-section body */
+.ltlb-progress-card > .ltlb-step:first-of-type {
+    padding-top: var(--ltlb-gap-lg);
+    margin-left: var(--ltlb-gap-lg);
+    margin-right: var(--ltlb-gap-lg);
+}
+
+.ltlb-progress-card > .ltlb-step {
+    margin-left: var(--ltlb-gap-lg);
+    margin-right: var(--ltlb-gap-lg);
+}
+
+.ltlb-progress-card > .ltlb-step:last-of-type {
+    padding-bottom: var(--ltlb-gap-lg);
 }
 
 /* Progress Steps */
@@ -276,6 +362,8 @@
     border-bottom: none;
 }
 
+/* PHP uses .ltlb-step-icon */
+.ltlb-step-icon,
 .ltlb-step__icon {
     width: 48px;
     height: 48px;
@@ -286,6 +374,17 @@
     border-radius: var(--ltlb-radius-md);
     margin-right: var(--ltlb-gap-md);
     flex-shrink: 0;
+    background: var(--ltlb-color-bg-light);
+}
+
+/* State-based icon backgrounds for PHP class pattern */
+.ltlb-step.completed .ltlb-step-icon {
+    background: var(--ltlb-color-success-light);
+}
+
+.ltlb-step.pending .ltlb-step-icon,
+.ltlb-step.warning .ltlb-step-icon {
+    background: var(--ltlb-color-warning-light);
 }
 
 .ltlb-step__icon--done {
@@ -300,10 +399,14 @@
     background: var(--ltlb-color-bg-light);
 }
 
+/* PHP uses .ltlb-step-content */
+.ltlb-step-content,
 .ltlb-step__content {
     flex: 1;
 }
 
+/* PHP uses .ltlb-step-title */
+.ltlb-step-title,
 .ltlb-step__title {
     margin: 0 0 0.25em 0;
     font-size: 1rem;
@@ -311,6 +414,8 @@
     color: var(--ltlb-color-text);
 }
 
+/* PHP uses .ltlb-step-status */
+.ltlb-step-status,
 .ltlb-step__description {
     margin: 0;
     font-size: 0.9rem;
@@ -339,6 +444,8 @@
     color: #856404;
 }
 
+/* PHP uses .ltlb-step-action */
+.ltlb-step-action,
 .ltlb-step__action {
     margin-left: var(--ltlb-gap-md);
 }
@@ -361,6 +468,8 @@
     box-shadow: var(--ltlb-shadow-md);
 }
 
+/* PHP uses .ltlb-section-header */
+.ltlb-section-header,
 .ltlb-form-section__header {
     display: flex;
     align-items: center;
@@ -370,6 +479,8 @@
     border-bottom: 1px solid var(--ltlb-color-border);
 }
 
+/* PHP uses .ltlb-section-icon */
+.ltlb-section-icon,
 .ltlb-form-section__icon {
     width: 48px;
     height: 48px;
@@ -386,11 +497,20 @@
     flex: 1;
 }
 
+/* PHP uses .ltlb-section-title */
+.ltlb-section-title,
 .ltlb-form-section__title {
-    margin: 0 0 0.25em 0;
+    margin: 0;
     font-size: 1.15rem;
     font-weight: 700;
     color: var(--ltlb-color-text);
+    display: flex;
+    align-items: center;
+    gap: var(--ltlb-gap-sm);
+}
+
+.ltlb-section-title .ltlb-section-icon {
+    font-size: 1.25rem;
 }
 
 .ltlb-form-section__subtitle {
@@ -407,6 +527,11 @@
    Form Elements
    ============================================ */
 
+/* PHP uses .ltlb-form as wrapper */
+.ltlb-form {
+    padding: var(--ltlb-gap-lg);
+}
+
 .ltlb-form-group {
     margin-bottom: var(--ltlb-gap-lg);
 }
@@ -415,6 +540,8 @@
     margin-bottom: 0;
 }
 
+/* PHP uses .ltlb-label */
+.ltlb-label,
 .ltlb-form-label {
     display: flex;
     align-items: center;
@@ -425,16 +552,20 @@
     color: var(--ltlb-color-text);
 }
 
-.ltlb-form-label__icon {
-    font-size: 1.1em;
-}
-
+/* PHP uses .ltlb-tooltip */
+.ltlb-tooltip,
 .ltlb-form-label__tooltip {
     cursor: help;
     color: var(--ltlb-color-primary);
     font-size: 0.9em;
 }
 
+.ltlb-form-label__icon {
+    font-size: 1.1em;
+}
+
+/* PHP uses .ltlb-input */
+.ltlb-input,
 .ltlb-form-input,
 .ltlb-form-select {
     width: 100%;
@@ -454,7 +585,7 @@
 .ltlb-form-select:focus {
     outline: none;
     border-color: var(--ltlb-color-primary);
-    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.15);
+    box-shadow: 0 0 0 4px rgba(var(--ltlb-color-primary-rgb), 0.15);
 }
 
 .ltlb-form-input::placeholder {
@@ -469,6 +600,8 @@
     padding-right: 2.5rem;
 }
 
+/* PHP uses .ltlb-help-text */
+.ltlb-help-text,
 .ltlb-form-hint {
     display: flex;
     align-items: flex-start;
@@ -480,6 +613,15 @@
 
 .ltlb-form-hint__icon {
     flex-shrink: 0;
+}
+
+/* PHP uses .ltlb-form-actions */
+.ltlb-form-actions {
+    display: flex;
+    gap: var(--ltlb-gap-md);
+    margin-top: var(--ltlb-gap-lg);
+    padding-top: var(--ltlb-gap-lg);
+    border-top: 1px solid var(--ltlb-color-border);
 }
 
 /* Input Grid for Side-by-Side */
@@ -510,24 +652,30 @@
     line-height: 1.4;
 }
 
+/* PHP uses .ltlb-btn-primary (without --) */
+.ltlb-btn-primary,
 .ltlb-btn--primary {
     background: var(--ltlb-color-primary-gradient);
     color: white;
     box-shadow: var(--ltlb-shadow-glow);
 }
 
+.ltlb-btn-primary:hover,
 .ltlb-btn--primary:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 25px rgba(102, 126, 234, 0.35);
+    box-shadow: 0 6px 25px rgba(var(--ltlb-color-primary-rgb), 0.35);
     color: white;
 }
 
+/* PHP uses .ltlb-btn-secondary (without --) */
+.ltlb-btn-secondary,
 .ltlb-btn--secondary {
     background: var(--ltlb-color-bg);
     color: var(--ltlb-color-primary);
     border: 2px solid var(--ltlb-color-primary);
 }
 
+.ltlb-btn-secondary:hover,
 .ltlb-btn--secondary:hover {
     background: var(--ltlb-color-primary);
     color: white;
@@ -543,14 +691,22 @@
     background: var(--ltlb-color-primary-light);
 }
 
+/* PHP uses .ltlb-btn-sm, .ltlb-btn-lg (without --) */
+.ltlb-btn-sm,
 .ltlb-btn--sm {
     padding: 0.5rem 1rem;
     font-size: 0.85rem;
 }
 
+.ltlb-btn-lg,
 .ltlb-btn--lg {
     padding: 1rem 2rem;
     font-size: 1.1rem;
+}
+
+/* PHP uses .ltlb-btn-block for full width */
+.ltlb-btn-block {
+    width: 100%;
 }
 
 .ltlb-btn:disabled {
@@ -561,6 +717,22 @@
 
 .ltlb-btn__icon {
     font-size: 1.1em;
+}
+
+/* PHP uses .ltlb-btn-icon for icon-only buttons */
+.ltlb-btn-icon {
+    padding: 0.5rem;
+    min-width: 40px;
+    min-height: 40px;
+    background: var(--ltlb-color-bg);
+    color: var(--ltlb-color-primary);
+    border: 2px solid var(--ltlb-color-primary);
+    box-shadow: none;
+}
+
+.ltlb-btn-icon:hover {
+    background: var(--ltlb-color-primary);
+    color: white;
 }
 
 /* Button Group */

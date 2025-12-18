@@ -152,6 +152,12 @@ Evidence required to declare PASS:
   - Evidence: file: `wp-portal-plugin/ltl-saas-portal/includes/class-ltl-saas-portal-crypto.php#L1-L70`
 - 2025-12-18: `/active-users` masks `wp_app_password` in response.
   - Evidence: file: `wp-portal-plugin/ltl-saas-portal/includes/REST/class-rest.php#L387-L427`
+- 2025-12-19: **Docs Cleanup** — Professional repository structure established.
+  - Archived obsolete release notes (`UPDATE-LANGUAGE-SWITCHER.md`, `CHANGELOG-i18n.md`) to `docs/archive/releases/`
+  - Merged redundant workflow docs (`issue-workflow-cheatsheet.md` → `issues-playbook.md`)
+  - Added "Top 10 Essential Docs" section in root `README.md`
+  - All active docs categorized by purpose (Reference, Product, Billing, Testing, etc.)
+  - Evidence: file: `README.md#L22-L36`, file: `docs/README.md#L1-L52`
 
 ## OPEN RISKS
 - P1 (planner): Plaintext password appears in Gumroad welcome email.
