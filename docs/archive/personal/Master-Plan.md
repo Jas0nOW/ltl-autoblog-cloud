@@ -68,12 +68,6 @@ Task: Onboarding Wizard finalisieren (Issue #20)
 
 
 
-Task: Month rollover atomic machen
-- Goal: Kein Race bei parallelen Runs/Tenant Pulls.
-- Files to touch: `wp-portal-plugin/ltl-saas-portal/includes/REST/class-rest.php`
-- DoD: Reset+Increment erfolgen atomar und reproduzierbar; dokumentierte Testcases `docs/testing/smoke/sprint-04.md` passen.
-- Impact: Med
-- KomplexitÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¤t: S/M
 
 Task: Rate limiting / brute-force surface reduzieren
 - Goal: Schutz gegen API-Key/Token brute-force und DoS.
@@ -107,6 +101,13 @@ Task: Multi-Tenant Blueprint als Deliverable
 ---
 
 ## DONE LOG (Erledigte Task-Cluster mit PR-Links)
+
+### Month Rollover Atomic ✅
+- **Date**: 2025-12-18
+- **Branch**: `fix/month-rollover-atomic` (commit: b0d35e6)
+- **Result**: Extracted month rollover into atomic helper function `ltl_saas_atomic_month_rollover()` using WHERE clause guard. Prevents race conditions when parallel /make/tenants and run_callback requests both try to reset. Both endpoints now use single atomic query.
+- **Impact**: Phase 1 — Data Correctness (prevents race conditions on month boundaries)
+- **Evidence**: class-ltl-saas-portal.php (new helper function), class-rest.php (both get_make_tenants and run_callback refactored to use atomic helper)
 
 ### Retry/Backoff Telemetrie (Issue #17) ✅
 - **Date**: 2025-12-18
