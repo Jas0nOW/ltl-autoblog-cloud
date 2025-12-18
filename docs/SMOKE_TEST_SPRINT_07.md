@@ -120,7 +120,7 @@ HTTP 200 OK
 SELECT COUNT(*) FROM wp_ltl_saas_settings WHERE user_id = <user_id>;
 
 -- Should show plan = 'pro'
-SELECT plan, is_active FROM wp_ltl_saas_settings 
+SELECT plan, is_active FROM wp_ltl_saas_settings
 WHERE user_id = <user_id>;
 ```
 
