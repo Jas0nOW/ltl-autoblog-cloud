@@ -30,6 +30,66 @@ class LTL_SAAS_Portal_REST {
             'callback' => array( $this, 'run_callback' ),
             'permission_callback' => '__return_true', // Auth in callback
         ) );
+
+        // Make Multi-Tenant: GET /make/tenants (Token Auth)
+        register_rest_route( self::NAMESPACE, '/make/tenants', array(
+            'methods'  => 'GET',
+            'callback' => array( $this, 'get_make_tenants' ),
+            'permission_callback' => '__return_true',
+        ) );
+    }
+    /**
+     * GET /wp-json/ltl-saas/v1/make/tenants
+     * Returns all tenants for Make.com (multi-tenant config pull)
+     * Auth: X-LTL-SAAS-TOKEN header, compared to option ltl_saas_make_token
+     * 401 if header missing, 403 if token missing/invalid/empty
+     */
+    public function get_make_tenants( $request ) {
+        $make_token = get_option('ltl_saas_make_token');
+        $header_token = $request->get_header('X-LTL-SAAS-TOKEN');
+        if (!$header_token) {
+            return new WP_REST_Response(['error' => 'Missing token'], 401);
+        }
+        if (!$make_token || !is_string($make_token) || !trim($make_token)) {
+            return new WP_REST_Response(['error' => 'Endpoint disabled'], 403);
+        }
+        if (!hash_equals($make_token, $header_token)) {
+            return new WP_REST_Response(['error' => 'Forbidden'], 403);
+        }
+        global $wpdb;
+        $conn_table = $wpdb->prefix . 'ltl_saas_connections';
+        $settings_table = $wpdb->prefix . 'ltl_saas_settings';
+        require_once LTL_SAAS_PORTAL_PLUGIN_DIR . 'includes/class-ltl-saas-portal-crypto.php';
+        $users = $wpdb->get_results("SELECT * FROM $conn_table");
+        $result = [];
+        foreach ($users as $u) {
+            $settings = $wpdb->get_row($wpdb->prepare("SELECT * FROM $settings_table WHERE user_id = %d", $u->user_id), ARRAY_A);
+            $decrypted = LTL_SAAS_Portal_Crypto::decrypt($u->wp_app_password_enc);
+            // Sanitize outputs
+            $site_url = esc_url_raw($u->wp_url);
+            $rss_url = isset($settings['rss_url']) ? esc_url_raw($settings['rss_url']) : '';
+            $language = isset($settings['language']) ? sanitize_text_field($settings['language']) : '';
+            $tone = isset($settings['tone']) ? sanitize_text_field($settings['tone']) : '';
+            $publish_mode = isset($settings['publish_mode']) ? sanitize_text_field($settings['publish_mode']) : '';
+            $frequency = isset($settings['frequency']) ? sanitize_text_field($settings['frequency']) : '';
+            $plan = isset($settings['plan']) ? sanitize_text_field($settings['plan']) : '';
+            $is_active = isset($settings['is_active']) ? (bool)$settings['is_active'] : true;
+            $tenant = [
+                'tenant_id' => (int)$u->user_id,
+                'site_url' => $site_url,
+                'wp_username' => sanitize_user($u->wp_user),
+                'wp_app_password' => $decrypted,
+                'rss_url' => $rss_url,
+                'language' => $language,
+                'tone' => $tone,
+                'publish_mode' => $publish_mode,
+                'frequency' => $frequency,
+                'plan' => $plan,
+                'is_active' => $is_active,
+            ];
+            $result[] = $tenant;
+        }
+        return new WP_REST_Response($result, 200);
     }
 
     /**
