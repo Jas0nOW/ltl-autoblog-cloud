@@ -350,8 +350,8 @@ class LTL_SAAS_Portal_REST {
             if (is_wp_error($decrypted)) {
                 continue; // skip tenant if decryption fails
             }
-            // Sanitize outputs
-            $site_url = esc_url_raw($u->wp_url);
+            // Sanitize outputs (avoid PHP 8.3 deprecations from esc_url_raw(null))
+            $site_url = esc_url_raw( is_string( $u->wp_url ) ? $u->wp_url : '' );
             $settings_table = $wpdb->prefix . 'ltl_saas_settings';
             $settings = $wpdb->get_row($wpdb->prepare("SELECT * FROM $settings_table WHERE user_id = %d", $u->user_id), ARRAY_A);
             $rss_url = isset($settings['rss_url']) ? esc_url_raw($settings['rss_url']) : '';
@@ -364,7 +364,7 @@ class LTL_SAAS_Portal_REST {
             $tenant = [
                 'tenant_id' => (int)$u->user_id,
                 'site_url' => $site_url,
-                'wp_username' => sanitize_user($u->wp_user),
+                'wp_username' => sanitize_user( is_string( $u->wp_user ) ? $u->wp_user : '' ),
                 'wp_app_password' => $decrypted,
                 'rss_url' => $rss_url,
                 'language' => $language,

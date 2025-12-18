@@ -1,0 +1,198 @@
+# Copyright (C) 2025 LazyTechLab
+# This file is distributed under the same license as the LTL AutoBlog Cloud Portal plugin.
+msgid ""
+msgstr ""
+"Project-Id-Version: LTL AutoBlog Cloud Portal 0.1.0\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/ltl-saas-portal\n"
+"POT-Creation-Date: 2025-12-18 12:00+0000\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"PO-Revision-Date: 2025-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: en\n"
+
+# Admin Menu & Pages
+msgid "Settings"
+msgstr ""
+
+msgid "Design"
+msgstr ""
+
+msgid "Customize Colors"
+msgstr ""
+
+msgid "Portal Settings"
+msgstr ""
+
+msgid "Save Changes"
+msgstr ""
+
+msgid "Regenerating will invalidate the old token. Continue?"
+msgstr ""
+
+msgid "Testing..."
+msgstr ""
+
+# Color Labels
+msgid "Primary Color"
+msgstr ""
+
+msgid "Success Color"
+msgstr ""
+
+msgid "Error Color"
+msgstr ""
+
+msgid "Warning Color"
+msgstr ""
+
+msgid "Form Background"
+msgstr ""
+
+# Sections
+msgid "Backend Colors (Admin Area)"
+msgstr ""
+
+msgid "These colors apply only to the WordPress admin dashboard and plugin settings."
+msgstr ""
+
+msgid "Frontend Colors (Customer Portal)"
+msgstr ""
+
+msgid "These colors are used in the customer-facing dashboard [ltl_saas_dashboard]."
+msgstr ""
+
+msgid "LTL AutoBlog Cloud Settings"
+msgstr ""
+
+msgid "Configure your API keys, tokens, and integrations. Customers can access their dashboard via the shortcode:"
+msgstr ""
+
+msgid "API & Authentication"
+msgstr ""
+
+msgid "Secure tokens for Make.com integration and portal authentication."
+msgstr ""
+
+msgid "Make Token"
+msgstr ""
+
+msgid "Used for Make.com webhook authentication."
+msgstr ""
+
+msgid "Regenerate"
+msgstr ""
+
+msgid "Generate"
+msgstr ""
+
+msgid "API Key"
+msgstr ""
+
+msgid "Portal to Make.com communication key."
+msgstr ""
+
+msgid "Billing Integration (Gumroad)"
+msgstr ""
+
+msgid "Configure Gumroad webhook for automatic subscription management."
+msgstr ""
+
+msgid "Webhook Secret"
+msgstr ""
+
+msgid "Secret key for Gumroad ping verification."
+msgstr ""
+
+msgid "Webhook URL"
+msgstr ""
+
+msgid "Add this URL to your Gumroad ping settings."
+msgstr ""
+
+msgid "Product ID → Plan Mapping"
+msgstr ""
+
+msgid "Map Gumroad product IDs to your subscription plans (JSON format)."
+msgstr ""
+
+msgid "Validate JSON before saving!"
+msgstr ""
+
+msgid "Marketing & Checkout Links"
+msgstr ""
+
+msgid "Configure checkout URLs for your pricing page."
+msgstr ""
+
+msgid "Checkout URL"
+msgstr ""
+
+msgid "Save All Settings"
+msgstr ""
+
+# Status Messages
+msgid "Active"
+msgstr ""
+
+msgid "Not Set"
+msgstr ""
+
+# Preview
+msgid "Backend Preview"
+msgstr ""
+
+msgid "Frontend Preview"
+msgstr ""
+
+msgid "This is a preview of how your colors will look in the admin area."
+msgstr ""
+
+msgid "This is a preview of how your colors will look in the customer portal."
+msgstr ""
+
+msgid "Primary Button"
+msgstr ""
+
+msgid "Success Button"
+msgstr ""
+
+msgid "Error Button"
+msgstr ""
+
+msgid "Warning Button"
+msgstr ""
+
+# REST API
+msgid "Invalid API key."
+msgstr ""
+
+msgid "Missing API key."
+msgstr ""
+
+msgid "Missing ping secret."
+msgstr ""
+
+msgid "Invalid ping secret."
+msgstr ""
+
+msgid "Missing required fields."
+msgstr ""
+
+msgid "Invalid product_id."
+msgstr ""
+
+msgid "No plan mapped for this product."
+msgstr ""
+
+msgid "User not found or not linked to a site."
+msgstr ""
+
+msgid "Subscription updated successfully."
+msgstr ""
+
+# Language Switcher
+msgid "Language:"
+msgstr ""

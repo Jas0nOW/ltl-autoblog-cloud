@@ -1,0 +1,199 @@
+# Copyright (C) 2025 LazyTechLab
+# This file is distributed under the same license as the LTL AutoBlog Cloud Portal plugin.
+msgid ""
+msgstr ""
+"Project-Id-Version: LTL AutoBlog Cloud Portal 0.1.0\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/ltl-saas-portal\n"
+"POT-Creation-Date: 2025-12-18 12:00+0000\n"
+"PO-Revision-Date: 2025-12-18 12:00+0000\n"
+"Last-Translator: LazyTechLab <info@lazytechlab.com>\n"
+"Language-Team: German\n"
+"Language: de_DE\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+# Admin Menu & Pages
+msgid "Settings"
+msgstr "Einstellungen"
+
+msgid "Design"
+msgstr "Design"
+
+msgid "Customize Colors"
+msgstr "Farben anpassen"
+
+msgid "Portal Settings"
+msgstr "Portal-Einstellungen"
+
+msgid "Save Changes"
+msgstr "Änderungen speichern"
+
+msgid "Regenerating will invalidate the old token. Continue?"
+msgstr "Die Neugenerierung macht den alten Token ungültig. Fortfahren?"
+
+msgid "Testing..."
+msgstr "Teste..."
+
+# Color Labels
+msgid "Primary Color"
+msgstr "Primärfarbe"
+
+msgid "Success Color"
+msgstr "Erfolgsfarbe"
+
+msgid "Error Color"
+msgstr "Fehlerfarbe"
+
+msgid "Warning Color"
+msgstr "Warnfarbe"
+
+msgid "Form Background"
+msgstr "Formular-Hintergrund"
+
+# Sections
+msgid "Backend Colors (Admin Area)"
+msgstr "Backend-Farben (Admin-Bereich)"
+
+msgid "These colors apply only to the WordPress admin dashboard and plugin settings."
+msgstr "Diese Farben gelten nur für das WordPress-Admin-Dashboard und die Plugin-Einstellungen."
+
+msgid "Frontend Colors (Customer Portal)"
+msgstr "Frontend-Farben (Kunden-Portal)"
+
+msgid "These colors are used in the customer-facing dashboard [ltl_saas_dashboard]."
+msgstr "Diese Farben werden im Kunden-Dashboard [ltl_saas_dashboard] verwendet."
+
+msgid "LTL AutoBlog Cloud Settings"
+msgstr "LTL AutoBlog Cloud Einstellungen"
+
+msgid "Configure your API keys, tokens, and integrations. Customers can access their dashboard via the shortcode:"
+msgstr "Konfigurieren Sie Ihre API-Schlüssel, Tokens und Integrationen. Kunden können über den Shortcode auf ihr Dashboard zugreifen:"
+
+msgid "API & Authentication"
+msgstr "API & Authentifizierung"
+
+msgid "Secure tokens for Make.com integration and portal authentication."
+msgstr "Sichere Tokens für Make.com-Integration und Portal-Authentifizierung."
+
+msgid "Make Token"
+msgstr "Make Token"
+
+msgid "Used for Make.com webhook authentication."
+msgstr "Wird für Make.com Webhook-Authentifizierung verwendet."
+
+msgid "Regenerate"
+msgstr "Neu generieren"
+
+msgid "Generate"
+msgstr "Generieren"
+
+msgid "API Key"
+msgstr "API-Schlüssel"
+
+msgid "Portal to Make.com communication key."
+msgstr "Portal zu Make.com Kommunikationsschlüssel."
+
+msgid "Billing Integration (Gumroad)"
+msgstr "Abrechnungs-Integration (Gumroad)"
+
+msgid "Configure Gumroad webhook for automatic subscription management."
+msgstr "Konfigurieren Sie Gumroad Webhook für automatische Abonnement-Verwaltung."
+
+msgid "Webhook Secret"
+msgstr "Webhook-Secret"
+
+msgid "Secret key for Gumroad ping verification."
+msgstr "Geheimer Schlüssel für Gumroad Ping-Verifizierung."
+
+msgid "Webhook URL"
+msgstr "Webhook-URL"
+
+msgid "Add this URL to your Gumroad ping settings."
+msgstr "Fügen Sie diese URL zu Ihren Gumroad Ping-Einstellungen hinzu."
+
+msgid "Product ID → Plan Mapping"
+msgstr "Produkt-ID → Plan-Zuordnung"
+
+msgid "Map Gumroad product IDs to your subscription plans (JSON format)."
+msgstr "Ordnen Sie Gumroad Produkt-IDs Ihren Abonnement-Plänen zu (JSON-Format)."
+
+msgid "Validate JSON before saving!"
+msgstr "Validieren Sie JSON vor dem Speichern!"
+
+msgid "Marketing & Checkout Links"
+msgstr "Marketing & Checkout-Links"
+
+msgid "Configure checkout URLs for your pricing page."
+msgstr "Konfigurieren Sie Checkout-URLs für Ihre Preisseite."
+
+msgid "Checkout URL"
+msgstr "Checkout-URL"
+
+msgid "Save All Settings"
+msgstr "Alle Einstellungen speichern"
+
+# Status Messages
+msgid "Active"
+msgstr "Aktiv"
+
+msgid "Not Set"
+msgstr "Nicht gesetzt"
+
+# Preview
+msgid "Backend Preview"
+msgstr "Backend-Vorschau"
+
+msgid "Frontend Preview"
+msgstr "Frontend-Vorschau"
+
+msgid "This is a preview of how your colors will look in the admin area."
+msgstr "Dies ist eine Vorschau, wie Ihre Farben im Admin-Bereich aussehen werden."
+
+msgid "This is a preview of how your colors will look in the customer portal."
+msgstr "Dies ist eine Vorschau, wie Ihre Farben im Kunden-Portal aussehen werden."
+
+msgid "Primary Button"
+msgstr "Primär-Button"
+
+msgid "Success Button"
+msgstr "Erfolgs-Button"
+
+msgid "Error Button"
+msgstr "Fehler-Button"
+
+msgid "Warning Button"
+msgstr "Warn-Button"
+
+# REST API
+msgid "Invalid API key."
+msgstr "Ungültiger API-Schlüssel."
+
+msgid "Missing API key."
+msgstr "Fehlender API-Schlüssel."
+
+msgid "Missing ping secret."
+msgstr "Fehlendes Ping-Secret."
+
+msgid "Invalid ping secret."
+msgstr "Ungültiges Ping-Secret."
+
+msgid "Missing required fields."
+msgstr "Erforderliche Felder fehlen."
+
+msgid "Invalid product_id."
+msgstr "Ungültige Produkt-ID."
+
+msgid "No plan mapped for this product."
+msgstr "Kein Plan für dieses Produkt zugeordnet."
+
+msgid "User not found or not linked to a site."
+msgstr "Benutzer nicht gefunden oder nicht mit einer Seite verknüpft."
+
+msgid "Subscription updated successfully."
+msgstr "Abonnement erfolgreich aktualisiert."
+
+# Language Switcher
+msgid "Language:"
+msgstr "Sprache:"
