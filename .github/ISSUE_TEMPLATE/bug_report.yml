@@ -1,0 +1,50 @@
+name: Bug Report
+description: Report a bug in LTL AutoBlog Cloud
+title: "bug: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Danke! Bitte fülle alles möglichst konkret aus.
+  - type: input
+    id: summary
+    attributes:
+      label: Kurzbeschreibung
+      description: Was ist kaputt? (1 Satz)
+      placeholder: "Beim WP-Connection-Test kommt 401 obwohl App Password korrekt ist"
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Schritte zum Reproduzieren
+      description: Schritt für Schritt, damit man es nachstellen kann.
+      placeholder: |
+        1) ...
+        2) ...
+        3) ...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Erwartetes Verhalten
+      placeholder: "Connection-Test sollte grün werden und /users/me liefern"
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Tatsächliches Verhalten
+      placeholder: "Fehler 401 + Message ..."
+    validations:
+      required: true
+  - type: input
+    id: env
+    attributes:
+      label: Umgebung
+      description: Portal/WP/Make Details
+      placeholder: "Portal: Hostinger WP 6.5 | Kunden-WP: 6.4 | Make: Scenario vX"
+    validations:
+      required: false

@@ -1,0 +1,30 @@
+name: Task / Implementation
+description: Implementation task (internal)
+title: "task: "
+labels: ["mvp"]
+body:
+  - type: input
+    id: milestone
+    attributes:
+      label: Milestone
+      placeholder: "M2 - Portal Dashboard & WP Connect"
+    validations:
+      required: true
+  - type: textarea
+    id: scope
+    attributes:
+      label: Scope
+      description: Was wird genau gemacht?
+      placeholder: |
+        - [ ] ...
+        - [ ] ...
+    validations:
+      required: true
+  - type: textarea
+    id: done
+    attributes:
+      label: Done Definition
+      description: Klarer “fertig”-Punkt.
+      placeholder: "Done wenn ..."
+    validations:
+      required: true
