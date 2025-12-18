@@ -46,7 +46,8 @@ class LTL_SAAS_Portal_REST {
         if ( ! is_ssl() ) {
             return new WP_Error('forbidden', 'HTTPS required for secrets.', array('status' => 403));
         }
-        $make_token = get_option('ltl_saas_make_token');
+        require_once LTL_SAAS_PORTAL_PLUGIN_DIR . 'includes/class-ltl-saas-portal-secrets.php';
+        $make_token = LTL_SAAS_Portal_Secrets::get_make_token();
         $header_token = $request->get_header('X-LTL-SAAS-TOKEN');
         if (!$header_token || !$make_token || !is_string($make_token) || !trim($make_token) || !hash_equals($make_token, $header_token)) {
             return new WP_Error('forbidden', 'Forbidden', array('status' => 403));
@@ -97,6 +98,9 @@ class LTL_SAAS_Portal_REST {
                 $remaining = 0;
             }
             $decrypted = LTL_SAAS_Portal_Crypto::decrypt($u->wp_app_password_enc);
+            if (is_wp_error($decrypted)) {
+                continue; // skip tenant if decryption fails
+            }
             // Sanitize outputs
             $site_url = esc_url_raw($u->wp_url);
             $settings_table = $wpdb->prefix . 'ltl_saas_settings';
@@ -139,7 +143,8 @@ class LTL_SAAS_Portal_REST {
      * NOTE: The decrypted app password is only for backend/service use. Never expose to frontend/UI.
      */
     public function get_active_users( $request ) {
-        $api_key = get_option('ltl_saas_api_key');
+        require_once LTL_SAAS_PORTAL_PLUGIN_DIR . 'includes/class-ltl-saas-portal-secrets.php';
+        $api_key = LTL_SAAS_Portal_Secrets::get_api_key();
         $header_key = $request->get_header('X-LTL-API-Key');
         if (!$api_key || !$header_key || !hash_equals($api_key, $header_key)) {
             return new WP_REST_Response(['error' => 'Unauthorized'], 401);
@@ -171,7 +176,8 @@ class LTL_SAAS_Portal_REST {
      * Testet die gespeicherte WP-Verbindung des eingeloggten Users.
      */
     public function run_callback( $request ) {
-        $api_key = get_option('ltl_saas_api_key');
+        require_once LTL_SAAS_PORTAL_PLUGIN_DIR . 'includes/class-ltl-saas-portal-secrets.php';
+        $api_key = LTL_SAAS_Portal_Secrets::get_api_key();
         $header_key = $request->get_header('X-LTL-API-Key');
         if (!$api_key || !$header_key || !hash_equals($api_key, $header_key)) {
             return new WP_REST_Response(['error' => 'Unauthorized'], 401);
@@ -195,6 +201,12 @@ class LTL_SAAS_Portal_REST {
         }
         if (!$tenant_id || !$status) {
             return new WP_REST_Response(['error' => 'Missing tenant_id or status'], 400);
+        }
+        // Validate tenant_id exists
+        $conn_table = $wpdb->prefix . 'ltl_saas_connections';
+        $exists = $wpdb->get_var($wpdb->prepare("SELECT id FROM $conn_table WHERE user_id = %d", $tenant_id));
+        if (!$exists) {
+            return new WP_REST_Response(['ok'=>false, 'error'=>'unknown_tenant'], 400);
         }
         // Insert run as before
         $row = [
@@ -255,7 +267,7 @@ class LTL_SAAS_Portal_REST {
             $wp_url = $conn->wp_url;
             $wp_user = $conn->wp_user;
             $wp_app_password = LTL_SAAS_Portal_Crypto::decrypt( $conn->wp_app_password_enc );
-            if ( ! $wp_url || ! $wp_user || ! $wp_app_password ) {
+            if ( is_wp_error($wp_app_password) || ! $wp_url || ! $wp_user || ! $wp_app_password ) {
                 return new WP_REST_Response( [ 'success' => false, 'message' => 'Ungültige Verbindungsdaten.' ], 400 );
             }
             $api_url = rtrim( $wp_url, '/' ) . '/wp-json/wp/v2/users/me';
