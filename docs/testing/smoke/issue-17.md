@@ -42,33 +42,18 @@ Wenn Make Callback sendet, Portal nutzt für Log:
 }
 ```
 
-### Implementation im `run_callback` Endpoint
+### Implementation im `run_callback` Endpoint ✅
 
 **Datei**: [wp-portal-plugin/ltl-saas-portal/includes/REST/class-rest.php](../../wp-portal-plugin/ltl-saas-portal/includes/REST/class-rest.php)
 
-```php
-// Im run_callback() Funktion, beim Speichern:
+**Status**: IMPLEMENTED (2025-12-18, Commit: TBD)
 
-$attempts = isset($params['attempts']) ? intval($params['attempts']) : 1;
-$last_http_status = isset($params['last_http_status']) ? intval($params['last_http_status']) : NULL;
-$retry_backoff_ms = isset($params['retry_backoff_ms']) ? intval($params['retry_backoff_ms']) : 0;
+The callback now accepts and stores:
+- `attempts` (integer, default 1): retry attempt counter
+- `last_http_status` (integer, optional): HTTP status code from last attempt
+- `retry_backoff_ms` (integer, default 0): backoff delay in milliseconds
 
-$row = [
-    'tenant_id' => $tenant_id,
-    'status' => $status,
-    'started_at' => $started_at,
-    'finished_at' => $finished_at,
-    'posts_created' => $posts_created,
-    'error_message' => $error_message,
-    'raw_payload' => $raw_payload,
-    'attempts' => $attempts,
-    'last_http_status' => $last_http_status,
-    'retry_backoff_ms' => $retry_backoff_ms,
-    'created_at' => current_time('mysql'),
-];
-
-$wpdb->insert($table, $row);
-```
+Fields are persisted in `wp_ltl_saas_runs` table and logged to `debug.log` when attempts > 1.
 
 ### Make Callback mit Retry-Info
 

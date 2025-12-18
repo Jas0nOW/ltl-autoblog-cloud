@@ -380,7 +380,7 @@ class LTL_SAAS_Portal_REST {
         require_once LTL_SAAS_PORTAL_PLUGIN_DIR . 'includes/class-ltl-saas-portal.php';
         $params = $request->get_json_params();
         if (!is_array($params)) $params = [];
-        
+
         $tenant_id = isset($params['tenant_id']) ? intval($params['tenant_id']) : 0;
         $execution_id = isset($params['execution_id']) ? sanitize_text_field($params['execution_id']) : '';
         $status = isset($params['status']) ? sanitize_text_field($params['status']) : '';
@@ -389,6 +389,12 @@ class LTL_SAAS_Portal_REST {
         $posts_created = isset($params['posts_created']) ? intval($params['posts_created']) : null;
         $error_message = isset($params['error_message']) ? sanitize_textarea_field($params['error_message']) : null;
         $meta = isset($params['meta']) ? wp_json_encode($params['meta']) : null;
+        
+        // Issue #17: Retry telemetry fields
+        $attempts = isset($params['attempts']) ? intval($params['attempts']) : 1;
+        $last_http_status = isset($params['last_http_status']) ? intval($params['last_http_status']) : null;
+        $retry_backoff_ms = isset($params['retry_backoff_ms']) ? intval($params['retry_backoff_ms']) : 0;
+        
         $raw_payload = wp_json_encode(array_slice($params,0,20));
         if ($raw_payload && strlen($raw_payload) > 8192) {
             $raw_payload = mb_strimwidth($raw_payload, 0, 8192, '...');
@@ -402,7 +408,7 @@ class LTL_SAAS_Portal_REST {
         if (!$exists) {
             return new WP_REST_Response(['ok'=>false, 'error'=>'unknown_tenant'], 400);
         }
-        
+
         // === Idempotency Check: If execution_id is provided, check if already processed ===
         $already_processed = false;
         if ($execution_id) {
@@ -417,8 +423,8 @@ class LTL_SAAS_Portal_REST {
                 return new WP_REST_Response(['ok'=>true, 'id'=>$existing_run->id, 'idempotent'=>true], 200);
             }
         }
-        
-        // Insert run
+
+        // Insert run with retry telemetry
         $row = [
             'tenant_id' => $tenant_id,
             'execution_id' => $execution_id ?: null,
@@ -428,10 +434,18 @@ class LTL_SAAS_Portal_REST {
             'posts_created' => $posts_created,
             'error_message' => $error_message,
             'raw_payload' => $raw_payload,
+            'attempts' => $attempts,
+            'last_http_status' => $last_http_status,
+            'retry_backoff_ms' => $retry_backoff_ms,
             'created_at' => current_time('mysql'),
         ];
         $ok = $wpdb->insert($table, $row);
         
+        // Log retry telemetry if attempts > 1
+        if ($attempts > 1 && $last_http_status) {
+            error_log('[LTL-SAAS] Callback: Retry telemetry - tenant_id=' . $tenant_id . ', status=' . $status . ', attempts=' . $attempts . ', last_http_status=' . $last_http_status . ', backoff_ms=' . $retry_backoff_ms);
+        }
+
         // === Increment usage ONLY on first successful processing (not on idempotent re-sends) ===
         if ($ok && $status === 'success' && !$already_processed) {
             $state = ltl_saas_get_tenant_state($tenant_id);

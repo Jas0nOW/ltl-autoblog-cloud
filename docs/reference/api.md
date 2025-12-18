@@ -68,6 +68,9 @@ Callback-Endpoint für Make.com, um Ergebnisse eines Runs zurückzumelden.
   "finished_at": "2025-12-18T10:01:00Z",
   "posts_created": 1,
   "error_message": null,
+  "attempts": 1,
+  "last_http_status": null,
+  "retry_backoff_ms": 0,
   "meta": { "post_id": 456, "title": "..." }
 }
 ```
@@ -76,6 +79,12 @@ Callback-Endpoint für Make.com, um Ergebnisse eines Runs zurückzumelden.
 - `execution_id` ist optional aber empfohlen: eindeutige Make.com Execution ID
 - Wenn derselbe `execution_id` zweimal gesendet wird (Retry/Fehlerfall): Portal antwortet mit 200 OK + `"idempotent": true`, inkrementiert Usage aber NICHT zweimal
 - Ohne `execution_id`: Callback wird mehrfach verarbeitet (altes Verhalten, für Backward Compat)
+
+**Retry Telemetry (Issue #17):**
+- `attempts` (optional, default 1): Retry attempt count (1 = first try, 2 = after 1 retry)
+- `last_http_status` (optional): HTTP status code from last Make.com error (429, 503, etc.)
+- `retry_backoff_ms` (optional, default 0): Backoff delay in milliseconds (2000, 4000, etc.)
+- These fields are stored in `wp_ltl_saas_runs` table and logged to `debug.log` for debugging
 
 **Response:**
 - 200 OK bei Erfolg
