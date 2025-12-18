@@ -329,3 +329,5 @@ final class LTL_SAAS_Portal {
         return ob_get_clean();
     }
 }
+
+}
