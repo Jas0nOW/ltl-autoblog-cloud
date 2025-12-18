@@ -290,7 +290,12 @@ final class LTL_SAAS_Portal {
 
             <!-- Issue #20: Setup Progress Block -->
             <div style="background: #f8f9fa; border: 1px solid #ddd; border-radius: 8px; padding: 20px; margin-bottom: 30px;">
-                <h2>📋 Dein Setup-Fortschritt</h2>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <h2 style="margin: 0;">📋 Dein Setup-Fortschritt</h2>
+                    <a href="<?php echo esc_url(plugins_url('../../../docs/product/onboarding-detailed.md', __FILE__)); ?>" target="_blank" style="text-decoration: none; color: #667eea; font-size: 0.9em;">
+                        📖 Hilfe &amp; Onboarding-Guide
+                    </a>
+                </div>
 
                 <!-- Step 1: WordPress Connection -->
                 <div style="display: flex; align-items: center; padding: 10px 0; border-bottom: 1px solid #eee;">
@@ -325,6 +330,73 @@ final class LTL_SAAS_Portal {
                         <a href="#settings" class="button <?php echo !empty($rss_url) ? 'button-secondary' : 'button-primary'; ?>">
                             <?php echo !empty($rss_url) ? 'Bearbeiten' : 'Jetzt konfigurieren'; ?>
                         </a>
+                    </div>
+                </div>
+
+                <?php
+                // Step 3: Plan Status (Issue #20)
+                $tenant_state = ltl_saas_get_tenant_state($user_id);
+                $plan_display = ucfirst($tenant_state['plan']); // basic → Basic
+                $is_active = $tenant_state['is_active'];
+                $posts_used = $tenant_state['posts_used_month'];
+                $posts_limit = $tenant_state['posts_limit_month'];
+                ?>
+                <!-- Step 3: Plan Active -->
+                <div style="display: flex; align-items: center; padding: 10px 0; border-bottom: 1px solid #eee;">
+                    <div style="font-size: 1.5em; margin-right: 15px;">
+                        [<?php echo $is_active ? '✅' : '⚠️'; ?>]
+                    </div>
+                    <div>
+                        <strong>Schritt 3: Plan aktiv</strong>
+                        <p style="margin: 5px 0; color: #666; font-size: 0.9em;">
+                            <?php 
+                            if ($is_active) {
+                                echo '<span style="color: green;">Plan: ' . esc_html($plan_display) . ' (' . $posts_used . '/' . $posts_limit . ' Posts)</span>';
+                            } else {
+                                echo '<span style="color: orange;">Abo erforderlich</span>';
+                            }
+                            ?>
+                        </p>
+                    </div>
+                    <div style="margin-left: auto;">
+                        <?php if (!$is_active): ?>
+                            <a href="<?php echo esc_url(get_option('ltl_saas_gumroad_checkout_url_basic', 'https://lazytechlab.de')); ?>" class="button button-primary">
+                                Abo aktivieren
+                            </a>
+                        <?php endif; ?>
+                    </div>
+                </div>
+
+                <?php
+                // Step 4: Last Run Status (Issue #20)
+                global $wpdb;
+                $runs_table = $wpdb->prefix . 'ltl_saas_runs';
+                $last_run = $wpdb->get_row($wpdb->prepare(
+                    "SELECT status, finished_at, posts_created FROM $runs_table WHERE tenant_id = %d ORDER BY id DESC LIMIT 1",
+                    $user_id
+                ), ARRAY_A);
+                $has_run = !empty($last_run);
+                $run_ok = $has_run && $last_run['status'] === 'success';
+                ?>
+                <!-- Step 4: Last Run -->
+                <div style="display: flex; align-items: center; padding: 10px 0;">
+                    <div style="font-size: 1.5em; margin-right: 15px;">
+                        [<?php echo $run_ok ? '✅' : ($has_run ? '⚠️' : '⏳'); ?>]
+                    </div>
+                    <div>
+                        <strong>Schritt 4: Erster Durchlauf</strong>
+                        <p style="margin: 5px 0; color: #666; font-size: 0.9em;">
+                            <?php 
+                            if ($run_ok) {
+                                $time_ago = human_time_diff(strtotime($last_run['finished_at']), current_time('timestamp'));
+                                echo '<span style="color: green;">✓ Letzter Run: vor ' . esc_html($time_ago) . ' (' . (int)$last_run['posts_created'] . ' Posts)</span>';
+                            } elseif ($has_run) {
+                                echo '<span style="color: orange;">Letzter Run: ' . esc_html($last_run['status']) . '</span>';
+                            } else {
+                                echo 'Warte auf ersten automatischen Run...';
+                            }
+                            ?>
+                        </p>
                     </div>
                 </div>
             </div>
