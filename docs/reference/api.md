@@ -14,7 +14,7 @@ Liefert eine Liste aller aktiven Tenants für Make.com (Multi-Tenant Config Pull
 - 401 wenn Header fehlt
 - 403 wenn Token fehlt/falsch/leer
 
-**Tenant-Objekt:**
+**Tenant-Objekt (Issue #8):**
 ```json
 {
   "tenant_id": 123,
@@ -30,21 +30,19 @@ Liefert eine Liste aller aktiven Tenants für Make.com (Multi-Tenant Config Pull
   "is_active": true,
   "skip": false,
   "skip_reason": "",
-  "remaining": 20,
-  "posts_this_month": 0,
-  "posts_limit_month": 20
+  "posts_used_month": 0,
+  "posts_limit_month": 30,
+  "posts_remaining": 30
 }
 ```
 
-**Curl Beispiel:**
-```bash
-curl -X GET \
-  -H "X-LTL-SAAS-TOKEN: <token>" \
-  https://<your-portal>/wp-json/ltl-saas/v1/make/tenants
-```
-
 **Hinweise:**
-- Neue Felder: `skip`, `skip_reason`, `remaining`, `posts_this_month`, `posts_limit_month`.
+- Plan names (canonical): `basic` (30/mo), `pro` (120/mo), `studio` (300/mo) — see `docs/product/pricing-plans.md`
+- `posts_used_month` (Issue #8): Current month usage (renamed from `posts_this_month` for clarity)
+- `posts_limit_month` (Issue #8): Plan-based limit (derived from `ltl_saas_plan_posts_limit()`)
+- `posts_remaining` (Issue #8): Calculated = `posts_limit_month - posts_used_month`
+- `skip=true` → Skip this tenant (either `is_active=false` or `monthly_limit_reached`)
+- Month rollover happens automatically in this endpoint: if `posts_period_start != current month start`, resets `posts_used_month` to 0
 - Alle URLs werden validiert.
 - Secrets werden niemals geloggt.
 - Endpoint ist deaktiviert, wenn kein Token gesetzt ist.

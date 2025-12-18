@@ -264,26 +264,26 @@ class LTL_SAAS_Portal_REST {
             if (!$state['is_active']) {
                 continue; // skip inactive tenants
             }
-            // Reset-Check: If posts_period_start != current month start, reset posts_this_month and update posts_period_start
+            // Reset-Check: If posts_period_start != current month start, reset posts_used_month and update posts_period_start
             $current_month_start = date('Y-m-01');
             if ($state['posts_period_start'] !== $current_month_start) {
                 $settings_table = $wpdb->prefix . 'ltl_saas_settings';
                 $wpdb->update(
                     $settings_table,
                     [
-                        'posts_this_month' => 0,
+                        'posts_this_month' => 0,  // Note: DB column still named posts_this_month for backward compat
                         'posts_period_start' => $current_month_start
                     ],
                     ['user_id' => $u->user_id]
                 );
-                $state['posts_this_month'] = 0;
+                $state['posts_used_month'] = 0;
                 $state['posts_period_start'] = $current_month_start;
             }
-            // Enforce: skip if posts_this_month >= posts_limit_month
+            // Enforce: skip if posts_used_month >= posts_limit_month
             $skip = false;
             $skip_reason = '';
-            $remaining = $state['posts_limit_month'] - $state['posts_this_month'];
-            if ($state['posts_this_month'] >= $state['posts_limit_month']) {
+            $remaining = $state['posts_limit_month'] - $state['posts_used_month'];
+            if ($state['posts_used_month'] >= $state['posts_limit_month']) {
                 $skip = true;
                 $skip_reason = 'monthly_limit_reached';
                 $remaining = 0;
@@ -314,8 +314,9 @@ class LTL_SAAS_Portal_REST {
                 'frequency' => $frequency,
                 'plan' => $plan,
                 'is_active' => $state['is_active'],
-                'posts_this_month' => $state['posts_this_month'],
+                'posts_used_month' => $state['posts_used_month'],     // Issue #8: Renamed for clarity
                 'posts_limit_month' => $state['posts_limit_month'],
+                'posts_remaining' => $state['posts_remaining'],       // Issue #8: Explicit remaining
                 'posts_period_start' => $state['posts_period_start'],
                 'skip' => $skip,
                 'skip_reason' => $skip ? $skip_reason : '',

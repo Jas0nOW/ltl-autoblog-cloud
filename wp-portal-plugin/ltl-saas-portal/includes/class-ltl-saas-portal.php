@@ -2,14 +2,16 @@
 // --- PLAN LIMIT HELPER ---
 if (!function_exists('ltl_saas_plan_posts_limit')) {
     function ltl_saas_plan_posts_limit($plan) {
+        // Plan names: basic, pro, studio (lowercase canonical names)
+        // See: docs/product/pricing-plans.md
         $map = [
-            'free' => 20,
-            'starter' => 80,
-            'pro' => 250,
-            'agency' => 1000,
+            'basic' => 30,      // Previously 'free' => 20
+            'pro' => 120,       // Previously 'starter' => 80
+            'studio' => 300,    // Previously 'pro' => 250
         ];
         $plan = strtolower(trim($plan));
-        return $map[$plan] ?? $map['free'];
+        // Default to 'basic' if plan not found (safest limit)
+        return $map[$plan] ?? $map['basic'];
     }
 }
 
@@ -19,17 +21,19 @@ if (!function_exists('ltl_saas_get_tenant_state')) {
         global $wpdb;
         $settings_table = $wpdb->prefix . 'ltl_saas_settings';
         $row = $wpdb->get_row($wpdb->prepare("SELECT * FROM $settings_table WHERE user_id = %d", $user_id), ARRAY_A);
-        $plan = isset($row['plan']) && $row['plan'] ? $row['plan'] : 'free';
+        $plan = isset($row['plan']) && $row['plan'] ? $row['plan'] : 'basic';
         $is_active = isset($row['is_active']) ? (bool)$row['is_active'] : true;
-        $posts_this_month = isset($row['posts_this_month']) ? (int)$row['posts_this_month'] : 0;
+        $posts_used_month = isset($row['posts_this_month']) ? (int)$row['posts_this_month'] : 0;
         $posts_period_start = isset($row['posts_period_start']) && $row['posts_period_start'] ? $row['posts_period_start'] : date('Y-m-01');
         $posts_limit_month = ltl_saas_plan_posts_limit($plan);
+        $posts_remaining = max(0, $posts_limit_month - $posts_used_month);
         return [
             'user_id' => (int)$user_id,
             'plan' => $plan,
             'is_active' => $is_active,
-            'posts_this_month' => $posts_this_month,
-            'posts_limit_month' => $posts_limit_month,
+            'posts_used_month' => $posts_used_month,        // Issue #8: Renamed from posts_this_month for clarity
+            'posts_limit_month' => $posts_limit_month,      // Issue #8: Explicit limit per plan
+            'posts_remaining' => $posts_remaining,          // Issue #8: Calculated remaining quota
             'posts_period_start' => $posts_period_start,
         ];
     }

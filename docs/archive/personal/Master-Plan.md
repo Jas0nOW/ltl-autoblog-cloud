@@ -131,3 +131,23 @@ Task: Multi-Tenant Blueprint als Deliverable
 - DoD: Blueprint enthält Module für `/make/tenants` Pull + Iterator + WP Post + `/run-callback` inkl. Retry Handler; Sanitizer entfernt Secrets.
 - Impact: Med
 - Komplexität: L
+---
+
+## DONE LOG (Erledigte Task-Cluster mit PR-Links)
+
+### Issue #7 — Gumroad Webhook Endpoint Contract ✅
+- **Date**: 2025-12-18
+- **Branch**: `fix/gumroad-webhook-contract` (commit: b7a22db)
+- **Result**: POST `/gumroad/webhook` + `/ping` alias implemented, logging enhanced (6 strategic points), docs updated (billing + API reference + smoke tests)
+- **Impact**: P0 Launch Blocker resolved
+
+### Issue #8 — Plans/Limits Datenmodell Vereinheitlichung ✅
+- **Date**: 2025-12-18
+- **Branch**: `fix/plans-limits-model` (current)
+- **Result**: Plan names unified to `basic/pro/studio` with limits `30/120/300` posts/month. API response fields clarified: `posts_used_month` + `posts_limit_month` + `posts_remaining`. Pricing docs finalized. API Reference updated.
+- **Impact**: P0 Launch Blocker resolved
+- **Files Changed**:
+  - `wp-portal-plugin/ltl-saas-portal/includes/class-ltl-saas-portal.php` (plan helpers + tenant state)
+  - `wp-portal-plugin/ltl-saas-portal/includes/REST/class-rest.php` (make/tenants response)
+  - `docs/product/pricing-plans.md` (finalized plan structure)
+  - `docs/reference/api.md` (Issue #8 endpoint spec)
