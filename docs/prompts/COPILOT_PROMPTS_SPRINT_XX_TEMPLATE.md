@@ -159,7 +159,7 @@ Only if yes:
 Then output post-merge steps (cleanup, next sprint).
 ```
 
----
+-- -
 
 ## 4) Warum dieser Single-File-Workflow sinnvoll ist (und wo er schwächer ist)
 
