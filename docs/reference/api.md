@@ -37,7 +37,7 @@ Liefert eine Liste aller aktiven Tenants für Make.com (Multi-Tenant Config Pull
 ```
 
 **Hinweise:**
-- Plan names (canonical): `basic` (30/mo), `pro` (120/mo), `studio` (300/mo) — see `docs/product/pricing-plans.md`
+- Plan names (canonical): `free` (10/mo), `basic` (30/mo), `pro` (120/mo), `studio` (300/mo) — see `docs/product/pricing-plans.md`
 - `posts_used_month` (Issue #8): Current month usage (renamed from `posts_this_month` for clarity)
 - `posts_limit_month` (Issue #8): Plan-based limit (derived from `ltl_saas_plan_posts_limit()`)
 - `posts_remaining` (Issue #8): Calculated = `posts_limit_month - posts_used_month`

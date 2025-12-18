@@ -3,7 +3,7 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
 
 
 
-require_once dirname(__FILE__,2) . '/../class-ltl-saas-portal-secrets.php';
+require_once LTL_SAAS_PORTAL_PLUGIN_DIR . 'includes/class-ltl-saas-portal-secrets.php';
 
 class LTL_SAAS_Portal_Admin {
     const OPTION_MAKE_TOKEN = 'ltl_saas_make_token';
@@ -213,7 +213,7 @@ class LTL_SAAS_Portal_Admin {
         echo '<th scope="row">Product-ID → Plan Mapping</th>';
         echo '<td>';
         echo '<textarea name="' . esc_attr(LTL_SAAS_Portal_Secrets::OPTION_GUMROAD_PRODUCT_MAP) . '" rows="6" cols="60">' . esc_textarea($gumroad_map) . '</textarea>';
-        echo '<br><span style="color:#888;">JSON, z.B. {"prod_ABC123": "starter", ...} <strong>(Validate JSON vor dem Speichern!)</strong></span>';
+        echo '<br><span style="color:#888;">JSON, z.B. {"prod_ABC123": "basic", "prod_DEF456": "pro", "prod_GHI789": "studio"} <strong>(Validate JSON vor dem Speichern!)</strong></span>';
         echo '</td></tr>';
 
         // Help text
@@ -227,11 +227,11 @@ class LTL_SAAS_Portal_Admin {
         echo '<tr valign="top"><th colspan="2"><h2>Marketing (Pricing Landing Page)</h2></th></tr>';
 
         echo '<tr valign="top">';
-        echo '<th scope="row">Checkout URL - Starter</th>';
+        echo '<th scope="row">Checkout URL - Basic</th>';
         echo '<td>';
         $url_starter = get_option(self::OPTION_CHECKOUT_URL_STARTER, '');
         echo '<input type="url" name="' . esc_attr(self::OPTION_CHECKOUT_URL_STARTER) . '" value="' . esc_attr($url_starter) . '" style="width:100%; max-width:400px;">';
-        echo '<br><span style="color:#888;">Beispiel: https://gumroad.com/l/ltl-starter</span>';
+        echo '<br><span style="color:#888;">Beispiel: https://gumroad.com/l/ltl-basic</span>';
         echo '</td></tr>';
 
         echo '<tr valign="top">';
@@ -243,11 +243,11 @@ class LTL_SAAS_Portal_Admin {
         echo '</td></tr>';
 
         echo '<tr valign="top">';
-        echo '<th scope="row">Checkout URL - Agency</th>';
+        echo '<th scope="row">Checkout URL - Studio</th>';
         echo '<td>';
         $url_agency = get_option(self::OPTION_CHECKOUT_URL_AGENCY, '');
         echo '<input type="url" name="' . esc_attr(self::OPTION_CHECKOUT_URL_AGENCY) . '" value="' . esc_attr($url_agency) . '" style="width:100%; max-width:400px;">';
-        echo '<br><span style="color:#888;">Beispiel: https://gumroad.com/l/ltl-agency</span>';
+        echo '<br><span style="color:#888;">Beispiel: https://gumroad.com/l/ltl-studio</span>';
         echo '</td></tr>';
 
         echo '</table>';

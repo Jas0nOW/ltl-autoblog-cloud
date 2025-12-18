@@ -13,6 +13,10 @@ const OPTION_CHECKOUT_URL_PRO = 'ltl_saas_checkout_url_pro';
 const OPTION_CHECKOUT_URL_AGENCY = 'ltl_saas_checkout_url_agency';
 ```
 
+> **Hinweis**: Die Option Keys sind aus Kompatibilitätsgründen historisch benannt.
+> - `..._starter` wird im UI als **Basic** verwendet
+> - `..._agency` wird im UI als **Studio** verwendet
+
 **In `register_settings()` hinzufügen**:
 ```php
 register_setting(
@@ -59,7 +63,7 @@ $checkout_pro = esc_url(get_option(self::OPTION_CHECKOUT_URL_PRO, ''));
 $checkout_agency = esc_url(get_option(self::OPTION_CHECKOUT_URL_AGENCY, ''));
 
 echo '<tr valign="top">';
-echo '<th scope="row">Checkout URL Starter</th>';
+echo '<th scope="row">Checkout URL Basic</th>';
 echo '<td>';
 echo '<input type="url" name="' . esc_attr(self::OPTION_CHECKOUT_URL_STARTER) . '" value="' . $checkout_starter . '" size="50">';
 echo '<br><small>Z.B.: https://gumroad.com/checkout/...</small>';
@@ -73,7 +77,7 @@ echo '<br><small>Z.B.: https://gumroad.com/checkout/...</small>';
 echo '</td></tr>';
 
 echo '<tr valign="top">';
-echo '<th scope="row">Checkout URL Agency</th>';
+echo '<th scope="row">Checkout URL Studio</th>';
 echo '<td>';
 echo '<input type="url" name="' . esc_attr(self::OPTION_CHECKOUT_URL_AGENCY) . '" value="' . $checkout_agency . '" size="50">';
 echo '<br><small>Z.B.: https://gumroad.com/checkout/...</small>';
@@ -148,14 +152,14 @@ public function shortcode_pricing( $atts = [] ) {
 
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
 
-                <!-- Starter -->
+                <!-- Basic -->
                 <div style="border: 2px solid #e0e0e0; border-radius: 8px; padding: 20px; text-align: center;">
-                    <h3>Starter</h3>
+                    <h3>Basic</h3>
                     <p style="font-size: 2em; color: #667eea; margin: 20px 0;">
                         <strong>€19</strong><span style="font-size: 0.6em; color: #666;">/<?php echo $lang === 'en' ? 'month' : 'Mo'; ?></span>
                     </p>
                     <ul style="text-align: left; margin: 20px 0; list-style: none; padding: 0;">
-                        <li>✓ 80 <?php echo $lang === 'en' ? 'posts/month' : 'Posts/Monat'; ?></li>
+                        <li>✓ 30 <?php echo $lang === 'en' ? 'posts/month' : 'Posts/Monat'; ?></li>
                         <li>✓ 1 RSS <?php echo $lang === 'en' ? 'source' : 'Quelle'; ?></li>
                         <li>✓ 6 <?php echo $lang === 'en' ? 'languages' : 'Sprachen'; ?></li>
                         <li>✓ Standard AI</li>
@@ -177,7 +181,7 @@ public function shortcode_pricing( $atts = [] ) {
                         <strong>€49</strong><span style="font-size: 0.6em; color: #666;">/<?php echo $lang === 'en' ? 'month' : 'Mo'; ?></span>
                     </p>
                     <ul style="text-align: left; margin: 20px 0; list-style: none; padding: 0;">
-                        <li>✓ 250 <?php echo $lang === 'en' ? 'posts/month' : 'Posts/Monat'; ?></li>
+                        <li>✓ 120 <?php echo $lang === 'en' ? 'posts/month' : 'Posts/Monat'; ?></li>
                         <li>✓ 3 RSS <?php echo $lang === 'en' ? 'sources' : 'Quellen'; ?></li>
                         <li>✓ 12 <?php echo $lang === 'en' ? 'languages' : 'Sprachen'; ?></li>
                         <li>✓ Premium AI</li>
@@ -190,14 +194,14 @@ public function shortcode_pricing( $atts = [] ) {
                     <?php endif; ?>
                 </div>
 
-                <!-- Agency -->
+                <!-- Studio -->
                 <div style="border: 2px solid #e0e0e0; border-radius: 8px; padding: 20px; text-align: center;">
-                    <h3>Agency</h3>
+                    <h3>Studio</h3>
                     <p style="font-size: 2em; color: #667eea; margin: 20px 0;">
                         <strong><?php echo $lang === 'en' ? 'Custom' : 'Individuell'; ?></strong>
                     </p>
                     <ul style="text-align: left; margin: 20px 0; list-style: none; padding: 0;">
-                        <li>✓ 1.000+ <?php echo $lang === 'en' ? 'posts/month' : 'Posts/Monat'; ?></li>
+                        <li>✓ 300 <?php echo $lang === 'en' ? 'posts/month' : 'Posts/Monat'; ?></li>
                         <li>✓ Unlimited RSS</li>
                         <li>✓ <?php echo $lang === 'en' ? 'All' : 'Alle'; ?> Languages</li>
                         <li>✓ Custom AI</li>
@@ -275,10 +279,10 @@ Alternativ direkt in HTML-Editor:
 
 ### Schritt 3: Checkout Links setzen
 1. WP Admin: **LTL AutoBlog Cloud → Marketing (Pricing Landing)**
-2. Trage die 3 Gumroad Checkout-URLs ein:
-   - **Checkout URL Starter**: (Deine Gumroad Starter Link)
+2. Trage die Checkout-URLs ein:
+    - **Checkout URL Basic**: (Dein Gumroad Basic Link; gespeichert im "Starter" Feld)
    - **Checkout URL Pro**: (Deine Gumroad Pro Link)
-   - **Checkout URL Agency**: (Leer oder anderer Link)
+    - **Checkout URL Studio**: (z.B. mailto:contact@...; gespeichert im "Agency" Feld)
 3. Speichern
 
 ### Schritt 4: Testen
@@ -324,7 +328,7 @@ curl -i https://yourdomain/preise
 2. Prüfe:
    - ✓ Hero Section sichtbar
    - ✓ Benefits (5 Punkte) sichtbar
-   - ✓ Plan Cards (Starter/Pro/Agency) sichtbar
+    - ✓ Plan Cards (Free/Basic/Pro/Studio) sichtbar
    - ✓ CTA Button sichtbar
 
 **Kein Fehler**:
@@ -337,14 +341,15 @@ curl -i https://yourdomain/preise
 
 **Setup**:
 1. Admin: Setze Checkout URLs:
-   - Starter: https://gumroad.com/checkout/starter
+    - Basic: https://gumroad.com/checkout/basic
    - Pro: https://gumroad.com/checkout/pro
-   - Agency: mailto:contact@...
+    - Studio: mailto:contact@...
 
 **Test**:
 1. Öffne `/preise` (ohne Login)
-2. Klick auf "Get Started" Starter Button
-3. Browser navigiert zu: `https://gumroad.com/checkout/starter` ✓
+2. Klick auf Free CTA → WP Registrierung/Login ✓
+3. Klick auf "Get Started" Basic Button
+4. Browser navigiert zu: `https://gumroad.com/checkout/basic` ✓
 4. Klick auf Pro Button → `https://gumroad.com/checkout/pro` ✓
 
 **Verifizierung**:

@@ -2,6 +2,8 @@
 
 > **Goal**: Automatically activate tenant accounts and assign plans when Gumroad sends payment confirmations.
 
+> **Note**: This is one of two supported payment providers. LTL AutoBlog Cloud also supports **Stripe** (via custom checkout on your own landing page). See `docs/billing/stripe.md` for Stripe setup.
+
 ---
 
 ## Overview
@@ -30,13 +32,15 @@ In the **"Product-ID → Plan Mapping"** textarea, enter a JSON mapping:
 
 ```json
 {
-  "prod_ABC123": "starter",
+   "prod_ABC123": "basic",
   "prod_DEF456": "pro",
-  "prod_GHI789": "agency"
+   "prod_GHI789": "studio"
 }
 ```
 
-Replace the product IDs with your actual Gumroad product IDs and assign appropriate plan names (`starter`, `pro`, `agency`, etc.).
+Replace the product IDs with your actual Gumroad product IDs and assign appropriate plan names (`basic`, `pro`, `studio`).
+
+> **Note**: Legacy values like `starter` and `agency` are still accepted for backward compatibility and will be normalized to `basic` / `studio` internally.
 
 Click **"Validate JSON"** to ensure the format is correct before saving.
 
@@ -84,7 +88,9 @@ When a customer purchases or upgrades on Gumroad, it sends a POST request with:
 
 3. **Assign Plan**:
    - Look up `product_id` in Product-ID → Plan mapping
-   - If not found: Assign default plan (currently `starter`)
+   - If not found: Assign default plan (currently `basic`)
+
+> **Free plan**: The `free` tier is meant as “start without Gumroad” (e.g., via normal WordPress registration). If you want to provision `free` via Gumroad anyway, you can map a product_id to `free`.
 
 4. **Activate/Deactivate**:
    - Normal purchase: Set `is_active = 1`

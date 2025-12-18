@@ -32,7 +32,7 @@ Content-Type: text/html
 **Expected to see**:
 - ✅ Hero headline: "Schreibe automatisch Blogposts mit KI" or "Automatically Write Blog Posts with AI"
 - ✅ 4 benefit boxes (✓ Zeit sparen, etc.)
-- ✅ 3 plan cards (Starter, Pro, Agency)
+- ✅ 4 plan cards (Free, Basic, Pro, Studio)
 - ✅ CTA section at bottom
 
 **No errors**:
@@ -47,18 +47,20 @@ Content-Type: text/html
 **Setup**:
 1. Admin Panel → LTL AutoBlog Cloud → Marketing (Pricing Landing)
 2. Set checkout URLs:
-   - Starter: `https://gumroad.com/checkout/starter`
+   - Basic (stored in “Starter” URL field): `https://gumroad.com/checkout/basic`
    - Pro: `https://gumroad.com/checkout/pro`
-   - Agency: `mailto:contact@lazytechlab.de`
+   - Studio (stored in “Agency” URL field): `mailto:contact@lazytechlab.de`
 3. Save
 4. Open pricing page (incognito)
 
 **Test**:
-1. Click "Get Started" on Starter card
-   - Expected: Browser navigates to `https://gumroad.com/checkout/starter` ✓
-2. Click "Get Started" on Pro card
+1. Click the CTA on Free card
+   - Expected: Browser navigates to WordPress registration/login (depends on WP registration setting) ✓
+2. Click "Get Started" on Basic card
+   - Expected: Browser navigates to `https://gumroad.com/checkout/basic` ✓
+3. Click "Get Started" on Pro card
    - Expected: Browser navigates to `https://gumroad.com/checkout/pro` ✓
-3. Click "Contact Us" on Agency card
+4. Click "Contact Us" on Studio card
    - Expected: Email client opens with `contact@lazytechlab.de` ✓
 
 **Verify in Browser DevTools**:
@@ -74,7 +76,7 @@ Content-Type: text/html
 
 **Expected**:
 - ✅ Hero section full width with background
-- ✅ Plans displayed in 3 columns (grid)
+- ✅ Plans displayed in a responsive grid (3–4 columns depending on width)
 - ✅ Pro plan card highlighted (centered, slightly larger)
 - ✅ All text readable (font-size > 14px)
 - ✅ Buttons clickable (min 44px height)

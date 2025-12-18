@@ -1,17 +1,35 @@
 <?php
+// --- PLAN NORMALIZATION HELPER ---
+// Canonical plan names: free, basic, pro, studio
+// Backward-compat aliases: starter -> basic, agency -> studio
+if (!function_exists('ltl_saas_normalize_plan')) {
+    function ltl_saas_normalize_plan($plan) {
+        $plan = is_string($plan) ? strtolower(trim($plan)) : '';
+        if ($plan === '') {
+            return 'free';
+        }
+        $aliases = [
+            'starter' => 'basic',
+            'agency' => 'studio',
+        ];
+        return $aliases[$plan] ?? $plan;
+    }
+}
+
 // --- PLAN LIMIT HELPER ---
 if (!function_exists('ltl_saas_plan_posts_limit')) {
     function ltl_saas_plan_posts_limit($plan) {
-        // Plan names: basic, pro, studio (lowercase canonical names)
+        // Plan names: free, basic, pro, studio (lowercase canonical names)
         // See: docs/product/pricing-plans.md
+        $plan = ltl_saas_normalize_plan($plan);
         $map = [
+            'free' => 10,
             'basic' => 30,      // Previously 'free' => 20
             'pro' => 120,       // Previously 'starter' => 80
             'studio' => 300,    // Previously 'pro' => 250
         ];
-        $plan = strtolower(trim($plan));
-        // Default to 'basic' if plan not found (safest limit)
-        return $map[$plan] ?? $map['basic'];
+        // Default to 'free' if plan not found (safest limit)
+        return $map[$plan] ?? $map['free'];
     }
 }
 
@@ -21,7 +39,8 @@ if (!function_exists('ltl_saas_get_tenant_state')) {
         global $wpdb;
         $settings_table = $wpdb->prefix . 'ltl_saas_settings';
         $row = $wpdb->get_row($wpdb->prepare("SELECT * FROM $settings_table WHERE user_id = %d", $user_id), ARRAY_A);
-        $plan = isset($row['plan']) && $row['plan'] ? $row['plan'] : 'basic';
+        $plan_raw = isset($row['plan']) && $row['plan'] ? $row['plan'] : 'free';
+        $plan = ltl_saas_normalize_plan($plan_raw);
         $is_active = isset($row['is_active']) ? (bool)$row['is_active'] : true;
         $posts_used_month = isset($row['posts_this_month']) ? (int)$row['posts_this_month'] : 0;
         $posts_period_start = isset($row['posts_period_start']) && $row['posts_period_start'] ? $row['posts_period_start'] : date('Y-m-01');
@@ -624,41 +643,53 @@ final class LTL_SAAS_Portal {
         }
 
         // Get checkout URLs from admin settings
-        $url_starter = get_option( 'ltl_saas_checkout_url_starter', '' );
+        // NOTE: Option keys are legacy (starter/pro/agency). We map them to canonical (basic/pro/studio).
+        $url_basic = get_option( 'ltl_saas_checkout_url_starter', '' );
         $url_pro = get_option( 'ltl_saas_checkout_url_pro', '' );
-        $url_agency = get_option( 'ltl_saas_checkout_url_agency', '' );
+        $url_studio = get_option( 'ltl_saas_checkout_url_agency', '' );
+
+        // Free plan CTA: use WP registration URL (site owner can disable registrations).
+        $url_free = function_exists('wp_registration_url') ? wp_registration_url() : wp_login_url();
 
         // Bilingual content
         $content = array(
             'de' => array(
                 'hero_title' => 'Schreibe automatisch mit KI',
                 'hero_subtitle' => 'Verwandle RSS-Feeds in SEO-optimierte WordPress-Posts',
-                'plan_starter' => 'Starter',
+                'plan_free' => 'Free',
+                'plan_basic' => 'Basic',
                 'plan_pro' => 'Pro',
-                'plan_agency' => 'Agency',
-                'price_starter' => '€19',
+                'plan_studio' => 'Studio',
+                'price_free' => '€0',
+                'price_basic' => '€19',
                 'price_pro' => '€49',
-                'price_agency' => 'Custom',
+                'price_studio' => 'Custom',
                 'period' => '/Monat',
-                'posts_starter' => 'bis 80 Posts/Monat',
-                'posts_pro' => 'bis 250 Posts/Monat',
-                'posts_agency' => 'Unbegrenzt',
+                'posts_free' => '10 Posts/Monat (1 Blog)',
+                'posts_basic' => '30 Posts/Monat',
+                'posts_pro' => '120 Posts/Monat',
+                'posts_studio' => '300 Posts/Monat',
+                'button_free' => 'Kostenlos starten',
                 'button' => 'Starten',
                 'contact' => 'Kontakt',
             ),
             'en' => array(
                 'hero_title' => 'Automatically Write with AI',
                 'hero_subtitle' => 'Turn RSS Feeds into SEO-optimized WordPress Posts',
-                'plan_starter' => 'Starter',
+                'plan_free' => 'Free',
+                'plan_basic' => 'Basic',
                 'plan_pro' => 'Pro',
-                'plan_agency' => 'Agency',
-                'price_starter' => '$19',
+                'plan_studio' => 'Studio',
+                'price_free' => '$0',
+                'price_basic' => '$19',
                 'price_pro' => '$49',
-                'price_agency' => 'Custom',
+                'price_studio' => 'Custom',
                 'period' => '/month',
-                'posts_starter' => 'up to 80 posts/month',
-                'posts_pro' => 'up to 250 posts/month',
-                'posts_agency' => 'Unlimited',
+                'posts_free' => '10 posts/month (1 blog)',
+                'posts_basic' => '30 posts/month',
+                'posts_pro' => '120 posts/month',
+                'posts_studio' => '300 posts/month',
+                'button_free' => 'Start Free',
                 'button' => 'Get Started',
                 'contact' => 'Contact Sales',
             ),
@@ -781,14 +812,25 @@ final class LTL_SAAS_Portal {
                 <p><?php echo esc_html( $txt['hero_subtitle'] ); ?></p>
             </div>
             <div class="ltl-saas-pricing-plans">
-                <!-- Starter Plan -->
+                <!-- Free Plan -->
                 <div class="ltl-saas-pricing-card">
-                    <h3 class="ltl-saas-pricing-card-title"><?php echo esc_html( $txt['plan_starter'] ); ?></h3>
-                    <div class="ltl-saas-pricing-card-price"><?php echo esc_html( $txt['price_starter'] ); ?></div>
+                    <h3 class="ltl-saas-pricing-card-title"><?php echo esc_html( $txt['plan_free'] ); ?></h3>
+                    <div class="ltl-saas-pricing-card-price"><?php echo esc_html( $txt['price_free'] ); ?></div>
                     <div class="ltl-saas-pricing-card-period"><?php echo esc_html( $txt['period'] ); ?></div>
-                    <div class="ltl-saas-pricing-card-desc"><?php echo esc_html( $txt['posts_starter'] ); ?></div>
-                    <?php if ( ! empty( $url_starter ) ) : ?>
-                        <a href="<?php echo esc_url( $url_starter ); ?>" class="ltl-saas-pricing-card-button"><?php echo esc_html( $txt['button'] ); ?></a>
+                    <div class="ltl-saas-pricing-card-desc"><?php echo esc_html( $txt['posts_free'] ); ?></div>
+                    <?php if ( ! empty( $url_free ) ) : ?>
+                        <a href="<?php echo esc_url( $url_free ); ?>" class="ltl-saas-pricing-card-button secondary"><?php echo esc_html( $txt['button_free'] ); ?></a>
+                    <?php endif; ?>
+                </div>
+
+                <!-- Basic Plan -->
+                <div class="ltl-saas-pricing-card">
+                    <h3 class="ltl-saas-pricing-card-title"><?php echo esc_html( $txt['plan_basic'] ); ?></h3>
+                    <div class="ltl-saas-pricing-card-price"><?php echo esc_html( $txt['price_basic'] ); ?></div>
+                    <div class="ltl-saas-pricing-card-period"><?php echo esc_html( $txt['period'] ); ?></div>
+                    <div class="ltl-saas-pricing-card-desc"><?php echo esc_html( $txt['posts_basic'] ); ?></div>
+                    <?php if ( ! empty( $url_basic ) ) : ?>
+                        <a href="<?php echo esc_url( $url_basic ); ?>" class="ltl-saas-pricing-card-button"><?php echo esc_html( $txt['button'] ); ?></a>
                     <?php endif; ?>
                 </div>
 
@@ -803,14 +845,14 @@ final class LTL_SAAS_Portal {
                     <?php endif; ?>
                 </div>
 
-                <!-- Agency Plan -->
+                <!-- Studio Plan -->
                 <div class="ltl-saas-pricing-card">
-                    <h3 class="ltl-saas-pricing-card-title"><?php echo esc_html( $txt['plan_agency'] ); ?></h3>
-                    <div class="ltl-saas-pricing-card-price"><?php echo esc_html( $txt['price_agency'] ); ?></div>
+                    <h3 class="ltl-saas-pricing-card-title"><?php echo esc_html( $txt['plan_studio'] ); ?></h3>
+                    <div class="ltl-saas-pricing-card-price"><?php echo esc_html( $txt['price_studio'] ); ?></div>
                     <div class="ltl-saas-pricing-card-period"><?php echo esc_html( $txt['period'] ); ?></div>
-                    <div class="ltl-saas-pricing-card-desc"><?php echo esc_html( $txt['posts_agency'] ); ?></div>
-                    <?php if ( ! empty( $url_agency ) ) : ?>
-                        <a href="<?php echo esc_url( $url_agency ); ?>" class="ltl-saas-pricing-card-button secondary"><?php echo esc_html( $txt['contact'] ); ?></a>
+                    <div class="ltl-saas-pricing-card-desc"><?php echo esc_html( $txt['posts_studio'] ); ?></div>
+                    <?php if ( ! empty( $url_studio ) ) : ?>
+                        <a href="<?php echo esc_url( $url_studio ); ?>" class="ltl-saas-pricing-card-button secondary"><?php echo esc_html( $txt['contact'] ); ?></a>
                     <?php endif; ?>
                 </div>
             </div>
