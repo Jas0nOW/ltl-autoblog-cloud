@@ -1,0 +1,204 @@
+{
+  "name": "LTL Multi-Tenant Scenario (Template)",
+  "description": "Iterate over Portal tenants, pull RSS, generate content, publish to WP, report back to Portal",
+  "version": "1.0",
+  "date": "2025-12-18",
+  "flow": [
+    {
+      "id": 1,
+      "module": "builtin:timer:Scheduler",
+      "label": "Scheduler (Every 30 min)",
+      "parameters": {
+        "interval": 30,
+        "unit": "minutes",
+        "timezone": "UTC"
+      },
+      "notes": "Kicks off scenario. Adjust interval as needed."
+    },
+    {
+      "id": 2,
+      "module": "http:GetURL",
+      "label": "HTTP GET - Fetch Tenants from Portal",
+      "parameters": {
+        "url": "https://{{PORTAL_URL}}/wp-json/ltl-saas/v1/make/tenants",
+        "method": "GET",
+        "headers": {
+          "X-LTL-SAAS-TOKEN": "{{MAKE_TOKEN}}",
+          "Accept": "application/json"
+        },
+        "ssl_verify": true,
+        "follow_redirects": true
+      },
+      "notes": "Returns array of active tenants. Replace PORTAL_URL and MAKE_TOKEN."
+    },
+    {
+      "id": 3,
+      "module": "builtin:array:Iterator",
+      "label": "Iterator - Loop over Tenants",
+      "parameters": {
+        "array": "{{2.body}}"
+      },
+      "notes": "Iterates over tenant array. Each iteration: tenant_id, site_url, wp_username, wp_app_password, rss_url, language, tone, publish_mode, skip, skip_reason, etc."
+    },
+    {
+      "id": 4,
+      "module": "builtin:if:ConditionalLogic",
+      "label": "Check Skip Flag",
+      "parameters": {
+        "condition": "{{3.skip}} = false"
+      },
+      "notes": "Skip processing if tenant is inactive or over limit (skip=true)"
+    },
+    {
+      "id": 5,
+      "module": "rss:WatchRSSFeed",
+      "label": "RSS - Read Tenant Feed",
+      "parameters": {
+        "url": "{{3.rss_url}}",
+        "max_items": 1
+      },
+      "notes": "Fetch top 1 item from RSS. Adjust max_items for bulk processing."
+    },
+    {
+      "id": 6,
+      "module": "builtin:json:JsonBuilder",
+      "label": "JSON - Map RSS to Prompt",
+      "parameters": {
+        "data": {
+          "rss_title": "{{5.title}}",
+          "rss_description": "{{5.description}}",
+          "language": "{{3.language}}",
+          "tone": "{{3.tone}}"
+        }
+      },
+      "notes": "Prepare data for AI generator. Adjust fields as needed."
+    },
+    {
+      "id": 7,
+      "module": "openai:CreateCompletion",
+      "label": "AI - Generate Post Content (Optional)",
+      "parameters": {
+        "prompt": "Write a blog post in {{6.language}} with {{6.tone}} tone based on: Title: {{6.rss_title}}, Description: {{6.rss_description}}. Generate: title, content.",
+        "model": "gpt-4",
+        "temperature": 0.7
+      },
+      "notes": "OPTIONAL. Replace with your AI provider (OpenAI, Gemini, etc.). Or skip if manual content."
+    },
+    {
+      "id": 8,
+      "module": "http:PostURL",
+      "label": "HTTP POST - Create WP Post",
+      "parameters": {
+        "url": "{{3.site_url}}/wp-json/wp/v2/posts",
+        "method": "POST",
+        "auth": {
+          "type": "basic",
+          "username": "{{3.wp_username}}",
+          "password": "{{3.wp_app_password}}"
+        },
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "title": "{{7.title}}",
+          "content": "{{7.content}}",
+          "status": "{{3.publish_mode}}",
+          "source_url": "{{5.link}}"
+        },
+        "ssl_verify": true,
+        "follow_redirects": true
+      },
+      "notes": "Creates post on tenant WordPress. Uses app password (not full password). Status: draft/publish per plan."
+    },
+    {
+      "id": 9,
+      "module": "http:PostURL",
+      "label": "HTTP POST - Callback Success",
+      "parameters": {
+        "url": "https://{{PORTAL_URL}}/wp-json/ltl-saas/v1/run-callback",
+        "method": "POST",
+        "auth": null,
+        "headers": {
+          "X-LTL-API-Key": "{{API_KEY}}",
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "tenant_id": "{{3.tenant_id}}",
+          "execution_id": "exec_{{timestamp}}_{{randomString}}",
+          "status": "success",
+          "started_at": "{{NOW()}}",
+          "finished_at": "{{NOW()}}",
+          "posts_created": 1,
+          "error_message": null,
+          "attempts": 1,
+          "last_http_status": 200,
+          "retry_backoff_ms": 0,
+          "wp_post_id": "{{8.id}}"
+        },
+        "ssl_verify": true
+      },
+      "notes": "Report success. Portal increments usage. Replace PORTAL_URL and API_KEY."
+    },
+    {
+      "id": 10,
+      "module": "builtin:errorhandler:CatchError",
+      "label": "Error Handler - Catch & Report Failure",
+      "parameters": {
+        "continue": true,
+        "error_message_var": "{{error.message}}"
+      },
+      "notes": "Catches any errors in modules 5-8. Continues to next tenant."
+    },
+    {
+      "id": 11,
+      "module": "http:PostURL",
+      "label": "HTTP POST - Callback Failure",
+      "parameters": {
+        "url": "https://{{PORTAL_URL}}/wp-json/ltl-saas/v1/run-callback",
+        "method": "POST",
+        "auth": null,
+        "headers": {
+          "X-LTL-API-Key": "{{API_KEY}}",
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "tenant_id": "{{3.tenant_id}}",
+          "execution_id": "exec_{{timestamp}}_{{randomString}}",
+          "status": "failed",
+          "started_at": "{{NOW()}}",
+          "finished_at": "{{NOW()}}",
+          "posts_created": 0,
+          "error_message": "{{10.error_message_var}}",
+          "attempts": 1,
+          "last_http_status": 0,
+          "retry_backoff_ms": 0
+        },
+        "ssl_verify": true
+      },
+      "notes": "Report failure. Portal logs but does NOT increment usage. Then continue to next tenant."
+    }
+  ],
+  "connections": [
+    {"from": 1, "to": 2},
+    {"from": 2, "to": 3},
+    {"from": 3, "to": 4},
+    {"from": 4, "to": 5, "condition": "success"},
+    {"from": 5, "to": 6},
+    {"from": 6, "to": 7},
+    {"from": 7, "to": 8},
+    {"from": 8, "to": 9, "condition": "success"},
+    {"from": 8, "to": 10, "condition": "error"},
+    {"from": 10, "to": 11},
+    {"from": 9, "to": 3, "loop": "next_iteration"},
+    {"from": 11, "to": 3, "loop": "next_iteration"},
+    {"from": 4, "to": 3, "condition": "skip_true", "loop": "next_iteration"}
+  ],
+  "configuration": {
+    "portal_url": "https://portal.example.com (CONFIGURE THIS)",
+    "make_token": "paste_from_portal_admin_settings (CONFIGURE THIS - use Make Secure Storage)",
+    "api_key": "paste_from_portal_admin_settings (CONFIGURE THIS - use Make Secure Storage)",
+    "retry_strategy": "3 attempts, exponential backoff on HTTP modules",
+    "error_handling": "Log errors, report via callback, continue scenario"
+  },
+  "notes": "IMPORTANT:\n1. Replace PORTAL_URL, MAKE_TOKEN, API_KEY with actual values.\n2. Use Make.com Secure Storage for tokens/keys (never hardcode).\n3. Configure AI module (7) if desired, or remove if using manual content.\n4. Test with 1 tenant first before running on full batch.\n5. Monitor first few runs in Portal logs (debug.log).\n6. Adjust Scheduler interval (default 30 min) to match your needs."
+}

@@ -1,4 +1,24 @@
-# Make.com Multi-Tenant Scenario – Schritt-für-Schritt Anleitung
+# Make.com Multi-Tenant Scenario – Implementation Guide
+
+> **Version**: 1.0  
+> **Status**: Complete — Deliverable blueprint available  
+> **Location**: [blueprints/LTL-MULTI-TENANT-SCENARIO.md](../../blueprints/LTL-MULTI-TENANT-SCENARIO.md) (documentation)  
+> **Template**: [blueprints/sanitized/LTL-MULTI-TENANT-TEMPLATE.json](../../blueprints/sanitized/LTL-MULTI-TENANT-TEMPLATE.json) (importable JSON)
+
+---
+
+## Quick Start
+
+1. **Read Full Spec**: Open [LTL-MULTI-TENANT-SCENARIO.md](../../blueprints/LTL-MULTI-TENANT-SCENARIO.md)
+2. **Import Template**: Copy contents of `LTL-MULTI-TENANT-TEMPLATE.json` into Make.com
+3. **Configure**:
+   - Set `{{PORTAL_URL}}`
+   - Set `{{MAKE_TOKEN}}` (from Portal Admin)
+   - Set `{{API_KEY}}` (from Portal Admin)
+4. **Test**: Run manually on 1 tenant
+5. **Deploy**: Enable Scheduler
+
+---
 
 ## Überblick: Szenario-Ablauf
 
@@ -17,7 +37,7 @@
 ---
 
 ## Benötigte Make-Module (generisch)
-- Scheduler/Trigger (z.B. „Scheduler“)
+- Scheduler/Trigger (z.B. „Scheduler")
 - HTTP (GET/POST)
 - Iterator (Array iterieren)
 - RSS (Feed abrufen)
@@ -54,13 +74,14 @@ Header: X-LTL-SAAS-TOKEN: <token>
     "skip_reason": "",
     "remaining": 20,
     "posts_this_month": 0,
-    "posts_limit_month": 20
+    "posts_limit_month": 20,
+    "posts_period_start": "2025-12-01"
   },
   ...
 ]
 ```
 
-### 2. Make → Portal (Run Callback)
+### 2. Make → Portal (Run Callback - Success)
 **Request:**
 ```http
 POST /wp-json/ltl-saas/v1/run-callback
@@ -69,34 +90,94 @@ Content-Type: application/json
 
 {
   "tenant_id": 123,
+  "execution_id": "exec_abc123",
   "status": "success",
   "posts_created": 1,
   "started_at": "2025-12-18T10:00:00Z",
-  "finished_at": "2025-12-18T10:05:00Z"
+  "finished_at": "2025-12-18T10:05:00Z",
+  "attempts": 1,
+  "last_http_status": 200,
+  "retry_backoff_ms": 0
 }
 ```
 **Response:**
-- 200 OK: {"success": true, "id": 456}
-- 401 Unauthorized
-- 400 Bad Request (e.g., missing tenant_id)
+```json
+{
+  "success": true,
+  "id": 456,
+  "message": "Callback processed. Usage incremented."
+}
+```
 
-**Hinweise:**
-- Neue Felder in `/make/tenants`: `skip`, `skip_reason`, `remaining`, `posts_this_month`, `posts_limit_month`.
-- Callback-Status: `success` oder `error`. Bei `success` wird `posts_this_month` inkrementiert.
+### 3. Make → Portal (Run Callback - Failure)
+**Request:**
+```http
+POST /wp-json/ltl-saas/v1/run-callback
+Header: X-LTL-API-Key: <api_key>
+Content-Type: application/json
+
+{
+  "tenant_id": 123,
+  "execution_id": "exec_def456",
+  "status": "failed",
+  "posts_created": 0,
+  "error_message": "RSS parse error",
+  "started_at": "2025-12-18T10:00:00Z",
+  "finished_at": "2025-12-18T10:02:00Z",
+  "attempts": 3,
+  "last_http_status": 500,
+  "retry_backoff_ms": 2000
+}
+```
+**Response:**
+```json
+{
+  "success": false,
+  "error": "RSS parse error",
+  "id": null,
+  "message": "Callback logged. Usage unchanged."
+}
+```
 
 ---
 
 ## Fehlerhandling
 - Bei Fehler pro Tenant: Sofort Callback an Portal mit `status: failed` und `error_message`.
-- Scenario läuft für andere Tenants weiter.
+- Scenario läuft für andere Tenants weiter (Error Handler mit continue=true).
+- Rate Limiting: Wenn Portal antwortet mit HTTP 429, verwende Retry (exponential backoff).
 
 ---
 
 ## Sicherheitsnotiz
 - **Token/API-Key niemals in Logs oder Screenshots zeigen!**
 - **Nur HTTPS verwenden!** (Portal und Tenant-WordPress)
+- Token/Keys in Make.com Secure Storage speichern (nicht hardcoded)
 - Token/Keys regelmäßig rotieren und nur im Secure Storage ablegen.
+- Tenant App Passwords verwenden, nie volle Passwörter
 
 ---
 
-**Mit dieser Anleitung kannst du das bestehende Make.com Scenario auf Multi-Tenant umbauen.**
+## Erweiterungen & Customization
+
+### AI Integration
+- Template enthält optional OpenAI Modul
+- Austauschbar mit: Anthropic, Google Gemini, Hugging Face, o.ä.
+- Oder entfernen wenn manueller Content gewünscht
+
+### Webhook auf Feedback
+- Callback könnte auch External Webhook triggern (z.B. Slack notification on failure)
+
+### Retry Logic
+- Alle HTTP Module sollten Retry konfiguriert haben (3 attempts, exponential backoff)
+- Make.com unterstützt auto-retry auf 5xx/429
+
+### Batch Processing
+- Standard: 1 Post pro Tenant pro Run
+- Ändern: In RSS Modul `max_items` erhöhen
+
+---
+
+## See Also
+- [Full Blueprint Documentation](../../blueprints/LTL-MULTI-TENANT-SCENARIO.md)
+- [API Reference](../../reference/api.md)
+- [Sanitizer Script](../../scripts/sanitize_make_blueprints.py)
