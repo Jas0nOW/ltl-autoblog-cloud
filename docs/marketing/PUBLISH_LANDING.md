@@ -299,7 +299,7 @@ Alternativ direkt in HTML-Editor:
 
 ## Prompt E: Smoke Tests
 
-Erstelle `docs/SMOKE_TEST_ISSUE_19.md`:
+Erstelle `docs/testing/smoke/issue-19.md`:
 
 ### Test 1: Landing Seite lädt ohne Login
 
@@ -409,7 +409,7 @@ curl -i https://yourdomain/preise
 - [ ] Admin Settings (Checkout URLs) in `class-admin.php` ✓
 - [ ] Shortcode `[ltl_saas_pricing]` in `class-ltl-saas-portal.php` ✓
 - [ ] Publishing Anleitung in `docs/marketing/PUBLISH_LANDING.md` ✓
-- [ ] Smoke Tests in `docs/SMOKE_TEST_ISSUE_19.md` ✓
+- [ ] Smoke Tests in `docs/testing/smoke/issue-19.md` ✓
 - [ ] Alle Tests grün ✓
 
 ---

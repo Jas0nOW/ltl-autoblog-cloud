@@ -2,14 +2,16 @@
 // --- PLAN LIMIT HELPER ---
 if (!function_exists('ltl_saas_plan_posts_limit')) {
     function ltl_saas_plan_posts_limit($plan) {
+        // Plan names: basic, pro, studio (lowercase canonical names)
+        // See: docs/product/pricing-plans.md
         $map = [
-            'free' => 20,
-            'starter' => 80,
-            'pro' => 250,
-            'agency' => 1000,
+            'basic' => 30,      // Previously 'free' => 20
+            'pro' => 120,       // Previously 'starter' => 80
+            'studio' => 300,    // Previously 'pro' => 250
         ];
         $plan = strtolower(trim($plan));
-        return $map[$plan] ?? $map['free'];
+        // Default to 'basic' if plan not found (safest limit)
+        return $map[$plan] ?? $map['basic'];
     }
 }
 
@@ -19,17 +21,19 @@ if (!function_exists('ltl_saas_get_tenant_state')) {
         global $wpdb;
         $settings_table = $wpdb->prefix . 'ltl_saas_settings';
         $row = $wpdb->get_row($wpdb->prepare("SELECT * FROM $settings_table WHERE user_id = %d", $user_id), ARRAY_A);
-        $plan = isset($row['plan']) && $row['plan'] ? $row['plan'] : 'free';
+        $plan = isset($row['plan']) && $row['plan'] ? $row['plan'] : 'basic';
         $is_active = isset($row['is_active']) ? (bool)$row['is_active'] : true;
-        $posts_this_month = isset($row['posts_this_month']) ? (int)$row['posts_this_month'] : 0;
+        $posts_used_month = isset($row['posts_this_month']) ? (int)$row['posts_this_month'] : 0;
         $posts_period_start = isset($row['posts_period_start']) && $row['posts_period_start'] ? $row['posts_period_start'] : date('Y-m-01');
         $posts_limit_month = ltl_saas_plan_posts_limit($plan);
+        $posts_remaining = max(0, $posts_limit_month - $posts_used_month);
         return [
             'user_id' => (int)$user_id,
             'plan' => $plan,
             'is_active' => $is_active,
-            'posts_this_month' => $posts_this_month,
-            'posts_limit_month' => $posts_limit_month,
+            'posts_used_month' => $posts_used_month,        // Issue #8: Renamed from posts_this_month for clarity
+            'posts_limit_month' => $posts_limit_month,      // Issue #8: Explicit limit per plan
+            'posts_remaining' => $posts_remaining,          // Issue #8: Calculated remaining quota
             'posts_period_start' => $posts_period_start,
         ];
     }
@@ -128,14 +132,19 @@ final class LTL_SAAS_Portal {
         $sql[] = "CREATE TABLE $runs (
             id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
             tenant_id BIGINT(20) UNSIGNED NOT NULL,
+            execution_id VARCHAR(255) NULL,
             status VARCHAR(32) NOT NULL,
             started_at DATETIME NULL,
             finished_at DATETIME NULL,
             posts_created INT NULL,
             error_message LONGTEXT NULL,
             raw_payload LONGTEXT NULL,
+            attempts TINYINT DEFAULT 1,
+            last_http_status SMALLINT DEFAULT NULL,
+            retry_backoff_ms INT DEFAULT 0,
             created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
             PRIMARY KEY  (id),
+            UNIQUE KEY execution_id (execution_id),
             KEY tenant_id (tenant_id)
         ) $charset_collate;";
 
@@ -286,7 +295,12 @@ final class LTL_SAAS_Portal {
 
             <!-- Issue #20: Setup Progress Block -->
             <div style="background: #f8f9fa; border: 1px solid #ddd; border-radius: 8px; padding: 20px; margin-bottom: 30px;">
-                <h2>📋 Dein Setup-Fortschritt</h2>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <h2 style="margin: 0;">📋 Dein Setup-Fortschritt</h2>
+                    <a href="<?php echo esc_url(plugins_url('../../../docs/product/onboarding-detailed.md', __FILE__)); ?>" target="_blank" style="text-decoration: none; color: #667eea; font-size: 0.9em;">
+                        📖 Hilfe &amp; Onboarding-Guide
+                    </a>
+                </div>
 
                 <!-- Step 1: WordPress Connection -->
                 <div style="display: flex; align-items: center; padding: 10px 0; border-bottom: 1px solid #eee;">
@@ -321,6 +335,73 @@ final class LTL_SAAS_Portal {
                         <a href="#settings" class="button <?php echo !empty($rss_url) ? 'button-secondary' : 'button-primary'; ?>">
                             <?php echo !empty($rss_url) ? 'Bearbeiten' : 'Jetzt konfigurieren'; ?>
                         </a>
+                    </div>
+                </div>
+
+                <?php
+                // Step 3: Plan Status (Issue #20)
+                $tenant_state = ltl_saas_get_tenant_state($user_id);
+                $plan_display = ucfirst($tenant_state['plan']); // basic → Basic
+                $is_active = $tenant_state['is_active'];
+                $posts_used = $tenant_state['posts_used_month'];
+                $posts_limit = $tenant_state['posts_limit_month'];
+                ?>
+                <!-- Step 3: Plan Active -->
+                <div style="display: flex; align-items: center; padding: 10px 0; border-bottom: 1px solid #eee;">
+                    <div style="font-size: 1.5em; margin-right: 15px;">
+                        [<?php echo $is_active ? '✅' : '⚠️'; ?>]
+                    </div>
+                    <div>
+                        <strong>Schritt 3: Plan aktiv</strong>
+                        <p style="margin: 5px 0; color: #666; font-size: 0.9em;">
+                            <?php
+                            if ($is_active) {
+                                echo '<span style="color: green;">Plan: ' . esc_html($plan_display) . ' (' . $posts_used . '/' . $posts_limit . ' Posts)</span>';
+                            } else {
+                                echo '<span style="color: orange;">Abo erforderlich</span>';
+                            }
+                            ?>
+                        </p>
+                    </div>
+                    <div style="margin-left: auto;">
+                        <?php if (!$is_active): ?>
+                            <a href="<?php echo esc_url(get_option('ltl_saas_gumroad_checkout_url_basic', 'https://lazytechlab.de')); ?>" class="button button-primary">
+                                Abo aktivieren
+                            </a>
+                        <?php endif; ?>
+                    </div>
+                </div>
+
+                <?php
+                // Step 4: Last Run Status (Issue #20)
+                global $wpdb;
+                $runs_table = $wpdb->prefix . 'ltl_saas_runs';
+                $last_run = $wpdb->get_row($wpdb->prepare(
+                    "SELECT status, finished_at, posts_created FROM $runs_table WHERE tenant_id = %d ORDER BY id DESC LIMIT 1",
+                    $user_id
+                ), ARRAY_A);
+                $has_run = !empty($last_run);
+                $run_ok = $has_run && $last_run['status'] === 'success';
+                ?>
+                <!-- Step 4: Last Run -->
+                <div style="display: flex; align-items: center; padding: 10px 0;">
+                    <div style="font-size: 1.5em; margin-right: 15px;">
+                        [<?php echo $run_ok ? '✅' : ($has_run ? '⚠️' : '⏳'); ?>]
+                    </div>
+                    <div>
+                        <strong>Schritt 4: Erster Durchlauf</strong>
+                        <p style="margin: 5px 0; color: #666; font-size: 0.9em;">
+                            <?php
+                            if ($run_ok) {
+                                $time_ago = human_time_diff(strtotime($last_run['finished_at']), current_time('timestamp'));
+                                echo '<span style="color: green;">✓ Letzter Run: vor ' . esc_html($time_ago) . ' (' . (int)$last_run['posts_created'] . ' Posts)</span>';
+                            } elseif ($has_run) {
+                                echo '<span style="color: orange;">Letzter Run: ' . esc_html($last_run['status']) . '</span>';
+                            } else {
+                                echo 'Warte auf ersten automatischen Run...';
+                            }
+                            ?>
+                        </p>
                     </div>
                 </div>
             </div>
@@ -737,6 +818,28 @@ final class LTL_SAAS_Portal {
         <?php
         return ob_get_clean();
     }
+}
+
+/**
+ * Atomic month rollover helper (Issue #22 Phase 1)
+ * Ensures reset + increment are atomic using WHERE clause
+ * Returns: true if reset happened, false if no reset needed
+ */
+function ltl_saas_atomic_month_rollover( $user_id ) {
+    global $wpdb;
+    $settings_table = $wpdb->prefix . 'ltl_saas_settings';
+    $current_month_start = date('Y-m-01');
+
+    // Atomic UPDATE: only update if posts_period_start != current month
+    // This prevents races where 2 parallel requests both try to reset
+    $updated = $wpdb->query($wpdb->prepare(
+        "UPDATE $settings_table SET posts_this_month = 0, posts_period_start = %s WHERE user_id = %d AND posts_period_start != %s",
+        $current_month_start,
+        $user_id,
+        $current_month_start
+    ));
+
+    return $updated > 0; // true if reset happened
 }
 
 
