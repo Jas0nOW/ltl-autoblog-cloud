@@ -69,12 +69,17 @@ final class LTL_SAAS_Portal {
             tone VARCHAR(50) NULL,
             frequency VARCHAR(20) NULL,
             publish_mode VARCHAR(20) NULL,
+            plan VARCHAR(32) NULL,
+            is_active TINYINT(1) NOT NULL DEFAULT 1,
             json LONGTEXT NULL,
             created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
             updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
             PRIMARY KEY  (id),
             UNIQUE KEY user_id (user_id)
         ) $charset_collate;";
+
+        // Optionally: versioning for future upgrades
+        update_option('ltl_saas_db_version', LTL_SAAS_PORTAL_VERSION);
 
         $sql[] = "CREATE TABLE $runs (
             id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -119,6 +124,11 @@ final class LTL_SAAS_Portal {
         $publish_modes = ['draft','publish'];
 
         if (isset($_POST['ltl_saas_save_settings']) && wp_verify_nonce($_POST['ltl_saas_settings_nonce'], 'ltl_saas_save_settings')) {
+            // Access control: prevent saving when user is inactive
+            $existing_settings = $wpdb->get_row($wpdb->prepare("SELECT is_active FROM $settings_table WHERE user_id = %d", $user_id));
+            if ($existing_settings && isset($existing_settings->is_active) && intval($existing_settings->is_active) === 0) {
+                $error = 'Account inaktiv. Einstellungen können nicht gespeichert werden.';
+            } else {
             $rss_url = esc_url_raw(trim($_POST['rss_url'] ?? ''));
             $language = $_POST['language'] ?? '';
             $tone = $_POST['tone'] ?? '';
@@ -150,14 +160,22 @@ final class LTL_SAAS_Portal {
                     $wpdb->update($settings_table, $row, ['user_id' => $user_id]);
                 } else {
                     $row['created_at'] = current_time('mysql');
+                    $row['is_active'] = 1; // default active
+                    $row['plan'] = 'free';
                     $wpdb->insert($settings_table, $row);
                 }
                 $settings_success = 'Saved ✓';
+            }
             }
         }
 
         // --- CONNECTION: Handle connection form submit ---
         if ( isset($_POST['ltl_saas_save_connection']) && wp_verify_nonce($_POST['ltl_saas_nonce'], 'ltl_saas_save_connection') ) {
+            // Access control: prevent saving connection when user is inactive
+            $existing_settings = $wpdb->get_row($wpdb->prepare("SELECT is_active FROM $settings_table WHERE user_id = %d", $user_id));
+            if ($existing_settings && isset($existing_settings->is_active) && intval($existing_settings->is_active) === 0) {
+                $error = 'Account inaktiv. Verbindung kann nicht gespeichert werden.';
+            } else {
             $wp_url = esc_url_raw(trim($_POST['wp_url'] ?? ''));
             $wp_user = sanitize_user(trim($_POST['wp_user'] ?? ''));
             $wp_app_password = trim($_POST['wp_app_password'] ?? '');
@@ -195,16 +213,26 @@ final class LTL_SAAS_Portal {
         $wp_user = $conn->wp_user ?? '';
 
         $settings = $wpdb->get_row($wpdb->prepare("SELECT * FROM $settings_table WHERE user_id = %d", $user_id));
+
         $rss_url = $settings->rss_url ?? '';
         $language = $settings->language ?? '';
         $tone = $settings->tone ?? '';
         $frequency = $settings->frequency ?? '';
         $publish_mode = $settings->publish_mode ?? '';
+        $is_active = isset($settings->is_active) ? (int)$settings->is_active : 1;
 
         $runs_table = $wpdb->prefix . 'ltl_saas_runs';
         $last_runs = $wpdb->get_results($wpdb->prepare("SELECT * FROM $runs_table WHERE tenant_id = %d ORDER BY created_at DESC LIMIT 10", $user_id));
 
         ob_start();
+        if (!$is_active) {
+            $pricing_url = get_option('ltl_saas_pricing_url', '#');
+            echo '<div class="ltl-saas-locked" style="border:2px solid #e00; background:#fff0f0; padding:2em; text-align:center; max-width:500px; margin:2em auto;">';
+            echo '<h2 style="color:#e00;">Abo erforderlich</h2>';
+            echo '<p>Dein Zugang ist aktuell inaktiv. Bitte buche ein Abo, um fortzufahren.</p>';
+            echo '<a href="' . esc_url($pricing_url) . '" class="button button-primary" style="font-size:1.2em;">Zu den Preisen</a>';
+            echo '</div>';
+        } else {
         ?>
         <div class="ltl-saas-dashboard">
             <h2>LTL AutoBlog Cloud</h2>
@@ -297,6 +325,7 @@ final class LTL_SAAS_Portal {
         });
         </script>
         <?php
+        }
         return ob_get_clean();
     }
 }

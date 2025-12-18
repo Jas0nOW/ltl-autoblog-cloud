@@ -69,6 +69,10 @@ class LTL_SAAS_Portal_REST {
         $result = [];
         foreach ($users as $u) {
             $settings = $wpdb->get_row($wpdb->prepare("SELECT * FROM $settings_table WHERE user_id = %d", $u->user_id), ARRAY_A);
+            $is_active = isset($settings['is_active']) ? (bool)$settings['is_active'] : true;
+            if (!$is_active) {
+                continue; // skip inactive tenants
+            }
             $decrypted = LTL_SAAS_Portal_Crypto::decrypt($u->wp_app_password_enc);
             // Sanitize outputs
             $site_url = esc_url_raw($u->wp_url);
@@ -78,7 +82,6 @@ class LTL_SAAS_Portal_REST {
             $publish_mode = isset($settings['publish_mode']) ? sanitize_text_field($settings['publish_mode']) : '';
             $frequency = isset($settings['frequency']) ? sanitize_text_field($settings['frequency']) : '';
             $plan = isset($settings['plan']) ? sanitize_text_field($settings['plan']) : '';
-            $is_active = isset($settings['is_active']) ? (bool)$settings['is_active'] : true;
             $tenant = [
                 'tenant_id' => (int)$u->user_id,
                 'site_url' => $site_url,
@@ -118,6 +121,10 @@ class LTL_SAAS_Portal_REST {
         $result = [];
         foreach ($users as $u) {
             $settings = $wpdb->get_row($wpdb->prepare("SELECT * FROM $settings_table WHERE user_id = %d", $u->user_id), ARRAY_A);
+            $is_active = isset($settings['is_active']) ? (bool)$settings['is_active'] : true;
+            if (!$is_active) {
+                continue; // skip inactive users
+            }
             $result[] = [
                 'user_id' => (int)$u->user_id,
                 'settings' => $settings ?: (object)[],
@@ -176,6 +183,12 @@ class LTL_SAAS_Portal_REST {
     public function test_wp_connection( $request ) {
             $user_id = get_current_user_id();
             global $wpdb;
+            // Access control: block inactive users
+            $settings_table = $wpdb->prefix . 'ltl_saas_settings';
+            $existing_settings = $wpdb->get_row($wpdb->prepare("SELECT is_active FROM $settings_table WHERE user_id = %d", $user_id));
+            if ($existing_settings && isset($existing_settings->is_active) && intval($existing_settings->is_active) === 0) {
+                return new WP_REST_Response( [ 'success' => false, 'message' => 'Account inaktiv' ], 403 );
+            }
             $table = $wpdb->prefix . 'ltl_saas_connections';
             $conn = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM $table WHERE user_id = %d", $user_id ) );
             if ( ! $conn ) {

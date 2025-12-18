@@ -42,3 +42,55 @@ curl -X GET \
 - Alle URLs werden validiert.
 - Secrets werden niemals geloggt.
 - Endpoint ist deaktiviert, wenn kein Token gesetzt ist.
+
+---
+
+## POST /wp-json/ltl-saas/v1/run-callback
+
+**Beschreibung:**
+Callback-Endpoint für Make.com, um Ergebnisse eines Runs zurückzumelden.
+
+**Auth:**
+- Header: `X-LTL-API-Key: <api_key>`
+- API-Key wird in WordPress-Option `ltl_saas_api_key` gesetzt
+
+**Request:**
+```json
+{
+  "tenant_id": 123,
+  "status": "success", // oder "failed"
+  "started_at": "2025-12-18T10:00:00Z",
+  "finished_at": "2025-12-18T10:01:00Z",
+  "posts_created": 1,
+  "error_message": null,
+  "meta": { "post_id": 456, "title": "..." }
+}
+```
+
+**Response:**
+- 200 OK bei Erfolg
+- 401 wenn Header fehlt
+- 403 wenn API-Key fehlt/falsch/leer
+- 400 bei ungültigen Daten
+- 500 bei Serverfehlern
+
+**Curl Beispiel:**
+```bash
+curl -X POST \
+  -H "X-LTL-API-Key: <api_key>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "tenant_id": 123,
+    "status": "success",
+    "started_at": "2025-12-18T10:00:00Z",
+    "finished_at": "2025-12-18T10:01:00Z",
+    "posts_created": 1,
+    "error_message": null,
+    "meta": { "post_id": 456, "title": "..." }
+  }' \
+  https://<your-portal>/wp-json/ltl-saas/v1/run-callback
+```
+
+**Hinweise:**
+- Fehlerhafte Requests liefern detaillierte Fehlermeldungen.
+- Endpoint ist deaktiviert, wenn kein API-Key gesetzt ist.
