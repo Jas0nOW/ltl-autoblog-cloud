@@ -199,6 +199,9 @@ final class LTL_SAAS_Portal {
         $frequency = $settings->frequency ?? '';
         $publish_mode = $settings->publish_mode ?? '';
 
+        $runs_table = $wpdb->prefix . 'ltl_saas_runs';
+        $last_runs = $wpdb->get_results($wpdb->prepare("SELECT * FROM $runs_table WHERE user_id = %d ORDER BY created_at DESC LIMIT 5", $user_id));
+
         ob_start();
         ?>
         <div class="ltl-saas-dashboard">
@@ -241,6 +244,31 @@ final class LTL_SAAS_Portal {
                 <button type="submit" name="ltl_saas_save_settings">Settings speichern</button>
                 <?php if ($settings_success): ?><span style="color:green;margin-left:1em;"><strong><?php echo esc_html($settings_success); ?></strong></span><?php endif; ?>
             </form>
+
+            <h3>Letzte 5 Runs</h3>
+            <?php if (empty($last_runs)): ?>
+                <p>Noch keine Runs.</p>
+            <?php else: ?>
+                <table style="width:100%;">
+                    <thead><tr><th>Datum</th><th>Status</th><th>Post-URL</th><th>Details</th></tr></thead>
+                    <tbody>
+                    <?php foreach ($last_runs as $run): ?>
+                        <tr>
+                            <td><?php echo esc_html($run->created_at); ?></td>
+                            <td>
+                                <?php if ($run->status === 'success'): ?>
+                                    <span style="color:green;">✓ Success</span>
+                                <?php else: ?>
+                                    <span style="color:red;">✗ Error</span>
+                                <?php endif; ?>
+                            </td>
+                            <td><?php if ($run->post_url): ?><a href="<?php echo esc_url($run->post_url); ?>" target="_blank">View Post</a><?php endif; ?></td>
+                            <td><?php if ($run->error): ?><pre><?php echo esc_html($run->error); ?></pre><?php endif; ?></td>
+                        </tr>
+                    <?php endforeach; ?>
+                    </tbody>
+                </table>
+            <?php endif; ?>
         </div>
         <script>
         document.getElementById('ltl-saas-test-connection').addEventListener('click', function(e) {

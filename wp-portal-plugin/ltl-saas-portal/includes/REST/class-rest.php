@@ -23,6 +23,13 @@ class LTL_SAAS_Portal_REST {
             'callback' => array( $this, 'get_active_users' ),
             'permission_callback' => '__return_true', // Auth in callback
         ) );
+
+        // Issue #14: POST /run-callback (API key auth)
+        register_rest_route( self::NAMESPACE, '/run-callback', array(
+            'methods'  => 'POST',
+            'callback' => array( $this, 'run_callback' ),
+            'permission_callback' => '__return_true', // Auth in callback
+        ) );
     }
 
     /**
@@ -61,6 +68,38 @@ class LTL_SAAS_Portal_REST {
     /**
      * Testet die gespeicherte WP-Verbindung des eingeloggten Users.
      */
+    public function run_callback( $request ) {
+        $api_key = get_option('ltl_saas_api_key');
+        $header_key = $request->get_header('X-LTL-API-Key');
+        if (!$api_key || !$header_key || !hash_equals($api_key, $header_key)) {
+            return new WP_REST_Response(['error' => 'Unauthorized'], 401);
+        }
+        global $wpdb;
+        $table = $wpdb->prefix . 'ltl_saas_runs';
+        $params = $request->get_json_params();
+        $user_id = isset($params['user_id']) ? intval($params['user_id']) : 0;
+        $status = isset($params['status']) ? sanitize_text_field($params['status']) : '';
+        $post_url = isset($params['post_url']) ? esc_url_raw($params['post_url']) : null;
+        $error = isset($params['error']) ? sanitize_textarea_field($params['error']) : null;
+        $meta = isset($params['meta']) ? wp_json_encode($params['meta']) : null;
+        if (!$user_id || !$status) {
+            return new WP_REST_Response(['error' => 'Missing user_id or status'], 400);
+        }
+        $row = [
+            'user_id' => $user_id,
+            'status' => $status,
+            'post_url' => $post_url,
+            'error' => $error,
+            'meta' => $meta,
+            'created_at' => current_time('mysql'),
+        ];
+        $ok = $wpdb->insert($table, $row);
+        if ($ok) {
+            return ['success' => true, 'id' => $wpdb->insert_id];
+        } else {
+            return new WP_REST_Response(['error' => 'DB insert failed'], 500);
+        }
+    }
     public function test_wp_connection( $request ) {
             $user_id = get_current_user_id();
             global $wpdb;
