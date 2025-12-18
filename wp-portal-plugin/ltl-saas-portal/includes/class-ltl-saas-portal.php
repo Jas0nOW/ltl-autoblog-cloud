@@ -829,7 +829,7 @@ function ltl_saas_atomic_month_rollover( $user_id ) {
     global $wpdb;
     $settings_table = $wpdb->prefix . 'ltl_saas_settings';
     $current_month_start = date('Y-m-01');
-    
+
     // Atomic UPDATE: only update if posts_period_start != current month
     // This prevents races where 2 parallel requests both try to reset
     $updated = $wpdb->query($wpdb->prepare(
@@ -838,7 +838,7 @@ function ltl_saas_atomic_month_rollover( $user_id ) {
         $user_id,
         $current_month_start
     ));
-    
+
     return $updated > 0; // true if reset happened
 }
 

@@ -66,6 +66,60 @@ class LTL_SAAS_Portal_REST {
     }
 
     /**
+     * Issue #23: Rate limiting helper
+     * Tracks failed auth attempts per IP and rejects if exceeds threshold
+     * Uses WP transient for state (TTL 15 minutes)
+     */
+    private function check_rate_limit( $request, $endpoint_name ) {
+        $ip = $this->get_client_ip();
+        $limit_key = 'ltl_saas_ratelimit_' . md5($ip . $endpoint_name);
+        $max_attempts = 10;  // 10 failed attempts
+        $window_seconds = 900; // 15 minutes
+
+        $attempts = get_transient($limit_key);
+        if ($attempts === false) {
+            $attempts = 0;
+        }
+
+        if ($attempts >= $max_attempts) {
+            error_log('[LTL-SAAS] Rate limit exceeded: IP=' . $ip . ', endpoint=' . $endpoint_name . ', attempts=' . $attempts);
+            return new WP_Error('rate_limit', 'Too many requests from this IP', array('status' => 429));
+        }
+
+        return true;
+    }
+
+    /**
+     * Issue #23: Increment rate limit counter on auth failure
+     */
+    private function increment_rate_limit( $request, $endpoint_name ) {
+        $ip = $this->get_client_ip();
+        $limit_key = 'ltl_saas_ratelimit_' . md5($ip . $endpoint_name);
+        $window_seconds = 900; // 15 minutes
+
+        $attempts = get_transient($limit_key);
+        if ($attempts === false) {
+            $attempts = 0;
+        }
+        set_transient($limit_key, $attempts + 1, $window_seconds);
+    }
+
+    /**
+     * Get client IP address
+     */
+    private function get_client_ip() {
+        $ip = '';
+        if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
+            $ip = $_SERVER['HTTP_CLIENT_IP'];
+        } elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+            $ip = explode(',', $_SERVER['HTTP_X_FORWARDED_FOR'])[0];
+        } elseif (!empty($_SERVER['REMOTE_ADDR'])) {
+            $ip = $_SERVER['REMOTE_ADDR'];
+        }
+        return sanitize_text_field($ip);
+    }
+
+    /**
      * POST /wp-json/ltl-saas/v1/gumroad/webhook (or /gumroad/ping for legacy)
      * Issue #7: Gumroad Billing Webhook Endpoint
      *
@@ -234,13 +288,22 @@ class LTL_SAAS_Portal_REST {
      * Permission callback for /make/tenants: Token + SSL required
      */
     public function permission_make_tenants( $request ) {
+        // === Issue #23: Rate limiting check ===
+        $rate_limit_check = $this->check_rate_limit($request, 'make-tenants');
+        if (is_wp_error($rate_limit_check)) {
+            return $rate_limit_check; // Will be converted to 429 response
+        }
+
         if ( ! is_ssl() ) {
+            $this->increment_rate_limit($request, 'make-tenants');
             return new WP_Error('forbidden', 'HTTPS required for secrets.', array('status' => 403));
         }
         require_once LTL_SAAS_PORTAL_PLUGIN_DIR . 'includes/class-ltl-saas-portal-secrets.php';
         $make_token = LTL_SAAS_Portal_Secrets::get_make_token();
         $header_token = $request->get_header('X-LTL-SAAS-TOKEN');
         if (!$header_token || !$make_token || !is_string($make_token) || !trim($make_token) || !hash_equals($make_token, $header_token)) {
+            // Increment rate limit on failed auth
+            $this->increment_rate_limit($request, 'make-tenants');
             return new WP_Error('forbidden', 'Forbidden', array('status' => 403));
         }
         return true;
@@ -264,14 +327,14 @@ class LTL_SAAS_Portal_REST {
             if (!$state['is_active']) {
                 continue; // skip inactive tenants
             }
-            
+
             // === Issue #22: Atomic month rollover ===
             $reset_happened = ltl_saas_atomic_month_rollover($u->user_id);
             if ($reset_happened) {
                 // Re-fetch state after reset
                 $state = ltl_saas_get_tenant_state($u->user_id);
             }
-            
+
             // Enforce: skip if posts_used_month >= posts_limit_month
             $skip = false;
             $skip_reason = '';
@@ -362,9 +425,18 @@ class LTL_SAAS_Portal_REST {
      */
     public function run_callback( $request ) {
         require_once LTL_SAAS_PORTAL_PLUGIN_DIR . 'includes/class-ltl-saas-portal-secrets.php';
+
+        // === Issue #23: Rate limiting check ===
+        $rate_limit_check = $this->check_rate_limit($request, 'run-callback');
+        if (is_wp_error($rate_limit_check)) {
+            return new WP_REST_Response(['error' => $rate_limit_check->get_error_message()], 429);
+        }
+
         $api_key = LTL_SAAS_Portal_Secrets::get_api_key();
         $header_key = $request->get_header('X-LTL-API-Key');
         if (!$api_key || !$header_key || !hash_equals($api_key, $header_key)) {
+            // Increment rate limit on failed auth
+            $this->increment_rate_limit($request, 'run-callback');
             return new WP_REST_Response(['error' => 'Unauthorized'], 401);
         }
         global $wpdb;
@@ -443,7 +515,7 @@ class LTL_SAAS_Portal_REST {
         if ($ok && $status === 'success' && !$already_processed) {
             // Atomic month rollover (Issue #22)
             $reset_happened = ltl_saas_atomic_month_rollover($tenant_id);
-            
+
             $settings_table = $wpdb->prefix . 'ltl_saas_settings';
             // Increment counter
             $wpdb->query($wpdb->prepare(
