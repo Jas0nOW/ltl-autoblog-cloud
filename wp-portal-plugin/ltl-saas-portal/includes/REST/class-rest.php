@@ -137,20 +137,29 @@ class LTL_SAAS_Portal_REST {
         global $wpdb;
         $table = $wpdb->prefix . 'ltl_saas_runs';
         $params = $request->get_json_params();
-        $user_id = isset($params['user_id']) ? intval($params['user_id']) : 0;
+        if (!is_array($params)) $params = [];
+        $tenant_id = isset($params['tenant_id']) ? intval($params['tenant_id']) : 0;
         $status = isset($params['status']) ? sanitize_text_field($params['status']) : '';
-        $post_url = isset($params['post_url']) ? esc_url_raw($params['post_url']) : null;
-        $error = isset($params['error']) ? sanitize_textarea_field($params['error']) : null;
+        $started_at = isset($params['started_at']) ? sanitize_text_field($params['started_at']) : null;
+        $finished_at = isset($params['finished_at']) ? sanitize_text_field($params['finished_at']) : null;
+        $posts_created = isset($params['posts_created']) ? intval($params['posts_created']) : null;
+        $error_message = isset($params['error_message']) ? sanitize_textarea_field($params['error_message']) : null;
         $meta = isset($params['meta']) ? wp_json_encode($params['meta']) : null;
-        if (!$user_id || !$status) {
-            return new WP_REST_Response(['error' => 'Missing user_id or status'], 400);
+        $raw_payload = wp_json_encode(array_slice($params,0,20));
+        if ($raw_payload && strlen($raw_payload) > 8192) {
+            $raw_payload = mb_strimwidth($raw_payload, 0, 8192, '...');
+        }
+        if (!$tenant_id || !$status) {
+            return new WP_REST_Response(['error' => 'Missing tenant_id or status'], 400);
         }
         $row = [
-            'user_id' => $user_id,
+            'tenant_id' => $tenant_id,
             'status' => $status,
-            'post_url' => $post_url,
-            'error' => $error,
-            'meta' => $meta,
+            'started_at' => $started_at,
+            'finished_at' => $finished_at,
+            'posts_created' => $posts_created,
+            'error_message' => $error_message,
+            'raw_payload' => $raw_payload,
             'created_at' => current_time('mysql'),
         ];
         $ok = $wpdb->insert($table, $row);

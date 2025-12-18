@@ -78,14 +78,16 @@ final class LTL_SAAS_Portal {
 
         $sql[] = "CREATE TABLE $runs (
             id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
-            user_id BIGINT(20) UNSIGNED NOT NULL,
-            status VARCHAR(20) NOT NULL,
-            post_url TEXT NULL,
-            error LONGTEXT NULL,
-            meta LONGTEXT NULL,
+            tenant_id BIGINT(20) UNSIGNED NOT NULL,
+            status VARCHAR(32) NOT NULL,
+            started_at DATETIME NULL,
+            finished_at DATETIME NULL,
+            posts_created INT NULL,
+            error_message LONGTEXT NULL,
+            raw_payload LONGTEXT NULL,
             created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
             PRIMARY KEY  (id),
-            KEY user_id (user_id)
+            KEY tenant_id (tenant_id)
         ) $charset_collate;";
 
         foreach ( $sql as $statement ) {
@@ -200,7 +202,7 @@ final class LTL_SAAS_Portal {
         $publish_mode = $settings->publish_mode ?? '';
 
         $runs_table = $wpdb->prefix . 'ltl_saas_runs';
-        $last_runs = $wpdb->get_results($wpdb->prepare("SELECT * FROM $runs_table WHERE user_id = %d ORDER BY created_at DESC LIMIT 5", $user_id));
+        $last_runs = $wpdb->get_results($wpdb->prepare("SELECT * FROM $runs_table WHERE tenant_id = %d ORDER BY created_at DESC LIMIT 10", $user_id));
 
         ob_start();
         ?>
@@ -245,30 +247,29 @@ final class LTL_SAAS_Portal {
                 <?php if ($settings_success): ?><span style="color:green;margin-left:1em;"><strong><?php echo esc_html($settings_success); ?></strong></span><?php endif; ?>
             </form>
 
-            <h3>Letzte 5 Runs</h3>
+            <h3>Letzter Run</h3>
             <?php if (empty($last_runs)): ?>
                 <p>Noch keine Runs.</p>
             <?php else: ?>
                 <table style="width:100%;">
-                    <thead><tr><th>Datum</th><th>Status</th><th>Post-URL</th><th>Details</th></tr></thead>
+                    <thead><tr><th>Datum</th><th>Status</th><th>Posts</th><th>Fehler</th><th>Payload</th></tr></thead>
                     <tbody>
                     <?php foreach ($last_runs as $run): ?>
                         <tr>
                             <td><?php echo esc_html($run->created_at); ?></td>
-                            <td>
-                                <?php if ($run->status === 'success'): ?>
-                                    <span style="color:green;">✓ Success</span>
-                                <?php else: ?>
-                                    <span style="color:red;">✗ Error</span>
-                                <?php endif; ?>
-                            </td>
-                            <td><?php if ($run->post_url): ?><a href="<?php echo esc_url($run->post_url); ?>" target="_blank">View Post</a><?php endif; ?></td>
-                            <td><?php if ($run->error): ?><pre><?php echo esc_html($run->error); ?></pre><?php endif; ?></td>
+                            <td><?php echo esc_html($run->status); ?></td>
+                            <td><?php echo esc_html($run->posts_created); ?></td>
+                            <td><?php if ($run->error_message): ?><pre><?php echo esc_html($run->error_message); ?></pre><?php endif; ?></td>
+                            <td><?php if ($run->raw_payload): ?><details><summary>Show</summary><pre><?php echo esc_html(mb_strimwidth($run->raw_payload,0,512,'...')); ?></pre></details><?php endif; ?></td>
                         </tr>
                     <?php endforeach; ?>
                     </tbody>
                 </table>
             <?php endif; ?>
+            <button type="button" onclick="document.querySelector('.ltl-saas-runs-list').classList.toggle('open')">Runs anzeigen</button>
+            <div class="ltl-saas-runs-list" style="display:none;">
+                <!-- Hier könnte eine erweiterte Runs-Ansicht folgen -->
+            </div>
         </div>
         <script>
         document.getElementById('ltl-saas-test-connection').addEventListener('click', function(e) {
