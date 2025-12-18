@@ -96,11 +96,17 @@ class LTL_SAAS_Portal_Admin {
     }
 
     public function sanitize_gumroad_secret($value) {
+        if ( ! is_string( $value ) ) {
+            $value = '';
+        }
         $value = trim($value);
         return preg_match('/^[A-Za-z0-9\-_]{16,}$/', $value) ? $value : '';
     }
 
     public function sanitize_gumroad_product_map($value) {
+        if ( ! is_string( $value ) ) {
+            $value = '';
+        }
         $value = trim($value);
         $arr = json_decode($value, true);
         if (!is_array($arr)) {
@@ -118,6 +124,9 @@ class LTL_SAAS_Portal_Admin {
     }
 
     public function sanitize_token( $value ) {
+        if ( ! is_string( $value ) ) {
+            $value = '';
+        }
         // Only allow base64url (A-Za-z0-9-_)
         return preg_match('/^[A-Za-z0-9\-_]{32,}$/', $value) ? $value : '';
     }
