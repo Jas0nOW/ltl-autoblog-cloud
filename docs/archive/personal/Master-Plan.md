@@ -65,12 +65,6 @@
 
 ### Phase 2 — Production Readiness (Packaging, Docs, Repo Hygiene)
 
-Task: Release Pipeline verifizieren
-- Goal: Reproduzierbares Plugin ZIP + Hashes, klare Release Steps.
-- Files to touch: `scripts/build-zip.ps1`, `docs/releases/release-checklist.md`, `docs/testing/logs/testing-log.md`
-- DoD: `build-zip.ps1` erzeugt ZIP + SHA256; Smoke Tests protokolliert; Checklist ist vollstÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¤ndig.
-- Impact: Med
-- KomplexitÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¤t: S
 
 Task: Docs Cleanup (MOVE statt Delete)
 - Goal: Doppelte/obsolete Docs in `docs/archive/` verschieben, aktive Docs konsistent.
@@ -88,6 +82,13 @@ Task: Multi-Tenant Blueprint als Deliverable
 ---
 
 ## DONE LOG (Erledigte Task-Cluster mit PR-Links)
+
+### Release Pipeline verifizieren ✅
+- **Date**: 2025-12-18
+- **Branch**: `fix/release-pipeline` (commit: 608b336)
+- **Result**: Enhanced build-zip.ps1 with improved logging output (colored status messages, file count, size, SHA256). Updated release-checklist.md with comprehensive pre-release QA, version management, build verification, deployment safety, and sign-off sections. Added release-specific fields to testing-log.md (version, build date, branch, checksum tests, Phase 1 security tests).
+- **Impact**: Phase 2 — Production Readiness (reproducible builds, clear release steps, enhanced testing template)
+- **Evidence**: scripts/build-zip.ps1 (enhanced logging + verification command), docs/releases/release-checklist.md (14-point checklist), docs/testing/logs/testing-log.md (release + Phase 1 security test fields)
 
 ### Rate Limiting / Brute-Force Protection (Issue #23) ✅
 - **Date**: 2025-12-18
