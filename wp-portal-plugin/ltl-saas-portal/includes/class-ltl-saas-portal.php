@@ -69,6 +69,8 @@ final class LTL_SAAS_Portal {
             tone VARCHAR(50) NULL,
             frequency VARCHAR(20) NULL,
             publish_mode VARCHAR(20) NULL,
+            plan VARCHAR(32) NULL,
+            is_active TINYINT(1) NOT NULL DEFAULT 1,
             json LONGTEXT NULL,
             created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
             updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -76,16 +78,21 @@ final class LTL_SAAS_Portal {
             UNIQUE KEY user_id (user_id)
         ) $charset_collate;";
 
+        // Optionally: versioning for future upgrades
+        update_option('ltl_saas_db_version', LTL_SAAS_PORTAL_VERSION);
+
         $sql[] = "CREATE TABLE $runs (
             id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
-            user_id BIGINT(20) UNSIGNED NOT NULL,
-            status VARCHAR(20) NOT NULL,
-            post_url TEXT NULL,
-            error LONGTEXT NULL,
-            meta LONGTEXT NULL,
+            tenant_id BIGINT(20) UNSIGNED NOT NULL,
+            status VARCHAR(32) NOT NULL,
+            started_at DATETIME NULL,
+            finished_at DATETIME NULL,
+            posts_created INT NULL,
+            error_message LONGTEXT NULL,
+            raw_payload LONGTEXT NULL,
             created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
             PRIMARY KEY  (id),
-            KEY user_id (user_id)
+            KEY tenant_id (tenant_id)
         ) $charset_collate;";
 
         foreach ( $sql as $statement ) {
@@ -117,6 +124,11 @@ final class LTL_SAAS_Portal {
         $publish_modes = ['draft','publish'];
 
         if (isset($_POST['ltl_saas_save_settings']) && wp_verify_nonce($_POST['ltl_saas_settings_nonce'], 'ltl_saas_save_settings')) {
+            // Access control: prevent saving when user is inactive
+            $existing_settings = $wpdb->get_row($wpdb->prepare("SELECT is_active FROM $settings_table WHERE user_id = %d", $user_id));
+            if ($existing_settings && isset($existing_settings->is_active) && intval($existing_settings->is_active) === 0) {
+                $error = 'Account inaktiv. Einstellungen können nicht gespeichert werden.';
+            } else {
             $rss_url = esc_url_raw(trim($_POST['rss_url'] ?? ''));
             $language = $_POST['language'] ?? '';
             $tone = $_POST['tone'] ?? '';
@@ -148,14 +160,22 @@ final class LTL_SAAS_Portal {
                     $wpdb->update($settings_table, $row, ['user_id' => $user_id]);
                 } else {
                     $row['created_at'] = current_time('mysql');
+                    $row['is_active'] = 1; // default active
+                    $row['plan'] = 'free';
                     $wpdb->insert($settings_table, $row);
                 }
                 $settings_success = 'Saved ✓';
+            }
             }
         }
 
         // --- CONNECTION: Handle connection form submit ---
         if ( isset($_POST['ltl_saas_save_connection']) && wp_verify_nonce($_POST['ltl_saas_nonce'], 'ltl_saas_save_connection') ) {
+            // Access control: prevent saving connection when user is inactive
+            $existing_settings = $wpdb->get_row($wpdb->prepare("SELECT is_active FROM $settings_table WHERE user_id = %d", $user_id));
+            if ($existing_settings && isset($existing_settings->is_active) && intval($existing_settings->is_active) === 0) {
+                $error = 'Account inaktiv. Verbindung kann nicht gespeichert werden.';
+            } else {
             $wp_url = esc_url_raw(trim($_POST['wp_url'] ?? ''));
             $wp_user = sanitize_user(trim($_POST['wp_user'] ?? ''));
             $wp_app_password = trim($_POST['wp_app_password'] ?? '');
@@ -193,16 +213,26 @@ final class LTL_SAAS_Portal {
         $wp_user = $conn->wp_user ?? '';
 
         $settings = $wpdb->get_row($wpdb->prepare("SELECT * FROM $settings_table WHERE user_id = %d", $user_id));
+
         $rss_url = $settings->rss_url ?? '';
         $language = $settings->language ?? '';
         $tone = $settings->tone ?? '';
         $frequency = $settings->frequency ?? '';
         $publish_mode = $settings->publish_mode ?? '';
+        $is_active = isset($settings->is_active) ? (int)$settings->is_active : 1;
 
         $runs_table = $wpdb->prefix . 'ltl_saas_runs';
-        $last_runs = $wpdb->get_results($wpdb->prepare("SELECT * FROM $runs_table WHERE user_id = %d ORDER BY created_at DESC LIMIT 5", $user_id));
+        $last_runs = $wpdb->get_results($wpdb->prepare("SELECT * FROM $runs_table WHERE tenant_id = %d ORDER BY created_at DESC LIMIT 10", $user_id));
 
         ob_start();
+        if (!$is_active) {
+            $pricing_url = get_option('ltl_saas_pricing_url', '#');
+            echo '<div class="ltl-saas-locked" style="border:2px solid #e00; background:#fff0f0; padding:2em; text-align:center; max-width:500px; margin:2em auto;">';
+            echo '<h2 style="color:#e00;">Abo erforderlich</h2>';
+            echo '<p>Dein Zugang ist aktuell inaktiv. Bitte buche ein Abo, um fortzufahren.</p>';
+            echo '<a href="' . esc_url($pricing_url) . '" class="button button-primary" style="font-size:1.2em;">Zu den Preisen</a>';
+            echo '</div>';
+        } else {
         ?>
         <div class="ltl-saas-dashboard">
             <h2>LTL AutoBlog Cloud</h2>
@@ -245,30 +275,29 @@ final class LTL_SAAS_Portal {
                 <?php if ($settings_success): ?><span style="color:green;margin-left:1em;"><strong><?php echo esc_html($settings_success); ?></strong></span><?php endif; ?>
             </form>
 
-            <h3>Letzte 5 Runs</h3>
+            <h3>Letzter Run</h3>
             <?php if (empty($last_runs)): ?>
                 <p>Noch keine Runs.</p>
             <?php else: ?>
                 <table style="width:100%;">
-                    <thead><tr><th>Datum</th><th>Status</th><th>Post-URL</th><th>Details</th></tr></thead>
+                    <thead><tr><th>Datum</th><th>Status</th><th>Posts</th><th>Fehler</th><th>Payload</th></tr></thead>
                     <tbody>
                     <?php foreach ($last_runs as $run): ?>
                         <tr>
                             <td><?php echo esc_html($run->created_at); ?></td>
-                            <td>
-                                <?php if ($run->status === 'success'): ?>
-                                    <span style="color:green;">✓ Success</span>
-                                <?php else: ?>
-                                    <span style="color:red;">✗ Error</span>
-                                <?php endif; ?>
-                            </td>
-                            <td><?php if ($run->post_url): ?><a href="<?php echo esc_url($run->post_url); ?>" target="_blank">View Post</a><?php endif; ?></td>
-                            <td><?php if ($run->error): ?><pre><?php echo esc_html($run->error); ?></pre><?php endif; ?></td>
+                            <td><?php echo esc_html($run->status); ?></td>
+                            <td><?php echo esc_html($run->posts_created); ?></td>
+                            <td><?php if ($run->error_message): ?><pre><?php echo esc_html($run->error_message); ?></pre><?php endif; ?></td>
+                            <td><?php if ($run->raw_payload): ?><details><summary>Show</summary><pre><?php echo esc_html(mb_strimwidth($run->raw_payload,0,512,'...')); ?></pre></details><?php endif; ?></td>
                         </tr>
                     <?php endforeach; ?>
                     </tbody>
                 </table>
             <?php endif; ?>
+            <button type="button" onclick="document.querySelector('.ltl-saas-runs-list').classList.toggle('open')">Runs anzeigen</button>
+            <div class="ltl-saas-runs-list" style="display:none;">
+                <!-- Hier könnte eine erweiterte Runs-Ansicht folgen -->
+            </div>
         </div>
         <script>
         document.getElementById('ltl-saas-test-connection').addEventListener('click', function(e) {
@@ -296,6 +325,9 @@ final class LTL_SAAS_Portal {
         });
         </script>
         <?php
+        }
         return ob_get_clean();
     }
+}
+
 }

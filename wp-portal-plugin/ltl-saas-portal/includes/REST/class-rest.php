@@ -30,6 +30,74 @@ class LTL_SAAS_Portal_REST {
             'callback' => array( $this, 'run_callback' ),
             'permission_callback' => '__return_true', // Auth in callback
         ) );
+
+        // Make Multi-Tenant: GET /make/tenants (Token Auth, SSL enforced)
+        register_rest_route( self::NAMESPACE, '/make/tenants', array(
+            'methods'  => 'GET',
+            'callback' => array( $this, 'get_make_tenants' ),
+            'permission_callback' => array( $this, 'permission_make_tenants' ),
+        ) );
+    }
+
+    /**
+     * Permission callback for /make/tenants: Token + SSL required
+     */
+    public function permission_make_tenants( $request ) {
+        if ( ! is_ssl() ) {
+            return new WP_Error('forbidden', 'HTTPS required for secrets.', array('status' => 403));
+        }
+        $make_token = get_option('ltl_saas_make_token');
+        $header_token = $request->get_header('X-LTL-SAAS-TOKEN');
+        if (!$header_token || !$make_token || !is_string($make_token) || !trim($make_token) || !hash_equals($make_token, $header_token)) {
+            return new WP_Error('forbidden', 'Forbidden', array('status' => 403));
+        }
+        return true;
+    }
+    /**
+     * GET /wp-json/ltl-saas/v1/make/tenants
+     * Returns all tenants for Make.com (multi-tenant config pull)
+     * Auth: X-LTL-SAAS-TOKEN header, compared to option ltl_saas_make_token
+     * 401 if header missing, 403 if token missing/invalid/empty
+     */
+    public function get_make_tenants( $request ) {
+        // Auth/SSL handled in permission_callback
+        global $wpdb;
+        $conn_table = $wpdb->prefix . 'ltl_saas_connections';
+        $settings_table = $wpdb->prefix . 'ltl_saas_settings';
+        require_once LTL_SAAS_PORTAL_PLUGIN_DIR . 'includes/class-ltl-saas-portal-crypto.php';
+        $users = $wpdb->get_results("SELECT * FROM $conn_table");
+        $result = [];
+        foreach ($users as $u) {
+            $settings = $wpdb->get_row($wpdb->prepare("SELECT * FROM $settings_table WHERE user_id = %d", $u->user_id), ARRAY_A);
+            $is_active = isset($settings['is_active']) ? (bool)$settings['is_active'] : true;
+            if (!$is_active) {
+                continue; // skip inactive tenants
+            }
+            $decrypted = LTL_SAAS_Portal_Crypto::decrypt($u->wp_app_password_enc);
+            // Sanitize outputs
+            $site_url = esc_url_raw($u->wp_url);
+            $rss_url = isset($settings['rss_url']) ? esc_url_raw($settings['rss_url']) : '';
+            $language = isset($settings['language']) ? sanitize_text_field($settings['language']) : '';
+            $tone = isset($settings['tone']) ? sanitize_text_field($settings['tone']) : '';
+            $publish_mode = isset($settings['publish_mode']) ? sanitize_text_field($settings['publish_mode']) : '';
+            $frequency = isset($settings['frequency']) ? sanitize_text_field($settings['frequency']) : '';
+            $plan = isset($settings['plan']) ? sanitize_text_field($settings['plan']) : '';
+            $tenant = [
+                'tenant_id' => (int)$u->user_id,
+                'site_url' => $site_url,
+                'wp_username' => sanitize_user($u->wp_user),
+                'wp_app_password' => $decrypted,
+                'rss_url' => $rss_url,
+                'language' => $language,
+                'tone' => $tone,
+                'publish_mode' => $publish_mode,
+                'frequency' => $frequency,
+                'plan' => $plan,
+                'is_active' => $is_active,
+            ];
+            $result[] = $tenant;
+        }
+        return new WP_REST_Response($result, 200);
     }
 
     /**
@@ -53,13 +121,16 @@ class LTL_SAAS_Portal_REST {
         $result = [];
         foreach ($users as $u) {
             $settings = $wpdb->get_row($wpdb->prepare("SELECT * FROM $settings_table WHERE user_id = %d", $u->user_id), ARRAY_A);
-            $decrypted = LTL_SAAS_Portal_Crypto::decrypt($u->wp_app_password_enc);
+            $is_active = isset($settings['is_active']) ? (bool)$settings['is_active'] : true;
+            if (!$is_active) {
+                continue; // skip inactive users
+            }
             $result[] = [
                 'user_id' => (int)$u->user_id,
                 'settings' => $settings ?: (object)[],
                 'wp_url' => $u->wp_url,
                 'wp_user' => $u->wp_user,
-                'wp_app_password' => $decrypted, // Only for backend/service use!
+                'wp_app_password' => '***',
             ];
         }
         return $result;
@@ -77,20 +148,29 @@ class LTL_SAAS_Portal_REST {
         global $wpdb;
         $table = $wpdb->prefix . 'ltl_saas_runs';
         $params = $request->get_json_params();
-        $user_id = isset($params['user_id']) ? intval($params['user_id']) : 0;
+        if (!is_array($params)) $params = [];
+        $tenant_id = isset($params['tenant_id']) ? intval($params['tenant_id']) : 0;
         $status = isset($params['status']) ? sanitize_text_field($params['status']) : '';
-        $post_url = isset($params['post_url']) ? esc_url_raw($params['post_url']) : null;
-        $error = isset($params['error']) ? sanitize_textarea_field($params['error']) : null;
+        $started_at = isset($params['started_at']) ? sanitize_text_field($params['started_at']) : null;
+        $finished_at = isset($params['finished_at']) ? sanitize_text_field($params['finished_at']) : null;
+        $posts_created = isset($params['posts_created']) ? intval($params['posts_created']) : null;
+        $error_message = isset($params['error_message']) ? sanitize_textarea_field($params['error_message']) : null;
         $meta = isset($params['meta']) ? wp_json_encode($params['meta']) : null;
-        if (!$user_id || !$status) {
-            return new WP_REST_Response(['error' => 'Missing user_id or status'], 400);
+        $raw_payload = wp_json_encode(array_slice($params,0,20));
+        if ($raw_payload && strlen($raw_payload) > 8192) {
+            $raw_payload = mb_strimwidth($raw_payload, 0, 8192, '...');
+        }
+        if (!$tenant_id || !$status) {
+            return new WP_REST_Response(['error' => 'Missing tenant_id or status'], 400);
         }
         $row = [
-            'user_id' => $user_id,
+            'tenant_id' => $tenant_id,
             'status' => $status,
-            'post_url' => $post_url,
-            'error' => $error,
-            'meta' => $meta,
+            'started_at' => $started_at,
+            'finished_at' => $finished_at,
+            'posts_created' => $posts_created,
+            'error_message' => $error_message,
+            'raw_payload' => $raw_payload,
             'created_at' => current_time('mysql'),
         ];
         $ok = $wpdb->insert($table, $row);
@@ -103,6 +183,12 @@ class LTL_SAAS_Portal_REST {
     public function test_wp_connection( $request ) {
             $user_id = get_current_user_id();
             global $wpdb;
+            // Access control: block inactive users
+            $settings_table = $wpdb->prefix . 'ltl_saas_settings';
+            $existing_settings = $wpdb->get_row($wpdb->prepare("SELECT is_active FROM $settings_table WHERE user_id = %d", $user_id));
+            if ($existing_settings && isset($existing_settings->is_active) && intval($existing_settings->is_active) === 0) {
+                return new WP_REST_Response( [ 'success' => false, 'message' => 'Account inaktiv' ], 403 );
+            }
             $table = $wpdb->prefix . 'ltl_saas_connections';
             $conn = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM $table WHERE user_id = %d", $user_id ) );
             if ( ! $conn ) {
