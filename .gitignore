@@ -1,7 +1,23 @@
-.env
-*.log
-.DS_Store
+# Secrets and credentials
+.env*
+*.key
+*.pem
+*.p12
+credentials*.json
+*service-account*.json
+
+# Build and runtime artifacts
 node_modules/
 vendor/
 dist/
+build/
+.pytest_cache/
+__pycache__/
+*.log
+
+# Project-specific
+blueprints_raw/
+
+# Others
+.DS_Store
 wp-portal/vendor/
