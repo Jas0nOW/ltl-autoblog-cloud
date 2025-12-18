@@ -51,21 +51,21 @@ Setz die Frequenz (täglich/3x Woche/wöchentlich) und lehne dich zurück. Posts
 
 ## Planvergleich
 
-| Feature | **Starter** | **Pro** | **Agency** |
-|---------|-----------|--------|-----------|
-| **Posts/Monat** | 80 | 250 | 1.000+ |
-| **RSS Quellen** | 1 | 3 | Unlimited |
-| **Sprachen** | 6 | 12 | Alle |
-| **KI-Modell** | Standard | Premium | Custom |
-| **Support** | Community | Email | Phone + Slack |
-| **Preis** | €19/Mo | €49/Mo | Custom |
+| Feature | **Free** | **Basic** | **Pro** | **Studio** |
+|---------|----------|----------|---------|-----------|
+| **Posts/Monat** | 10 | 30 | 120 | 300 |
+| **RSS Quellen** | 1 | 1 | 5 | 5 |
+| **Sprachen** | Basis | Basis | Premium | Premium |
+| **KI-Modell** | Standard | Standard | Premium | Premium |
+| **Support** | Community | Community | Email | Custom |
+| **Preis** | €0 | €19/Mo | €49/Mo | Custom |
 
 ---
 
 ## Häufig gestellte Fragen (Mini-FAQ)
 
 **Q: Muss ich technisch versiert sein?**
-A: Nein! Alles läuft über WordPress. Du brauchst nur: eine WordPress-Website, RSS-URL und eine Gumroad-Bestellung.
+A: Nein! Alles läuft über WordPress. Du brauchst nur: eine WordPress-Website + eine RSS-URL. Kostenlos starten ist möglich, Upgrades laufen über Stripe (auf unserer Website) oder Gumroad.
 
 **Q: Wie sicher ist meine WordPress-Verbindung?**
 A: Wir speichern nur verschlüsselte Application Passwords. Deine echten Anmeldedaten sind bei uns nicht einsehbar.
@@ -84,7 +84,7 @@ A: Deine Einstellungen bleiben erhalten. Neue Posts werden einfach nicht mehr er
 ## Call-to-Action
 
 ### Primär
-**„Jetzt starten — 30 Tage kostenloses Testen"**
+**„Jetzt starten — Kostenlos (10 Posts/Monat)"**
 
 *Keine Kreditkarte erforderlich. Nur WordPress + RSS-URL.*
 
@@ -159,21 +159,21 @@ Set the frequency (daily/3x week/weekly) and relax. Posts are created automatica
 
 ## Plan Comparison
 
-| Feature | **Starter** | **Pro** | **Agency** |
-|---------|-----------|--------|-----------|
-| **Posts/Month** | 80 | 250 | 1.000+ |
-| **RSS Sources** | 1 | 3 | Unlimited |
-| **Languages** | 6 | 12 | All |
-| **AI Model** | Standard | Premium | Custom |
-| **Support** | Community | Email | Phone + Slack |
-| **Price** | $19/Mo | $49/Mo | Custom |
+| Feature | **Free** | **Basic** | **Pro** | **Studio** |
+|---------|----------|----------|---------|-----------|
+| **Posts/Month** | 10 | 30 | 120 | 300 |
+| **RSS Sources** | 1 | 1 | 5 | 5 |
+| **Languages** | Basic | Basic | Premium | Premium |
+| **AI Model** | Standard | Standard | Premium | Premium |
+| **Support** | Community | Community | Email | Custom |
+| **Price** | $0 | $19/Mo | $49/Mo | Custom |
 
 ---
 
 ## Frequently Asked Questions (Mini-FAQ)
 
 **Q: Do I need to be tech-savvy?**
-A: No! Everything runs through WordPress. You only need: a WordPress website, RSS URL, and a Gumroad purchase.
+A: No! Everything runs through WordPress. You only need a WordPress website + an RSS URL. You can start on Free; upgrades run via Stripe (on our website) or Gumroad.
 
 **Q: How secure is my WordPress connection?**
 A: We only store encrypted Application Passwords. Your actual login credentials are never visible to us.
@@ -192,7 +192,7 @@ A: Your settings are preserved. New posts simply won't be created. Old posts rem
 ## Call-to-Action
 
 ### Primary
-**„Get Started — 30 Days Free Trial"**
+**"Get Started — Free (10 posts/month)"**
 
 *No credit card required. Just WordPress + RSS URL.*
 

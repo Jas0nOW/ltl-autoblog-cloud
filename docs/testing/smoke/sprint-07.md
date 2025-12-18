@@ -7,7 +7,7 @@
 ## Prerequisites
 
 - Admin access to LTL AutoBlog Cloud Portal
-- Gumroad Secret configured (see [Billing Gumroad Setup](billing-gumroad.md))
+- Gumroad Secret configured (see [Billing Gumroad Setup](../../billing/gumroad.md))
 - Product-ID → Plan mapping configured (JSON valid)
 - HTTPS enabled (local: self-signed OK, can use `--insecure` with curl)
 - Access to `wp-content/debug.log` to verify webhook logging
@@ -45,7 +45,7 @@ HTTP 403 Forbidden
 **Objective**: Verify new user account is created with correct plan on `/gumroad/webhook`.
 
 ### Setup
-- Ensure `product_ABC123` maps to `starter` in admin panel
+- Ensure `product_ABC123` maps to `basic` in admin panel
 - Replace `YOUR_SECRET` with actual secret from admin
 
 ### Command
@@ -67,7 +67,7 @@ HTTP 200 OK
 1. ✅ New WordPress user created (username derived from email)
 2. ✅ User has role `subscriber`
 3. ✅ Entry in `wp_ltl_saas_settings` with:
-   - `plan = 'starter'`
+  - `plan = 'basic'`
    - `is_active = 1`
    - `posts_this_month = 0`
 4. ✅ User meta `gumroad_subscription_id = sub_test123`
@@ -110,7 +110,7 @@ HTTP 200 OK
 ### Verification
 1. ✅ **No new user** created (same email → same user_id)
 2. ✅ Plan updated in `wp_ltl_saas_settings`:
-   - `plan = 'pro'` (changed from `starter`)
+  - `plan = 'pro'` (changed from `basic`)
    - `is_active = 1` (remains active)
    - `posts_this_month = 0` (unchanged)
 3. ✅ User meta `gumroad_subscription_id` updated to `sub_test456`
@@ -293,7 +293,7 @@ HTTP 200 OK
 ```
 
 ### Verification
-- ✅ User created with default plan (`starter`)
+- ✅ User created with default plan (`basic`)
 - ✅ Warning/notice logged in debug log
 
 ---

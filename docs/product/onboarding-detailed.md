@@ -6,18 +6,41 @@
 
 ## Schritt 1: Account erstellen & Anmelden
 
-### 1.1 Gumroad Kauf
-1. Öffne https://lazytechlab.de (oder gumroad link)
-2. Klick auf Plan ("Starter", "Pro", etc.)
-3. Checkout durchlaufen
-4. Nach Zahlung erhältst du einen Download-Link
+### 1.1 Zahlungsweg wählen
 
-### 1.2 Account aktivieren
-1. Gumroad sendet Email mit Aktivierungscode (automatisch via Gumroad Ping)
-2. Dein WordPress-Account wurde erstellt
-3. Login: https://yourdomain/wp-login.php
-   - Email: Die Email, die du bei Gumroad angegeben hast
-   - Passwort: Kam per Email an (oder nutze "Passwort vergessen")
+**Du hast 3 Möglichkeiten:**
+
+#### Option A: Free (ohne Zahlung)
+1. Öffne https://lazytechlab.de
+2. Klick auf "Kostenlos starten" (10 Posts/Monat)
+3. Registriere dich mit E-Mail + Passwort
+4. Fertig – Du kannst sofort loslegen!
+
+#### Option B: Stripe (Empfohlen – auf unserer Website)
+1. Öffne https://lazytechlab.de/preise
+2. Wähle deinen Plan (Basic/Pro/Studio)
+3. Checkout über **Stripe** (Kreditkarte, SEPA, etc.)
+4. Nach Zahlung: Account wird automatisch aktiviert
+5. Du erhältst eine E-Mail mit Login-Daten
+
+#### Option C: Gumroad (Alternative)
+1. Öffne den Gumroad-Link (falls bereitgestellt)
+2. Kaufe über Gumroad
+3. Account wird automatisch per Webhook erstellt
+4. Du erhältst eine E-Mail mit Login-Daten
+
+### 1.2 Account aktivieren & Einloggen
+
+**Nach erfolgreicher Zahlung (Stripe oder Gumroad) oder Registrierung (Free):**
+
+1. Du erhältst eine E-Mail mit:
+   - Login-URL: `https://portal.lazytechlab.de/wp-login.php`
+   - Benutzername (meist deine E-Mail-Adresse)
+   - Temporäres Passwort (bei Stripe/Gumroad)
+
+2. Logge dich ein mit den Zugangsdaten aus der E-Mail
+
+3. (Optional) Ändere dein Passwort: **Profil → Passwort ändern**
 
 ✅ **Fertig**: Du bist jetzt eingeloggt!
 
@@ -92,7 +115,7 @@ curl https://example.com/feed | head -20
 
 ---
 
-## Schritt 4: Kostenloses Testen starten
+## Schritt 4: Kostenlos starten (Free Plan)
 
 ### 4.1 Test-Run durchführen
 1. Im Dashboard: Klick **„Test Run starten"** (wenn vorhanden)
@@ -139,8 +162,11 @@ curl https://example.com/feed | head -20
 - Klick: **„Passwort verloren?"**
 - E-Mail bestätige und Passwort neu setzen
 
-### 6. **"Kein Email-Zugang (Gumroad)"**
-- Nutze alternative Email-Adresse oder Kontaktiere Support
+### 6. **"Kein Email-Zugang nach Zahlung"**
+- Prüfe Spam-Ordner (besonders bei Gmail/Outlook)
+- **Stripe**: E-Mail kommt von `noreply@lazytechlab.de`
+- **Gumroad**: E-Mail kommt von Gumroad + separate E-Mail von uns
+- Nutze "Passwort vergessen" auf der Login-Seite
 - Support-Email: `support@lazytechlab.de`
 
 ### 7. **"SSL Certificate Error"**
@@ -154,8 +180,9 @@ curl https://example.com/feed | head -20
 - Wenn Problem bleibt: Prüfe Firewall/Rate-Limit Plugin
 
 ### 9. **"Plan abgelaufen"**
-- Gumroad Abo beendet → Plan ist nicht mehr aktiv
-- **Lösung**: Erneuere dein Abo auf Gumroad
+- Abo beendet (Stripe oder Gumroad) → Plan ist nicht mehr aktiv
+- **Lösung Stripe**: Erneuere dein Abo auf https://lazytechlab.de/account
+- **Lösung Gumroad**: Erneuere dein Abo über deinen Gumroad-Link
 - Nach Zahlung: Account wird automatisch reaktiviert
 
 ### 10. **"Dashboard zeigt alles als unvollständig"**
@@ -181,7 +208,7 @@ Du weißt, dass alles funktioniert, wenn:
 - Posts haben deine RSS-Quelle als Basis
 
 ✅ **Zähler läuft**:
-- Dashboard zeigt: "2/80 Posts diesen Monat" (bei Starter)
+- Dashboard zeigt z.B.: "2/10 Posts diesen Monat" (Free) oder "2/30" (Basic)
 
 ---
 
@@ -212,7 +239,7 @@ Du weißt, dass alles funktioniert, wenn:
 A: Ja! Posts werden als Entwürfe erstellt. Du kannst sie vor dem Veröffentlichen bearbeiten oder in Echtzeit ändern.
 
 **Q: Wie lange dauert es, bis der erste Post kommt?**
-A: Normalerweise innerhalb von 30 Minuten. Bei Starter-Plan täglich, bei Pro/Agency mehrmals täglich.
+A: Normalerweise innerhalb von 30 Minuten. Bei Basic täglich, bei Pro/Studio mehrmals täglich.
 
 **Q: Was wenn mein WP-Server schlecht reagiert?**
 A: Das System macht automatisches Retry nach 2 Sekunden. Wenn danach noch ein Fehler: Wird geloggt und nächster Versuch im nächsten Cycle.
@@ -234,5 +261,5 @@ A: Nein. Neue Posts werden einfach nicht mehr erstellt. Alte Posts bleiben erhal
 | Entwurf | Draft (Post noch nicht veröffentlicht) |
 | Veröffentlichen | Publish (Post geht live) |
 | Cycle | Zeitraum zwischen zwei Ausführungen (tägl/wöchentl) |
-| Plan | Abo-Stufe (Starter/Pro/Agency) |
+| Plan | Abo-Stufe (Free/Basic/Pro/Studio) |
 

@@ -1,7 +1,15 @@
 # Pricing Plans — V1 Final (Issue #8)
 
-> **Canonical Plan Names** (normalized to lowercase in code): `basic`, `pro`, `studio`
+> **Canonical Plan Names** (normalized to lowercase in code): `free`, `basic`, `pro`, `studio`
 > **Post Limits** are enforced at API level via `/make/tenants` (skip with `monthly_limit_reached` reason).
+> **Payment Providers**: LTL AutoBlog Cloud supports **Stripe** (primary, own landing page) and **Gumroad** (alternative) for billing.
+
+## Free
+- 1 Blog (1 WP Connection)
+- 1 RSS Feed
+- Draft-Mode
+- **10 Posts/Monat**
+- Canonical name: `free`
 
 ## Basic
 - 1 Blog (1 WP Connection)
@@ -36,7 +44,7 @@
 ### Limits Enforcement (Issue #8)
 
 **Database**: `wp_ltl_saas_settings`
-- `plan` (VARCHAR): One of `basic`, `pro`, `studio` (lowercase)
+- `plan` (VARCHAR): One of `free`, `basic`, `pro`, `studio` (lowercase)
 - `posts_this_month` (INT): Usage counter for current period
 - `posts_period_start` (DATE): Start of current billing period (rolls over monthly)
 
@@ -53,11 +61,18 @@
 
 ---
 
-### Gumroad Product Mapping
+### Payment Provider Mapping
 
-Example in WordPress Admin → LTL AutoBlog Cloud → Billing:
+**Primary: Stripe** (recommended for own branding)
+- Stripe webhook integration handles plan assignment automatically
+- See `docs/billing/stripe.md` for setup instructions
+
+**Alternative: Gumroad** (for quick setup)
+
+Example in WordPress Admin → LTL AutoBlog Cloud → Billing (Gumroad):
 ```json
 {
+  "prod_FREE_PRODUCT_ID": "free",
   "prod_BASIC_PRODUCT_ID": "basic",
   "prod_PRO_PRODUCT_ID": "pro",
   "prod_STUDIO_PRODUCT_ID": "studio"

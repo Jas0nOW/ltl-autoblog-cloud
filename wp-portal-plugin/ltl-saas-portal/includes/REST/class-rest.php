@@ -188,11 +188,13 @@ class LTL_SAAS_Portal_REST {
             $user_id = $user->ID;
         }
 
-        // Determine plan from product_map
+        // Determine plan from product_map (canonicalize to avoid starter/agency legacy drift)
+        require_once LTL_SAAS_PORTAL_PLUGIN_DIR . 'includes/class-ltl-saas-portal.php';
         $product_map = LTL_SAAS_Portal_Secrets::get_gumroad_product_map();
-        $plan = isset($product_map[$product_id]) ? $product_map[$product_id] : 'starter';
+        $plan_raw = isset($product_map[$product_id]) ? $product_map[$product_id] : 'basic';
+        $plan = ltl_saas_normalize_plan($plan_raw);
         if ($product_id && !isset($product_map[$product_id])) {
-            error_log('[LTL-SAAS] Gumroad webhook: unmapped product_id=' . $product_id . ', using default plan=starter');
+            error_log('[LTL-SAAS] Gumroad webhook: unmapped product_id=' . $product_id . ', using default plan=basic');
         }
 
         // Issue #7: Refunded handling
@@ -357,7 +359,8 @@ class LTL_SAAS_Portal_REST {
             $tone = isset($settings['tone']) ? sanitize_text_field($settings['tone']) : '';
             $publish_mode = isset($settings['publish_mode']) ? sanitize_text_field($settings['publish_mode']) : '';
             $frequency = isset($settings['frequency']) ? sanitize_text_field($settings['frequency']) : '';
-            $plan = isset($settings['plan']) ? sanitize_text_field($settings['plan']) : '';
+            $plan_raw = isset($settings['plan']) ? sanitize_text_field($settings['plan']) : '';
+            $plan = ltl_saas_normalize_plan($plan_raw);
             $tenant = [
                 'tenant_id' => (int)$u->user_id,
                 'site_url' => $site_url,
