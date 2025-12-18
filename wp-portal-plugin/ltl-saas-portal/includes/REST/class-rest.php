@@ -17,13 +17,45 @@ class LTL_SAAS_Portal_REST {
             'permission_callback' => '__return_true',
         ) );
 
-        // TODO (#12): GET /active-users (Make auth)
-        // TODO (#14): POST /run-callback
-        register_rest_route( self::NAMESPACE, '/wp-connection/test', array(
-            'methods'  => 'POST',
-            'callback' => array( $this, 'test_wp_connection' ),
-            'permission_callback' => function() { return is_user_logged_in(); },
+        // Issue #12: GET /active-users (API key auth)
+        register_rest_route( self::NAMESPACE, '/active-users', array(
+            'methods'  => 'GET',
+            'callback' => array( $this, 'get_active_users' ),
+            'permission_callback' => '__return_true', // Auth in callback
         ) );
+    }
+
+    /**
+     * GET /wp-json/ltl-saas/v1/active-users
+     * Returns all users with a saved connection (active), with settings and decrypted app password.
+     * Protected by API key in header X-LTL-API-Key (compared to option ltl_saas_api_key).
+     *
+     * NOTE: The decrypted app password is only for backend/service use. Never expose to frontend/UI.
+     */
+    public function get_active_users( $request ) {
+        $api_key = get_option('ltl_saas_api_key');
+        $header_key = $request->get_header('X-LTL-API-Key');
+        if (!$api_key || !$header_key || !hash_equals($api_key, $header_key)) {
+            return new WP_REST_Response(['error' => 'Unauthorized'], 401);
+        }
+        global $wpdb;
+        $conn_table = $wpdb->prefix . 'ltl_saas_connections';
+        $settings_table = $wpdb->prefix . 'ltl_saas_settings';
+        require_once LTL_SAAS_PORTAL_PLUGIN_DIR . 'includes/class-ltl-saas-portal-crypto.php';
+        $users = $wpdb->get_results("SELECT * FROM $conn_table");
+        $result = [];
+        foreach ($users as $u) {
+            $settings = $wpdb->get_row($wpdb->prepare("SELECT * FROM $settings_table WHERE user_id = %d", $u->user_id), ARRAY_A);
+            $decrypted = LTL_SAAS_Portal_Crypto::decrypt($u->wp_app_password_enc);
+            $result[] = [
+                'user_id' => (int)$u->user_id,
+                'settings' => $settings ?: (object)[],
+                'wp_url' => $u->wp_url,
+                'wp_user' => $u->wp_user,
+                'wp_app_password' => $decrypted, // Only for backend/service use!
+            ];
+        }
+        return $result;
     }
 
     /**
