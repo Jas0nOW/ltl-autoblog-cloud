@@ -264,21 +264,14 @@ class LTL_SAAS_Portal_REST {
             if (!$state['is_active']) {
                 continue; // skip inactive tenants
             }
-            // Reset-Check: If posts_period_start != current month start, reset posts_used_month and update posts_period_start
-            $current_month_start = date('Y-m-01');
-            if ($state['posts_period_start'] !== $current_month_start) {
-                $settings_table = $wpdb->prefix . 'ltl_saas_settings';
-                $wpdb->update(
-                    $settings_table,
-                    [
-                        'posts_this_month' => 0,  // Note: DB column still named posts_this_month for backward compat
-                        'posts_period_start' => $current_month_start
-                    ],
-                    ['user_id' => $u->user_id]
-                );
-                $state['posts_used_month'] = 0;
-                $state['posts_period_start'] = $current_month_start;
+            
+            // === Issue #22: Atomic month rollover ===
+            $reset_happened = ltl_saas_atomic_month_rollover($u->user_id);
+            if ($reset_happened) {
+                // Re-fetch state after reset
+                $state = ltl_saas_get_tenant_state($u->user_id);
             }
+            
             // Enforce: skip if posts_used_month >= posts_limit_month
             $skip = false;
             $skip_reason = '';
@@ -389,12 +382,12 @@ class LTL_SAAS_Portal_REST {
         $posts_created = isset($params['posts_created']) ? intval($params['posts_created']) : null;
         $error_message = isset($params['error_message']) ? sanitize_textarea_field($params['error_message']) : null;
         $meta = isset($params['meta']) ? wp_json_encode($params['meta']) : null;
-        
+
         // Issue #17: Retry telemetry fields
         $attempts = isset($params['attempts']) ? intval($params['attempts']) : 1;
         $last_http_status = isset($params['last_http_status']) ? intval($params['last_http_status']) : null;
         $retry_backoff_ms = isset($params['retry_backoff_ms']) ? intval($params['retry_backoff_ms']) : 0;
-        
+
         $raw_payload = wp_json_encode(array_slice($params,0,20));
         if ($raw_payload && strlen($raw_payload) > 8192) {
             $raw_payload = mb_strimwidth($raw_payload, 0, 8192, '...');
@@ -440,7 +433,7 @@ class LTL_SAAS_Portal_REST {
             'created_at' => current_time('mysql'),
         ];
         $ok = $wpdb->insert($table, $row);
-        
+
         // Log retry telemetry if attempts > 1
         if ($attempts > 1 && $last_http_status) {
             error_log('[LTL-SAAS] Callback: Retry telemetry - tenant_id=' . $tenant_id . ', status=' . $status . ', attempts=' . $attempts . ', last_http_status=' . $last_http_status . ', backoff_ms=' . $retry_backoff_ms);
@@ -448,25 +441,15 @@ class LTL_SAAS_Portal_REST {
 
         // === Increment usage ONLY on first successful processing (not on idempotent re-sends) ===
         if ($ok && $status === 'success' && !$already_processed) {
-            $state = ltl_saas_get_tenant_state($tenant_id);
-            $current_month_start = date('Y-m-01');
-            if ($state['posts_period_start'] !== $current_month_start) {
-                // Reset for new month
-                $wpdb->update(
-                    $settings_table,
-                    [
-                        'posts_this_month' => 1,
-                        'posts_period_start' => $current_month_start
-                    ],
-                    ['user_id' => $tenant_id]
-                );
-            } else {
-                // Normal increment
-                $wpdb->query($wpdb->prepare(
-                    "UPDATE $settings_table SET posts_this_month = posts_this_month + 1 WHERE user_id = %d",
-                    $tenant_id
-                ));
-            }
+            // Atomic month rollover (Issue #22)
+            $reset_happened = ltl_saas_atomic_month_rollover($tenant_id);
+            
+            $settings_table = $wpdb->prefix . 'ltl_saas_settings';
+            // Increment counter
+            $wpdb->query($wpdb->prepare(
+                "UPDATE $settings_table SET posts_this_month = posts_this_month + 1 WHERE user_id = %d",
+                $tenant_id
+            ));
             // Do NOT set is_active=0 if over limit; only limit enforcement applies
         }
         if ($ok) {

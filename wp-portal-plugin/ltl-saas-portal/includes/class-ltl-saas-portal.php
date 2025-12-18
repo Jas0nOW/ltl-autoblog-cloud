@@ -820,6 +820,28 @@ final class LTL_SAAS_Portal {
     }
 }
 
+/**
+ * Atomic month rollover helper (Issue #22 Phase 1)
+ * Ensures reset + increment are atomic using WHERE clause
+ * Returns: true if reset happened, false if no reset needed
+ */
+function ltl_saas_atomic_month_rollover( $user_id ) {
+    global $wpdb;
+    $settings_table = $wpdb->prefix . 'ltl_saas_settings';
+    $current_month_start = date('Y-m-01');
+    
+    // Atomic UPDATE: only update if posts_period_start != current month
+    // This prevents races where 2 parallel requests both try to reset
+    $updated = $wpdb->query($wpdb->prepare(
+        "UPDATE $settings_table SET posts_this_month = 0, posts_period_start = %s WHERE user_id = %d AND posts_period_start != %s",
+        $current_month_start,
+        $user_id,
+        $current_month_start
+    ));
+    
+    return $updated > 0; // true if reset happened
+}
+
 
 
 
