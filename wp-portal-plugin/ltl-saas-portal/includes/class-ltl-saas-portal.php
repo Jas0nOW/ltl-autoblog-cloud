@@ -1,3 +1,38 @@
+// --- PLAN LIMIT HELPER ---
+if (!function_exists('ltl_saas_plan_posts_limit')) {
+    function ltl_saas_plan_posts_limit($plan) {
+        $map = [
+            'free' => 20,
+            'starter' => 80,
+            'pro' => 250,
+            'agency' => 1000,
+        ];
+        $plan = strtolower(trim($plan));
+        return $map[$plan] ?? $map['free'];
+    }
+}
+
+// --- TENANT STATE HELPER ---
+if (!function_exists('ltl_saas_get_tenant_state')) {
+    function ltl_saas_get_tenant_state($user_id) {
+        global $wpdb;
+        $settings_table = $wpdb->prefix . 'ltl_saas_settings';
+        $row = $wpdb->get_row($wpdb->prepare("SELECT * FROM $settings_table WHERE user_id = %d", $user_id), ARRAY_A);
+        $plan = isset($row['plan']) && $row['plan'] ? $row['plan'] : 'free';
+        $is_active = isset($row['is_active']) ? (bool)$row['is_active'] : true;
+        $posts_this_month = isset($row['posts_this_month']) ? (int)$row['posts_this_month'] : 0;
+        $posts_period_start = isset($row['posts_period_start']) && $row['posts_period_start'] ? $row['posts_period_start'] : date('Y-m-01');
+        $posts_limit_month = ltl_saas_plan_posts_limit($plan);
+        return [
+            'user_id' => (int)$user_id,
+            'plan' => $plan,
+            'is_active' => $is_active,
+            'posts_this_month' => $posts_this_month,
+            'posts_limit_month' => $posts_limit_month,
+            'posts_period_start' => $posts_period_start,
+        ];
+    }
+}
 <?php
 if ( ! defined( 'ABSPATH' ) ) { exit; }
 
@@ -71,6 +106,8 @@ final class LTL_SAAS_Portal {
             publish_mode VARCHAR(20) NULL,
             plan VARCHAR(32) NULL,
             is_active TINYINT(1) NOT NULL DEFAULT 1,
+            posts_this_month INT NOT NULL DEFAULT 0,
+            posts_period_start DATE NULL,
             json LONGTEXT NULL,
             created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
             updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -78,8 +115,14 @@ final class LTL_SAAS_Portal {
             UNIQUE KEY user_id (user_id)
         ) $charset_collate;";
 
-        // Optionally: versioning for future upgrades
-        update_option('ltl_saas_db_version', LTL_SAAS_PORTAL_VERSION);
+        // Versioning for future upgrades
+        update_option('ltl_saas_db_version', LTL_SAAS_PORTAL_VERSION . '-sprint04');
+
+        // Backfill: set posts_period_start to current month for NULLs
+        $wpdb->query($wpdb->prepare(
+            "UPDATE $settings SET posts_period_start = %s WHERE posts_period_start IS NULL",
+            date('Y-m-01')
+        ));
 
         $sql[] = "CREATE TABLE $runs (
             id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,

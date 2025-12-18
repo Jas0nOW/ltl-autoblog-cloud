@@ -27,7 +27,12 @@ Liefert eine Liste aller aktiven Tenants für Make.com (Multi-Tenant Config Pull
   "publish_mode": "draft",
   "frequency": "weekly",
   "plan": "basic",
-  "is_active": true
+  "is_active": true,
+  "skip": false,
+  "skip_reason": "",
+  "remaining": 20,
+  "posts_this_month": 0,
+  "posts_limit_month": 20
 }
 ```
 
@@ -39,6 +44,7 @@ curl -X GET \
 ```
 
 **Hinweise:**
+- Neue Felder: `skip`, `skip_reason`, `remaining`, `posts_this_month`, `posts_limit_month`.
 - Alle URLs werden validiert.
 - Secrets werden niemals geloggt.
 - Endpoint ist deaktiviert, wenn kein Token gesetzt ist.
