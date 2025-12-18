@@ -7,6 +7,9 @@ require_once dirname(__FILE__,2) . '/../class-ltl-saas-portal-secrets.php';
 
 class LTL_SAAS_Portal_Admin {
     const OPTION_MAKE_TOKEN = 'ltl_saas_make_token';
+    const OPTION_CHECKOUT_URL_STARTER = 'ltl_saas_checkout_url_starter';
+    const OPTION_CHECKOUT_URL_PRO = 'ltl_saas_checkout_url_pro';
+    const OPTION_CHECKOUT_URL_AGENCY = 'ltl_saas_checkout_url_agency';
 
     public function __construct() {
         add_action( 'admin_menu', array( $this, 'register_menu' ) );
@@ -41,6 +44,37 @@ class LTL_SAAS_Portal_Admin {
             array(
                 'type' => 'string',
                 'sanitize_callback' => array( $this, 'sanitize_gumroad_product_map' ),
+                'show_in_rest' => false,
+                'default' => '',
+            )
+        );
+        // Issue #19: Checkout Links
+        register_setting(
+            'ltl_saas_portal_settings',
+            self::OPTION_CHECKOUT_URL_STARTER,
+            array(
+                'type' => 'string',
+                'sanitize_callback' => 'esc_url_raw',
+                'show_in_rest' => false,
+                'default' => '',
+            )
+        );
+        register_setting(
+            'ltl_saas_portal_settings',
+            self::OPTION_CHECKOUT_URL_PRO,
+            array(
+                'type' => 'string',
+                'sanitize_callback' => 'esc_url_raw',
+                'show_in_rest' => false,
+                'default' => '',
+            )
+        );
+        register_setting(
+            'ltl_saas_portal_settings',
+            self::OPTION_CHECKOUT_URL_AGENCY,
+            array(
+                'type' => 'string',
+                'sanitize_callback' => 'esc_url_raw',
                 'show_in_rest' => false,
                 'default' => '',
             )
@@ -187,6 +221,33 @@ class LTL_SAAS_Portal_Admin {
         echo '<th scope="row">Ping URL</th>';
         echo '<td>';
         echo '<code>https://' . esc_html($_SERVER['HTTP_HOST']) . '/wp-json/ltl-saas/v1/gumroad/ping?secret=XXXX</code>';
+        echo '</td></tr>';
+
+        // Issue #19: Marketing Section - Checkout Links
+        echo '<tr valign="top"><th colspan="2"><h2>Marketing (Pricing Landing Page)</h2></th></tr>';
+
+        echo '<tr valign="top">';
+        echo '<th scope="row">Checkout URL - Starter</th>';
+        echo '<td>';
+        $url_starter = get_option(self::OPTION_CHECKOUT_URL_STARTER, '');
+        echo '<input type="url" name="' . esc_attr(self::OPTION_CHECKOUT_URL_STARTER) . '" value="' . esc_attr($url_starter) . '" style="width:100%; max-width:400px;">';
+        echo '<br><span style="color:#888;">Beispiel: https://gumroad.com/l/ltl-starter</span>';
+        echo '</td></tr>';
+
+        echo '<tr valign="top">';
+        echo '<th scope="row">Checkout URL - Pro</th>';
+        echo '<td>';
+        $url_pro = get_option(self::OPTION_CHECKOUT_URL_PRO, '');
+        echo '<input type="url" name="' . esc_attr(self::OPTION_CHECKOUT_URL_PRO) . '" value="' . esc_attr($url_pro) . '" style="width:100%; max-width:400px;">';
+        echo '<br><span style="color:#888;">Beispiel: https://gumroad.com/l/ltl-pro</span>';
+        echo '</td></tr>';
+
+        echo '<tr valign="top">';
+        echo '<th scope="row">Checkout URL - Agency</th>';
+        echo '<td>';
+        $url_agency = get_option(self::OPTION_CHECKOUT_URL_AGENCY, '');
+        echo '<input type="url" name="' . esc_attr(self::OPTION_CHECKOUT_URL_AGENCY) . '" value="' . esc_attr($url_agency) . '" style="width:100%; max-width:400px;">';
+        echo '<br><span style="color:#888;">Beispiel: https://gumroad.com/l/ltl-agency</span>';
         echo '</td></tr>';
 
         echo '</table>';

@@ -43,6 +43,20 @@ class LTL_SAAS_Portal_REST {
             'callback' => array( $this, 'gumroad_ping' ),
             'permission_callback' => '__return_true',
         ) );
+
+        // Issue #20: Test WordPress Connection
+        register_rest_route( self::NAMESPACE, '/test-connection', array(
+            'methods'  => 'POST',
+            'callback' => array( $this, 'test_wp_connection' ),
+            'permission_callback' => array( $this, 'permission_user_logged_in' ),
+        ) );
+
+        // Issue #20: Test RSS Feed
+        register_rest_route( self::NAMESPACE, '/test-rss', array(
+            'methods'  => 'POST',
+            'callback' => array( $this, 'test_rss_feed' ),
+            'permission_callback' => array( $this, 'permission_user_logged_in' ),
+        ) );
     }
 
     /**
@@ -75,9 +89,128 @@ class LTL_SAAS_Portal_REST {
         $recurrence = isset($params['recurrence']) ? sanitize_text_field($params['recurrence']) : '';
         $refunded = isset($params['refunded']) ? $params['refunded'] : '';
         $sale_id = isset($params['sale_id']) ? sanitize_text_field($params['sale_id']) : '';
-        // TODO: Provisioning logic in next prompt
+
+        // Prompt C: User & Settings Provisioning
+        if (!$email) {
+            error_log('[LTL-SAAS] Gumroad ping: missing email');
+            return new WP_REST_Response(['ok' => true], 200); // Respond quickly
+        }
+
+        // Find or create user
+        $user = get_user_by('email', $email);
+        if (!$user) {
+            // Create new user
+            $user_login = sanitize_user(sanitize_email(explode('@', $email)[0]));
+            $user_login = $this->ensure_unique_username($user_login);
+            $user_pass = wp_generate_password(16, true, true);
+            $user_id = wp_create_user($user_login, $user_pass, $email);
+            if (is_wp_error($user_id)) {
+                error_log('[LTL-SAAS] Failed to create user: ' . $user_id->get_error_message());
+                return new WP_REST_Response(['ok' => true], 200); // Respond quickly
+            }
+            // Set user role to subscriber
+            $new_user = get_user_by('ID', $user_id);
+            if ($new_user) {
+                $new_user->add_role('subscriber');
+            }
+            // Send welcome email
+            $this->send_gumroad_welcome_email($email, $user_login, $user_pass);
+            $user_id = $user_id;
+        } else {
+            $user_id = $user->ID;
+        }
+
+        // Determine plan from product_map
+        $product_map = LTL_SAAS_Portal_Secrets::get_gumroad_product_map();
+        $plan = isset($product_map[$product_id]) ? $product_map[$product_id] : 'starter';
+        if (!$product_id) {
+            error_log('[LTL-SAAS] Gumroad ping: unmapped product_id=' . $product_id);
+        }
+
+        // Prompt D: Refunded handling
+        $is_active = 1;
+        $deactivated_reason = '';
+        if ($refunded === 'true' || $refunded === '1') {
+            $is_active = 0;
+            $deactivated_reason = 'refunded';
+        }
+
+        // Upsert settings
+        global $wpdb;
+        $settings_table = $wpdb->prefix . 'ltl_saas_settings';
+        $existing = $wpdb->get_row($wpdb->prepare("SELECT id FROM $settings_table WHERE user_id = %d", $user_id));
+
+        if ($existing) {
+            // Update
+            $wpdb->update(
+                $settings_table,
+                [
+                    'plan' => $plan,
+                    'is_active' => $is_active,
+                    'updated_at' => current_time('mysql'),
+                ],
+                ['user_id' => $user_id]
+            );
+        } else {
+            // Insert
+            $wpdb->insert(
+                $settings_table,
+                [
+                    'user_id' => $user_id,
+                    'plan' => $plan,
+                    'is_active' => $is_active,
+                    'posts_this_month' => 0,
+                    'posts_period_start' => date('Y-m-01'),
+                    'created_at' => current_time('mysql'),
+                    'updated_at' => current_time('mysql'),
+                ]
+            );
+        }
+
+        if ($subscription_id) {
+            update_user_meta($user_id, 'gumroad_subscription_id', sanitize_text_field($subscription_id));
+        }
+
         // Respond quickly
         return new WP_REST_Response(['ok' => true], 200);
+    }
+
+    /**
+     * Ensure username is unique
+     */
+    private function ensure_unique_username($base_login) {
+        $login = $base_login;
+        $counter = 1;
+        while (username_exists($login)) {
+            $login = $base_login . $counter;
+            $counter++;
+        }
+        return $login;
+    }
+
+    /**
+     * Send welcome email to new Gumroad customer
+     */
+    private function send_gumroad_welcome_email($email, $user_login, $user_pass) {
+        $subject = 'Willkommen bei LTL AutoBlog Cloud!';
+        $login_url = wp_login_url();
+        $reset_url = wp_lostpassword_url();
+        $message = sprintf(
+            'Hallo,\n\n' .
+            'Dein Account wurde erfolgreich erstellt!\n\n' .
+            'Login: %s\n' .
+            'Benutzer: %s\n' .
+            'Passwort: %s\n\n' .
+            'Login URL: %s\n' .
+            'Passwort zurücksetzen: %s\n\n' .
+            'Viel Erfolg!\nLTL AutoBlog Cloud Team',
+            get_bloginfo('name'),
+            $user_login,
+            $user_pass,
+            $login_url,
+            $reset_url
+        );
+        wp_mail($email, $subject, $message);
     }
 
     /**
@@ -290,56 +423,107 @@ class LTL_SAAS_Portal_REST {
             return new WP_REST_Response(['error' => 'DB insert failed'], 500);
         }
     }
+
+    /**
+     * Issue #20: Permission check - user must be logged in
+     */
+    public function permission_user_logged_in() {
+        return is_user_logged_in();
+    }
+
+    /**
+     * Issue #20: POST /test-connection
+     * Test WordPress connection with provided credentials
+     * Body: wp_url, wp_user, wp_app_password
+     */
     public function test_wp_connection( $request ) {
-            $user_id = get_current_user_id();
-            global $wpdb;
-            // Access control: block inactive users
-            $settings_table = $wpdb->prefix . 'ltl_saas_settings';
-            $existing_settings = $wpdb->get_row($wpdb->prepare("SELECT is_active FROM $settings_table WHERE user_id = %d", $user_id));
-            if ($existing_settings && isset($existing_settings->is_active) && intval($existing_settings->is_active) === 0) {
-                return new WP_REST_Response( [ 'success' => false, 'message' => 'Account inaktiv' ], 403 );
-            }
-            $table = $wpdb->prefix . 'ltl_saas_connections';
-            $conn = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM $table WHERE user_id = %d", $user_id ) );
-            if ( ! $conn ) {
-                return new WP_REST_Response( [ 'success' => false, 'message' => 'Keine Verbindung gespeichert.' ], 400 );
-            }
-            require_once LTL_SAAS_PORTAL_PLUGIN_DIR . 'includes/class-ltl-saas-portal-crypto.php';
-            $wp_url = $conn->wp_url;
-            $wp_user = $conn->wp_user;
-            $wp_app_password = LTL_SAAS_Portal_Crypto::decrypt( $conn->wp_app_password_enc );
-            if ( is_wp_error($wp_app_password) || ! $wp_url || ! $wp_user || ! $wp_app_password ) {
-                return new WP_REST_Response( [ 'success' => false, 'message' => 'Ungültige Verbindungsdaten.' ], 400 );
-            }
-            $api_url = rtrim( $wp_url, '/' ) . '/wp-json/wp/v2/users/me';
-            $auth = base64_encode( $wp_user . ':' . $wp_app_password );
-            $args = [
-                'headers' => [
-                    'Authorization' => 'Basic ' . $auth,
-                    'Accept' => 'application/json',
-                ],
-                'timeout' => 10,
-            ];
-            $resp = wp_remote_get( $api_url, $args );
-            if ( is_wp_error( $resp ) ) {
-                return new WP_REST_Response( [ 'success' => false, 'message' => $resp->get_error_message() ], 500 );
-            }
-            $code = wp_remote_retrieve_response_code( $resp );
-            $body = wp_remote_retrieve_body( $resp );
-            $json = json_decode( $body, true );
-            if ( $code === 200 && isset($json['id']) ) {
-                return [
-                    'success' => true,
-                    'remote_user' => [
-                        'id' => $json['id'],
-                        'name' => $json['name'] ?? '',
-                        'roles' => $json['roles'] ?? [],
-                    ],
-                ];
-            } else {
-                return new WP_REST_Response( [ 'success' => false, 'message' => $json['message'] ?? 'Fehler', 'response' => $json ], 400 );
-            }
+        $params = $request->get_json_params();
+        $wp_url = isset( $params['wp_url'] ) ? esc_url_raw( $params['wp_url'] ) : '';
+        $wp_user = isset( $params['wp_user'] ) ? sanitize_user( $params['wp_user'] ) : '';
+        $wp_pass = isset( $params['wp_app_password'] ) ? $params['wp_app_password'] : '';
+
+        if ( ! $wp_url || ! $wp_user || ! $wp_pass ) {
+            return new WP_REST_Response( array( 'success' => false, 'message' => 'Missing fields' ), 400 );
         }
+
+        // Try to get /wp-json/wp/v2/users/me
+        $api_url = rtrim( $wp_url, '/' ) . '/wp-json/wp/v2/users/me';
+        $auth = base64_encode( $wp_user . ':' . $wp_pass );
+
+        $response = wp_remote_get( $api_url, array(
+            'headers' => array( 'Authorization' => 'Basic ' . $auth ),
+            'timeout' => 5,
+            'sslverify' => true,
+        ) );
+
+        $code = wp_remote_retrieve_response_code( $response );
+        if ( $code === 200 ) {
+            $body = json_decode( wp_remote_retrieve_body( $response ), true );
+            return array(
+                'success' => true,
+                'user' => isset( $body['name'] ) ? $body['name'] : 'OK',
+            );
+        } else {
+            $error_msg = 'HTTP ' . $code;
+            if ( is_wp_error( $response ) ) {
+                $error_msg = $response->get_error_message();
+            }
+            return array(
+                'success' => false,
+                'message' => $error_msg,
+            );
+        }
+    }
+
+    /**
+     * Issue #20: POST /test-rss
+     * Test RSS feed validity and fetch first item title
+     * Body: rss_url
+     */
+    public function test_rss_feed( $request ) {
+        $params = $request->get_json_params();
+        $rss_url = isset( $params['rss_url'] ) ? esc_url_raw( $params['rss_url'] ) : '';
+
+        if ( ! $rss_url ) {
+            return new WP_REST_Response( array( 'success' => false, 'message' => 'Missing RSS URL' ), 400 );
+        }
+
+        $response = wp_remote_get( $rss_url, array(
+            'timeout' => 5,
+            'sslverify' => true,
+        ) );
+
+        $code = wp_remote_retrieve_response_code( $response );
+        if ( $code !== 200 ) {
+            return array(
+                'success' => false,
+                'message' => 'HTTP ' . $code,
+            );
+        }
+
+        $body = wp_remote_retrieve_body( $response );
+        $xml = simplexml_load_string( $body );
+
+        if ( $xml === false ) {
+            return array(
+                'success' => false,
+                'message' => 'Invalid XML/RSS',
+            );
+        }
+
+        // Try to get first item title
+        $title = '';
+        if ( isset( $xml->channel->item[0]->title ) ) {
+            $title = (string) $xml->channel->item[0]->title;
+        } elseif ( isset( $xml->entry[0]->title ) ) {
+            $title = (string) $xml->entry[0]->title;
+        }
+
+        return array(
+            'success' => true,
+            'title' => substr( $title, 0, 50 ),
+        );
+    }
 
     public function health( $request ) {
         return array(

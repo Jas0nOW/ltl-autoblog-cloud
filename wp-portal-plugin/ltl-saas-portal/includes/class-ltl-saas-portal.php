@@ -1,3 +1,4 @@
+<?php
 // --- PLAN LIMIT HELPER ---
 if (!function_exists('ltl_saas_plan_posts_limit')) {
     function ltl_saas_plan_posts_limit($plan) {
@@ -33,7 +34,6 @@ if (!function_exists('ltl_saas_get_tenant_state')) {
         ];
     }
 }
-<?php
 if ( ! defined( 'ABSPATH' ) ) { exit; }
 
 require_once LTL_SAAS_PORTAL_PLUGIN_DIR . 'includes/class-ltl-saas-portal-crypto.php';
@@ -66,6 +66,7 @@ final class LTL_SAAS_Portal {
         $this->rest  = new LTL_SAAS_Portal_REST();
 
         add_shortcode( 'ltl_saas_dashboard', array( $this, 'shortcode_dashboard' ) );
+        add_shortcode( 'ltl_saas_pricing', array( $this, 'shortcode_pricing' ) );
     }
 
     /**
@@ -172,43 +173,43 @@ final class LTL_SAAS_Portal {
             if ($existing_settings && isset($existing_settings->is_active) && intval($existing_settings->is_active) === 0) {
                 $error = 'Account inaktiv. Einstellungen können nicht gespeichert werden.';
             } else {
-            $rss_url = esc_url_raw(trim($_POST['rss_url'] ?? ''));
-            $language = $_POST['language'] ?? '';
-            $tone = $_POST['tone'] ?? '';
-            $frequency = $_POST['frequency'] ?? '';
-            $publish_mode = $_POST['publish_mode'] ?? '';
+                $rss_url = esc_url_raw(trim($_POST['rss_url'] ?? ''));
+                $language = $_POST['language'] ?? '';
+                $tone = $_POST['tone'] ?? '';
+                $frequency = $_POST['frequency'] ?? '';
+                $publish_mode = $_POST['publish_mode'] ?? '';
 
-            if ($rss_url && !filter_var($rss_url, FILTER_VALIDATE_URL)) {
-                $error = 'Bitte eine gültige RSS-URL angeben.';
-            } elseif ($language && !in_array($language, $languages, true)) {
-                $error = 'Ungültige Sprache.';
-            } elseif ($tone && !in_array($tone, $tones, true)) {
-                $error = 'Ungültiger Ton.';
-            } elseif ($frequency && !in_array($frequency, $frequencies, true)) {
-                $error = 'Ungültige Frequenz.';
-            } elseif ($publish_mode && !in_array($publish_mode, $publish_modes, true)) {
-                $error = 'Ungültiger Veröffentlichungsmodus.';
-            } else {
-                $row = [
-                    'user_id' => $user_id,
-                    'rss_url' => $rss_url,
-                    'language' => $language,
-                    'tone' => $tone,
-                    'frequency' => $frequency,
-                    'publish_mode' => $publish_mode,
-                    'updated_at' => current_time('mysql'),
-                ];
-                $exists = $wpdb->get_var($wpdb->prepare("SELECT id FROM $settings_table WHERE user_id = %d", $user_id));
-                if ($exists) {
-                    $wpdb->update($settings_table, $row, ['user_id' => $user_id]);
+                if ($rss_url && !filter_var($rss_url, FILTER_VALIDATE_URL)) {
+                    $error = 'Bitte eine gültige RSS-URL angeben.';
+                } elseif ($language && !in_array($language, $languages, true)) {
+                    $error = 'Ungültige Sprache.';
+                } elseif ($tone && !in_array($tone, $tones, true)) {
+                    $error = 'Ungültiger Ton.';
+                } elseif ($frequency && !in_array($frequency, $frequencies, true)) {
+                    $error = 'Ungültige Frequenz.';
+                } elseif ($publish_mode && !in_array($publish_mode, $publish_modes, true)) {
+                    $error = 'Ungültiger Veröffentlichungsmodus.';
                 } else {
-                    $row['created_at'] = current_time('mysql');
-                    $row['is_active'] = 1; // default active
-                    $row['plan'] = 'free';
-                    $wpdb->insert($settings_table, $row);
+                    $row = [
+                        'user_id' => $user_id,
+                        'rss_url' => $rss_url,
+                        'language' => $language,
+                        'tone' => $tone,
+                        'frequency' => $frequency,
+                        'publish_mode' => $publish_mode,
+                        'updated_at' => current_time('mysql'),
+                    ];
+                    $exists = $wpdb->get_var($wpdb->prepare("SELECT id FROM $settings_table WHERE user_id = %d", $user_id));
+                    if ($exists) {
+                        $wpdb->update($settings_table, $row, ['user_id' => $user_id]);
+                    } else {
+                        $row['created_at'] = current_time('mysql');
+                        $row['is_active'] = 1; // default active
+                        $row['plan'] = 'free';
+                        $wpdb->insert($settings_table, $row);
+                    }
+                    $settings_success = 'Saved ✓';
                 }
-                $settings_success = 'Saved ✓';
-            }
             }
         }
 
@@ -219,34 +220,35 @@ final class LTL_SAAS_Portal {
             if ($existing_settings && isset($existing_settings->is_active) && intval($existing_settings->is_active) === 0) {
                 $error = 'Account inaktiv. Verbindung kann nicht gespeichert werden.';
             } else {
-            $wp_url = esc_url_raw(trim($_POST['wp_url'] ?? ''));
-            $wp_user = sanitize_user(trim($_POST['wp_user'] ?? ''));
-            $wp_app_password = trim($_POST['wp_app_password'] ?? '');
+                $wp_url = esc_url_raw(trim($_POST['wp_url'] ?? ''));
+                $wp_user = sanitize_user(trim($_POST['wp_user'] ?? ''));
+                $wp_app_password = trim($_POST['wp_app_password'] ?? '');
 
-            if ( empty($wp_url) || ! filter_var($wp_url, FILTER_VALIDATE_URL) ) {
-                $error = 'Bitte eine gültige WordPress-URL angeben.';
-            } elseif ( empty($wp_user) ) {
-                $error = 'Bitte einen gültigen Benutzernamen oder E-Mail angeben.';
-            } elseif ( empty($wp_app_password) ) {
-                $error = 'Bitte ein Application Password angeben.';
-            } else {
-                $enc = LTL_SAAS_Portal_Crypto::encrypt($wp_app_password);
-                $row = [
-                    'user_id' => $user_id,
-                    'wp_url' => $wp_url,
-                    'wp_user' => $wp_user,
-                    'wp_app_password_enc' => $enc,
-                    'updated_at' => current_time('mysql'),
-                ];
-                // Insert or update
-                $exists = $wpdb->get_var($wpdb->prepare("SELECT id FROM $table WHERE user_id = %d", $user_id));
-                if ($exists) {
-                    $wpdb->update($table, $row, ['user_id' => $user_id]);
+                if ( empty($wp_url) || ! filter_var($wp_url, FILTER_VALIDATE_URL) ) {
+                    $error = 'Bitte eine gültige WordPress-URL angeben.';
+                } elseif ( empty($wp_user) ) {
+                    $error = 'Bitte einen gültigen Benutzernamen oder E-Mail angeben.';
+                } elseif ( empty($wp_app_password) ) {
+                    $error = 'Bitte ein Application Password angeben.';
                 } else {
-                    $row['created_at'] = current_time('mysql');
-                    $wpdb->insert($table, $row);
+                    $enc = LTL_SAAS_Portal_Crypto::encrypt($wp_app_password);
+                    $row = [
+                        'user_id' => $user_id,
+                        'wp_url' => $wp_url,
+                        'wp_user' => $wp_user,
+                        'wp_app_password_enc' => $enc,
+                        'updated_at' => current_time('mysql'),
+                    ];
+                    // Insert or update
+                    $exists = $wpdb->get_var($wpdb->prepare("SELECT id FROM $table WHERE user_id = %d", $user_id));
+                    if ($exists) {
+                        $wpdb->update($table, $row, ['user_id' => $user_id]);
+                    } else {
+                        $row['created_at'] = current_time('mysql');
+                        $wpdb->insert($table, $row);
+                    }
+                    $success = 'Verbindung gespeichert.';
                 }
-                $success = 'Verbindung gespeichert.';
             }
         }
 
@@ -281,38 +283,131 @@ final class LTL_SAAS_Portal {
             <h2>LTL AutoBlog Cloud</h2>
             <?php if ($error): ?><div style="color:red;"><strong><?php echo esc_html($error); ?></strong></div><?php endif; ?>
             <?php if ($success): ?><div style="color:green;"><strong><?php echo esc_html($success); ?></strong></div><?php endif; ?>
-            <form method="post" style="margin-bottom:2em;">
+
+            <!-- Issue #20: Setup Progress Block -->
+            <div style="background: #f8f9fa; border: 1px solid #ddd; border-radius: 8px; padding: 20px; margin-bottom: 30px;">
+                <h2>📋 Dein Setup-Fortschritt</h2>
+
+                <!-- Step 1: WordPress Connection -->
+                <div style="display: flex; align-items: center; padding: 10px 0; border-bottom: 1px solid #eee;">
+                    <div style="font-size: 1.5em; margin-right: 15px;">
+                        [<?php echo !empty($wp_url) ? '✅' : '⚠️'; ?>]
+                    </div>
+                    <div>
+                        <strong>Schritt 1: WordPress verbinden</strong>
+                        <p style="margin: 5px 0; color: #666; font-size: 0.9em;">
+                            <?php echo !empty($wp_url) ? 'Verbunden ✓' : 'Noch nicht konfiguriert'; ?>
+                        </p>
+                    </div>
+                    <div style="margin-left: auto;">
+                        <a href="#wp-connection" class="button <?php echo !empty($wp_url) ? 'button-secondary' : 'button-primary'; ?>">
+                            <?php echo !empty($wp_url) ? 'Bearbeiten' : 'Jetzt verbinden'; ?>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Step 2: RSS + Settings -->
+                <div style="display: flex; align-items: center; padding: 10px 0; border-bottom: 1px solid #eee;">
+                    <div style="font-size: 1.5em; margin-right: 15px;">
+                        [<?php echo !empty($rss_url) ? '✅' : '⚠️'; ?>]
+                    </div>
+                    <div>
+                        <strong>Schritt 2: RSS-Feed + Einstellungen</strong>
+                        <p style="margin: 5px 0; color: #666; font-size: 0.9em;">
+                            <?php echo !empty($rss_url) ? 'RSS: ' . esc_html(substr($rss_url, 0, 30)) . '...' : 'Noch nicht konfiguriert'; ?>
+                        </p>
+                    </div>
+                    <div style="margin-left: auto;">
+                        <a href="#settings" class="button <?php echo !empty($rss_url) ? 'button-secondary' : 'button-primary'; ?>">
+                            <?php echo !empty($rss_url) ? 'Bearbeiten' : 'Jetzt konfigurieren'; ?>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <form method="post" style="margin-bottom:2em;" id="wp-connection">
                 <?php wp_nonce_field('ltl_saas_save_connection', 'ltl_saas_nonce'); ?>
+                <h3>Schritt 1: WordPress verbinden</h3>
                 <table>
-                    <tr><td>WordPress-URL:</td><td><input type="url" name="wp_url" value="<?php echo esc_attr($wp_url); ?>" required style="width:300px;"></td></tr>
-                    <tr><td>Benutzername/E-Mail:</td><td><input type="text" name="wp_user" value="<?php echo esc_attr($wp_user); ?>" required></td></tr>
-                    <tr><td>Application Password:</td><td><input type="password" name="wp_app_password" value="" autocomplete="new-password"></td></tr>
+                    <tr>
+                        <td><label for="wp_url">🔗 WordPress URL <span title="Deine Website Domain" style="cursor: help; color: #667eea;">ℹ️</span></label></td>
+                        <td>
+                            <input type="url" id="wp_url" name="wp_url" value="<?php echo esc_attr($wp_url); ?>" placeholder="https://meinblog.de" required style="width:300px;">
+                            <small style="color: #666;">✓ Muss https:// sein | 💡 Beispiel: https://meinseite.de (ohne /wp-admin)</small>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><label for="wp_user">👤 Benutzername/E-Mail <span title="Dein WP Admin Benutzer" style="cursor: help; color: #667eea;">ℹ️</span></label></td>
+                        <td>
+                            <input type="text" id="wp_user" name="wp_user" value="<?php echo esc_attr($wp_user); ?>" placeholder="admin@meinblog.de" required>
+                            <small style="color: #666;">💡 Der Benutzer, der die App-Passwörter erstellt hat</small>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><label for="wp_app_password">🔐 Application Password <span title="Generiertes Passwort aus WP" style="cursor: help; color: #667eea;">ℹ️</span></label></td>
+                        <td>
+                            <input type="password" id="wp_app_password" name="wp_app_password" placeholder="xxxx xxxx xxxx xxxx" autocomplete="new-password">
+                            <small style="color: #666;">💡 Generieren unter: WP-Admin → Nutzer → Profil → Anwendungspasswörter</small>
+                        </td>
+                    </tr>
                 </table>
                 <button type="submit" name="ltl_saas_save_connection">Speichern</button>
-                <button type="button" id="ltl-saas-test-connection">Test connection</button>
+                <button type="button" id="ltl-saas-test-connection" class="button button-secondary">🧪 Test Connection</button>
             </form>
             <div id="ltl-saas-test-result"></div>
 
-            <form method="post">
+            <form method="post" id="settings">
                 <?php wp_nonce_field('ltl_saas_save_settings', 'ltl_saas_settings_nonce'); ?>
+                <h3>Schritt 2: RSS-Feed + Einstellungen</h3>
                 <table>
-                    <tr><td>RSS-Feed URL:</td><td><input type="url" name="rss_url" value="<?php echo esc_attr($rss_url); ?>" style="width:300px;"></td></tr>
-                    <tr><td>Sprache:</td><td><select name="language">
-                        <option value="">Bitte wählen</option>
-                        <?php foreach($languages as $l): ?><option value="<?php echo $l; ?>" <?php selected($language, $l); ?>><?php echo strtoupper($l); ?></option><?php endforeach; ?>
-                    </select></td></tr>
-                    <tr><td>Ton:</td><td><select name="tone">
-                        <option value="">Bitte wählen</option>
-                        <?php foreach($tones as $t): ?><option value="<?php echo $t; ?>" <?php selected($tone, $t); ?>><?php echo ucfirst($t); ?></option><?php endforeach; ?>
-                    </select></td></tr>
-                    <tr><td>Frequenz:</td><td><select name="frequency">
-                        <option value="">Bitte wählen</option>
-                        <?php foreach($frequencies as $f): ?><option value="<?php echo $f; ?>" <?php selected($frequency, $f); ?>><?php echo $f === '3x_week' ? '3x/Woche' : ucfirst($f); ?></option><?php endforeach; ?>
-                    </select></td></tr>
-                    <tr><td>Veröffentlichung:</td><td><select name="publish_mode">
-                        <option value="">Bitte wählen</option>
-                        <?php foreach($publish_modes as $p): ?><option value="<?php echo $p; ?>" <?php selected($publish_mode, $p); ?>><?php echo ucfirst($p); ?></option><?php endforeach; ?>
-                    </select></td></tr>
+                    <tr>
+                        <td><label for="rss_url">📰 RSS-Quelle <span title="Deine RSS URL" style="cursor: help; color: #667eea;">ℹ️</span></label></td>
+                        <td>
+                            <input type="url" id="rss_url" name="rss_url" value="<?php echo esc_attr($rss_url); ?>" placeholder="https://beispiel.de/feed" style="width:300px;">
+                            <small style="color: #666;">✓ Muss https:// sein | 💡 Beispiele: blog.de/feed, news-portal.com/rss | <a href="#" id="ltl-saas-test-rss" style="text-decoration:none; cursor:pointer; color: #667eea;">🧪 Test RSS</a></small>
+                            <div id="ltl-saas-rss-result"></div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><label for="language">🌍 Sprache</label></td>
+                        <td>
+                            <select id="language" name="language">
+                                <option value="">Bitte wählen</option>
+                                <?php foreach($languages as $l): ?><option value="<?php echo $l; ?>" <?php selected($language, $l); ?>><?php echo strtoupper($l); ?></option><?php endforeach; ?>
+                            </select>
+                            <small style="color: #666;">💡 Die Sprache, in der Posts geschrieben werden</small>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><label for="tone">✨ Ton</label></td>
+                        <td>
+                            <select id="tone" name="tone">
+                                <option value="">Bitte wählen</option>
+                                <?php foreach($tones as $t): ?><option value="<?php echo $t; ?>" <?php selected($tone, $t); ?>><?php echo ucfirst($t); ?></option><?php endforeach; ?>
+                            </select>
+                            <small style="color: #666;">💡 z.B. 'professional' oder 'funny'</small>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><label for="frequency">📅 Frequenz</label></td>
+                        <td>
+                            <select id="frequency" name="frequency">
+                                <option value="">Bitte wählen</option>
+                                <?php foreach($frequencies as $f): ?><option value="<?php echo $f; ?>" <?php selected($frequency, $f); ?>><?php echo $f === '3x_week' ? '3x/Woche' : ucfirst($f); ?></option><?php endforeach; ?>
+                            </select>
+                            <small style="color: #666;">💡 Wie oft sollen Posts veröffentlicht werden?</small>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><label for="publish_mode">📝 Veröffentlichung</label></td>
+                        <td>
+                            <select id="publish_mode" name="publish_mode">
+                                <option value="">Bitte wählen</option>
+                                <?php foreach($publish_modes as $p): ?><option value="<?php echo $p; ?>" <?php selected($publish_mode, $p); ?>><?php echo ucfirst($p); ?></option><?php endforeach; ?>
+                            </select>
+                            <small style="color: #666;">💡 'draft' = Vorlage prüfen | 'publish' = automatisch live</small>
+                        </td>
+                    </tr>
                 </table>
                 <button type="submit" name="ltl_saas_save_settings">Settings speichern</button>
                 <?php if ($settings_success): ?><span style="color:green;margin-left:1em;"><strong><?php echo esc_html($settings_success); ?></strong></span><?php endif; ?>
@@ -343,34 +438,307 @@ final class LTL_SAAS_Portal {
             </div>
         </div>
         <script>
+        // Issue #20: Test WordPress Connection
         document.getElementById('ltl-saas-test-connection').addEventListener('click', function(e) {
             e.preventDefault();
             var btn = this;
             btn.disabled = true;
             var result = document.getElementById('ltl-saas-test-result');
-            result.innerHTML = 'Testing...';
-            fetch('<?php echo esc_url(rest_url('ltl-saas/v1/wp-connection/test')); ?>', {
+            result.innerHTML = '⏳ Teste Verbindung...';
+            result.style.color = '#666';
+
+            var wpUrl = document.getElementById('wp_url').value;
+            var wpUser = document.getElementById('wp_user').value;
+            var wpPass = document.getElementById('wp_app_password').value;
+
+            if (!wpUrl || !wpUser || !wpPass) {
+                result.innerHTML = '❌ Alle Felder erforderlich (URL, User, Password)';
+                result.style.color = '#dc3545';
+                btn.disabled = false;
+                return;
+            }
+
+            fetch('<?php echo esc_url(rest_url('ltl-saas/v1/test-connection')); ?>', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'X-WP-Nonce': '<?php echo wp_create_nonce('wp_rest'); ?>' },
                 credentials: 'same-origin',
-                body: JSON.stringify({})
+                body: JSON.stringify({
+                    wp_url: wpUrl,
+                    wp_user: wpUser,
+                    wp_app_password: wpPass
+                })
             })
             .then(r => r.json())
             .then(data => {
                 if (data.success) {
-                    result.innerHTML = '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+                    result.innerHTML = '✅ Verbindung erfolgreich! (User: ' + data.user + ')';
+                    result.style.color = '#28a745';
                 } else {
-                    result.innerHTML = '<span style="color:red">' + (data.message || 'Fehler') + '</span>';
+                    result.innerHTML = '❌ Fehler: ' + (data.message || 'Unbekannter Fehler');
+                    result.style.color = '#dc3545';
                 }
             })
-            .catch(err => { result.innerHTML = '<span style="color:red">' + err + '</span>'; })
+            .catch(err => {
+                result.innerHTML = '❌ Netzwerkfehler: ' + err;
+                result.style.color = '#dc3545';
+            })
             .finally(() => { btn.disabled = false; });
+        });
+
+        // Issue #20: Test RSS Feed
+        document.getElementById('ltl-saas-test-rss').addEventListener('click', function(e) {
+            e.preventDefault();
+            var rssUrl = document.getElementById('rss_url').value;
+            var result = document.getElementById('ltl-saas-rss-result');
+            result.innerHTML = '⏳ Teste RSS...';
+            result.style.color = '#666';
+
+            if (!rssUrl) {
+                result.innerHTML = '❌ RSS-URL erforderlich';
+                result.style.color = '#dc3545';
+                return;
+            }
+
+            fetch('<?php echo esc_url(rest_url('ltl-saas/v1/test-rss')); ?>', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-WP-Nonce': '<?php echo wp_create_nonce('wp_rest'); ?>' },
+                credentials: 'same-origin',
+                body: JSON.stringify({
+                    rss_url: rssUrl
+                })
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    result.innerHTML = '✅ RSS OK! Titel: ' + data.title;
+                    result.style.color = '#28a745';
+                } else {
+                    result.innerHTML = '❌ Fehler: ' + (data.message || 'Unbekannter Fehler');
+                    result.style.color = '#dc3545';
+                }
+            })
+            .catch(err => {
+                result.innerHTML = '❌ Netzwerkfehler: ' + err;
+                result.style.color = '#dc3545';
+            });
         });
         </script>
         <?php
         }
         return ob_get_clean();
     }
+
+    /**
+     * Issue #19: Pricing Landing Page Shortcode
+     * Usage: [ltl_saas_pricing] or [ltl_saas_pricing lang="en"]
+     */
+    public function shortcode_pricing( $atts = [] ) {
+        $atts = shortcode_atts( array(
+            'lang' => 'de',
+        ), $atts );
+
+        $lang = strtolower( $atts['lang'] );
+        if ( ! in_array( $lang, array( 'de', 'en' ), true ) ) {
+            $lang = 'de';
+        }
+
+        // Get checkout URLs from admin settings
+        $url_starter = get_option( 'ltl_saas_checkout_url_starter', '' );
+        $url_pro = get_option( 'ltl_saas_checkout_url_pro', '' );
+        $url_agency = get_option( 'ltl_saas_checkout_url_agency', '' );
+
+        // Bilingual content
+        $content = array(
+            'de' => array(
+                'hero_title' => 'Schreibe automatisch mit KI',
+                'hero_subtitle' => 'Verwandle RSS-Feeds in SEO-optimierte WordPress-Posts',
+                'plan_starter' => 'Starter',
+                'plan_pro' => 'Pro',
+                'plan_agency' => 'Agency',
+                'price_starter' => '€19',
+                'price_pro' => '€49',
+                'price_agency' => 'Custom',
+                'period' => '/Monat',
+                'posts_starter' => 'bis 80 Posts/Monat',
+                'posts_pro' => 'bis 250 Posts/Monat',
+                'posts_agency' => 'Unbegrenzt',
+                'button' => 'Starten',
+                'contact' => 'Kontakt',
+            ),
+            'en' => array(
+                'hero_title' => 'Automatically Write with AI',
+                'hero_subtitle' => 'Turn RSS Feeds into SEO-optimized WordPress Posts',
+                'plan_starter' => 'Starter',
+                'plan_pro' => 'Pro',
+                'plan_agency' => 'Agency',
+                'price_starter' => '$19',
+                'price_pro' => '$49',
+                'price_agency' => 'Custom',
+                'period' => '/month',
+                'posts_starter' => 'up to 80 posts/month',
+                'posts_pro' => 'up to 250 posts/month',
+                'posts_agency' => 'Unlimited',
+                'button' => 'Get Started',
+                'contact' => 'Contact Sales',
+            ),
+        );
+
+        $txt = $content[ $lang ];
+
+        ob_start();
+        ?>
+        <style>
+            .ltl-saas-pricing {
+                background: #f8f9fa;
+                padding: 60px 20px;
+                font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            }
+            .ltl-saas-pricing-hero {
+                text-align: center;
+                margin-bottom: 60px;
+            }
+            .ltl-saas-pricing-hero h1 {
+                font-size: 2.5em;
+                margin: 0 0 10px 0;
+                color: #1a1a1a;
+            }
+            .ltl-saas-pricing-hero p {
+                font-size: 1.2em;
+                color: #666;
+                margin: 0;
+            }
+            .ltl-saas-pricing-plans {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+                gap: 30px;
+                max-width: 1200px;
+                margin: 0 auto;
+            }
+            .ltl-saas-pricing-card {
+                background: white;
+                border-radius: 12px;
+                padding: 30px;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                text-align: center;
+                position: relative;
+                transition: transform 0.3s, box-shadow 0.3s;
+            }
+            .ltl-saas-pricing-card:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+            }
+            .ltl-saas-pricing-card.featured {
+                transform: scale(1.05);
+                border: 3px solid #667eea;
+            }
+            .ltl-saas-pricing-card.featured:hover {
+                transform: scale(1.05) translateY(-5px);
+            }
+            .ltl-saas-pricing-card-title {
+                font-size: 1.5em;
+                font-weight: 600;
+                margin: 0 0 15px 0;
+                color: #1a1a1a;
+            }
+            .ltl-saas-pricing-card-price {
+                font-size: 2.5em;
+                font-weight: 700;
+                color: #667eea;
+                margin: 15px 0 5px 0;
+            }
+            .ltl-saas-pricing-card-period {
+                color: #888;
+                font-size: 0.9em;
+                margin-bottom: 20px;
+            }
+            .ltl-saas-pricing-card-desc {
+                color: #666;
+                font-size: 0.95em;
+                margin-bottom: 30px;
+            }
+            .ltl-saas-pricing-card-button {
+                display: inline-block;
+                padding: 12px 30px;
+                background: #667eea;
+                color: white;
+                text-decoration: none;
+                border-radius: 6px;
+                font-weight: 600;
+                transition: background 0.3s;
+                border: none;
+                cursor: pointer;
+                font-size: 1em;
+            }
+            .ltl-saas-pricing-card-button:hover {
+                background: #5568d3;
+            }
+            .ltl-saas-pricing-card-button.secondary {
+                background: #f0f0f0;
+                color: #333;
+            }
+            .ltl-saas-pricing-card-button.secondary:hover {
+                background: #e0e0e0;
+            }
+            @media (max-width: 768px) {
+                .ltl-saas-pricing-hero h1 {
+                    font-size: 1.8em;
+                }
+                .ltl-saas-pricing-card.featured {
+                    transform: scale(1);
+                }
+                .ltl-saas-pricing-card.featured:hover {
+                    transform: translateY(-5px);
+                }
+                .ltl-saas-pricing-plans {
+                    gap: 20px;
+                }
+            }
+        </style>
+        <div class="ltl-saas-pricing">
+            <div class="ltl-saas-pricing-hero">
+                <h1><?php echo esc_html( $txt['hero_title'] ); ?></h1>
+                <p><?php echo esc_html( $txt['hero_subtitle'] ); ?></p>
+            </div>
+            <div class="ltl-saas-pricing-plans">
+                <!-- Starter Plan -->
+                <div class="ltl-saas-pricing-card">
+                    <h3 class="ltl-saas-pricing-card-title"><?php echo esc_html( $txt['plan_starter'] ); ?></h3>
+                    <div class="ltl-saas-pricing-card-price"><?php echo esc_html( $txt['price_starter'] ); ?></div>
+                    <div class="ltl-saas-pricing-card-period"><?php echo esc_html( $txt['period'] ); ?></div>
+                    <div class="ltl-saas-pricing-card-desc"><?php echo esc_html( $txt['posts_starter'] ); ?></div>
+                    <?php if ( ! empty( $url_starter ) ) : ?>
+                        <a href="<?php echo esc_url( $url_starter ); ?>" class="ltl-saas-pricing-card-button"><?php echo esc_html( $txt['button'] ); ?></a>
+                    <?php endif; ?>
+                </div>
+
+                <!-- Pro Plan (Featured) -->
+                <div class="ltl-saas-pricing-card featured">
+                    <h3 class="ltl-saas-pricing-card-title"><?php echo esc_html( $txt['plan_pro'] ); ?></h3>
+                    <div class="ltl-saas-pricing-card-price"><?php echo esc_html( $txt['price_pro'] ); ?></div>
+                    <div class="ltl-saas-pricing-card-period"><?php echo esc_html( $txt['period'] ); ?></div>
+                    <div class="ltl-saas-pricing-card-desc"><?php echo esc_html( $txt['posts_pro'] ); ?></div>
+                    <?php if ( ! empty( $url_pro ) ) : ?>
+                        <a href="<?php echo esc_url( $url_pro ); ?>" class="ltl-saas-pricing-card-button"><?php echo esc_html( $txt['button'] ); ?></a>
+                    <?php endif; ?>
+                </div>
+
+                <!-- Agency Plan -->
+                <div class="ltl-saas-pricing-card">
+                    <h3 class="ltl-saas-pricing-card-title"><?php echo esc_html( $txt['plan_agency'] ); ?></h3>
+                    <div class="ltl-saas-pricing-card-price"><?php echo esc_html( $txt['price_agency'] ); ?></div>
+                    <div class="ltl-saas-pricing-card-period"><?php echo esc_html( $txt['period'] ); ?></div>
+                    <div class="ltl-saas-pricing-card-desc"><?php echo esc_html( $txt['posts_agency'] ); ?></div>
+                    <?php if ( ! empty( $url_agency ) ) : ?>
+                        <a href="<?php echo esc_url( $url_agency ); ?>" class="ltl-saas-pricing-card-button secondary"><?php echo esc_html( $txt['contact'] ); ?></a>
+                    <?php endif; ?>
+                </div>
+            </div>
+        </div>
+        <?php
+        return ob_get_clean();
+    }
 }
 
-}
+
+
+
