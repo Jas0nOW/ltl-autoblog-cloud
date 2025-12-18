@@ -1,8 +1,8 @@
 # Make.com Multi-Tenant Scenario – Implementation Guide
 
-> **Version**: 1.0  
-> **Status**: Complete — Deliverable blueprint available  
-> **Location**: [blueprints/LTL-MULTI-TENANT-SCENARIO.md](../../blueprints/LTL-MULTI-TENANT-SCENARIO.md) (documentation)  
+> **Version**: 1.0
+> **Status**: Complete — Deliverable blueprint available
+> **Location**: [blueprints/LTL-MULTI-TENANT-SCENARIO.md](../../blueprints/LTL-MULTI-TENANT-SCENARIO.md) (documentation)
 > **Template**: [blueprints/sanitized/LTL-MULTI-TENANT-TEMPLATE.json](../../blueprints/sanitized/LTL-MULTI-TENANT-TEMPLATE.json) (importable JSON)
 
 ---

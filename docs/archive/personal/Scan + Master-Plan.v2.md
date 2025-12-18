@@ -32,6 +32,14 @@ AUFGABEN (Pflicht):
    - DX/Docs: Setup, onboarding, pricing, troubleshooting, release packaging (zip), changelog, smoke tests.
    - Repo hygiene: doppelte/obsolete Docs, leere Stubs, Naming-Konsistenz.
 
+ZUSATZ-REGELN (V2):
+- Jeder Task in der Master-Plan muss in der DoD MINDESTENS enthalten:
+  - 1–3 reproduzierbare Test-Commands (copy/paste) ODER klarer manueller Smoke-Test Schritt
+  - Evidence im Format `path/to/file.ext:L12-L34` (oder Route/Hook/Endpoint-Name + Pfad)
+- Füge am Ende des Master Plans eine zusätzliche Phase hinzu:
+  **Phase 3 — Release Candidate (Final Gate)** (Build/Install/Smoke/Docs/Packaging),
+  damit “Launch Ready” nicht nur gefühlt, sondern überprüfbar ist.
+
 OUTPUT (als Datei + Kurzsummary im Chat):
 A) Erzeuge/aktualisiere die Datei `docs/archive/personal/Master-Plan.md` mit exakt dieser Struktur:
 

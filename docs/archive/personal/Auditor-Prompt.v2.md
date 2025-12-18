@@ -13,6 +13,13 @@
   - “Evidence Needed (konkret)”
 - Keine “DONE” Marker in den Phasen. DONE ist ausschließlich DONE LOG.
 
+ZUSATZ-REGELN (V2):
+- **Evidence-Format ist Pflicht**: Jede “DONE”-Behauptung braucht mindestens **1 parsbaren Beleg**
+  im Format `path/to/file.ext:L12-L34` (oder Endpoint/Route/Hook-Name + Pfad).
+- **Tests sind Pflicht**: Pro Task mindestens 1 reproduzierbarer Test-Command ODER ein klarer manueller Smoke-Test.
+- **Audit-Fail Counter**: Wenn ein Task FAILt, schreibe in dessen “Gaps” ganz oben:
+  `AUDIT_FAILS: +1 (total: N)` und aktualisiere die Issue-Tabelle entsprechend.
+- Du auditierst alle Phasen **0/1/2/3**.
 ---
 
 # AUDIT START

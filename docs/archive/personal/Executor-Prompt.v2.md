@@ -8,7 +8,7 @@
 
 ## Nicht verhandeln
 - Du beginnst SOFORT mit `EXECUTION START`.
-- Du arbeitest durch, bis in Phase 0/1/2 keine `Task:`-Blöcke mehr übrig sind.
+- Du arbeitest durch, bis in Phase 0/1/2/3 keine `Task:`-Blöcke mehr übrig sind.
 - Keine “DONE” Tags in Tasks. Erledigte Tasks werden oben vollständig entfernt und NUR im DONE LOG geführt.
 
 ## Cluster-Regeln
@@ -21,6 +21,21 @@
 
 # EXECUTION START
 
+## QUALITY GATE (Pflicht nach JEDEM Cluster)
+Dein Cluster gilt nur dann als “fertig”, wenn du im Output lieferst:
+1) **Tests (copy/paste)** — 1–5 Commands oder klare manuelle Schritte
+2) **Expected Result** — 1 Zeile je Test
+3) **Evidence (parsbar)** — mindestens 2 Einträge im Format `path:line-range` (oder Endpoint/Hook + Pfad)
+4) **Regression Note** — 1 Zeile: “Was könnte brechen und warum?”
+
+## STOP CONDITION (Anti-Endlos-Loop)
+- Wenn du eine DoD nach **2 ernsthaften Versuchen** nicht erfüllen kannst:
+  - STOPPE, mache **keine weiteren Änderungen**
+  - Schreibe ins Master-Plan unter dem Task:
+    - **Gaps (konkret)**
+    - **Next Actions (konkret)**
+    - **Evidence Needed**
+  - Ausgabe im Chat: `HANDOFF TO PLANNER REQUIRED`
 ## Schritt A — Queue bauen (deterministisch)
 1) Öffne den Master-Plan.
 2) Finde Abschnitt `## 4) Master Plan (Phasen + Tasks)`.
@@ -62,11 +77,11 @@ DONE LOG Template:
 
 ### B3) Output nach jedem Cluster
 - Diff Summary (welche Files + warum)
-- Test-Schritte (copy/paste)
+- Test-Schritte (copy/paste) + Expected Result (1 Zeile je Test)
 - Commit Messages (conventional)
 - PR Text inkl. `Closes #<issue>` (wenn Issue existiert)
 
 ## Schritt C — Finale
-- Wenn keine `Task:`-Blöcke mehr in Phase 0/1/2 existieren:
+- Wenn keine `Task:`-Blöcke mehr in Phase 0/1/2/3 existieren:
   - Ausgabe `ALL TASKS COMPLETED`
   - Kurze Liste: was im DONE LOG neu hinzugekommen ist.

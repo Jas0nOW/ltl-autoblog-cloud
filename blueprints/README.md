@@ -1,6 +1,6 @@
 # Make.com Blueprints — Customer Deliverables
 
-> **Status**: Production Ready  
+> **Status**: Production Ready
 > **Last Updated**: 2025-12-18
 
 ---
@@ -140,5 +140,5 @@ Blueprints are versioned by date + scenario name:
 
 ---
 
-**Last Updated**: 2025-12-18  
+**Last Updated**: 2025-12-18
 **Maintained by**: LTL AutoBlog Cloud Engineering Team
