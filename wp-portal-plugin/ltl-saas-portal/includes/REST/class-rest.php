@@ -31,12 +31,27 @@ class LTL_SAAS_Portal_REST {
             'permission_callback' => '__return_true', // Auth in callback
         ) );
 
-        // Make Multi-Tenant: GET /make/tenants (Token Auth)
+        // Make Multi-Tenant: GET /make/tenants (Token Auth, SSL enforced)
         register_rest_route( self::NAMESPACE, '/make/tenants', array(
             'methods'  => 'GET',
             'callback' => array( $this, 'get_make_tenants' ),
-            'permission_callback' => '__return_true',
+            'permission_callback' => array( $this, 'permission_make_tenants' ),
         ) );
+    }
+
+    /**
+     * Permission callback for /make/tenants: Token + SSL required
+     */
+    public function permission_make_tenants( $request ) {
+        if ( ! is_ssl() ) {
+            return new WP_Error('forbidden', 'HTTPS required for secrets.', array('status' => 403));
+        }
+        $make_token = get_option('ltl_saas_make_token');
+        $header_token = $request->get_header('X-LTL-SAAS-TOKEN');
+        if (!$header_token || !$make_token || !is_string($make_token) || !trim($make_token) || !hash_equals($make_token, $header_token)) {
+            return new WP_Error('forbidden', 'Forbidden', array('status' => 403));
+        }
+        return true;
     }
     /**
      * GET /wp-json/ltl-saas/v1/make/tenants
@@ -45,17 +60,7 @@ class LTL_SAAS_Portal_REST {
      * 401 if header missing, 403 if token missing/invalid/empty
      */
     public function get_make_tenants( $request ) {
-        $make_token = get_option('ltl_saas_make_token');
-        $header_token = $request->get_header('X-LTL-SAAS-TOKEN');
-        if (!$header_token) {
-            return new WP_REST_Response(['error' => 'Missing token'], 401);
-        }
-        if (!$make_token || !is_string($make_token) || !trim($make_token)) {
-            return new WP_REST_Response(['error' => 'Endpoint disabled'], 403);
-        }
-        if (!hash_equals($make_token, $header_token)) {
-            return new WP_REST_Response(['error' => 'Forbidden'], 403);
-        }
+        // Auth/SSL handled in permission_callback
         global $wpdb;
         $conn_table = $wpdb->prefix . 'ltl_saas_connections';
         $settings_table = $wpdb->prefix . 'ltl_saas_settings';
@@ -113,13 +118,12 @@ class LTL_SAAS_Portal_REST {
         $result = [];
         foreach ($users as $u) {
             $settings = $wpdb->get_row($wpdb->prepare("SELECT * FROM $settings_table WHERE user_id = %d", $u->user_id), ARRAY_A);
-            $decrypted = LTL_SAAS_Portal_Crypto::decrypt($u->wp_app_password_enc);
             $result[] = [
                 'user_id' => (int)$u->user_id,
                 'settings' => $settings ?: (object)[],
                 'wp_url' => $u->wp_url,
                 'wp_user' => $u->wp_user,
-                'wp_app_password' => $decrypted, // Only for backend/service use!
+                'wp_app_password' => '***',
             ];
         }
         return $result;
