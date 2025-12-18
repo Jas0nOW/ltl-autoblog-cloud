@@ -75,9 +75,128 @@ class LTL_SAAS_Portal_REST {
         $recurrence = isset($params['recurrence']) ? sanitize_text_field($params['recurrence']) : '';
         $refunded = isset($params['refunded']) ? $params['refunded'] : '';
         $sale_id = isset($params['sale_id']) ? sanitize_text_field($params['sale_id']) : '';
-        // TODO: Provisioning logic in next prompt
+
+        // Prompt C: User & Settings Provisioning
+        if (!$email) {
+            error_log('[LTL-SAAS] Gumroad ping: missing email');
+            return new WP_REST_Response(['ok' => true], 200); // Respond quickly
+        }
+
+        // Find or create user
+        $user = get_user_by('email', $email);
+        if (!$user) {
+            // Create new user
+            $user_login = sanitize_user(sanitize_email(explode('@', $email)[0]));
+            $user_login = $this->ensure_unique_username($user_login);
+            $user_pass = wp_generate_password(16, true, true);
+            $user_id = wp_create_user($user_login, $user_pass, $email);
+            if (is_wp_error($user_id)) {
+                error_log('[LTL-SAAS] Failed to create user: ' . $user_id->get_error_message());
+                return new WP_REST_Response(['ok' => true], 200); // Respond quickly
+            }
+            // Set user role to subscriber
+            $new_user = get_user_by('ID', $user_id);
+            if ($new_user) {
+                $new_user->add_role('subscriber');
+            }
+            // Send welcome email
+            $this->send_gumroad_welcome_email($email, $user_login, $user_pass);
+            $user_id = $user_id;
+        } else {
+            $user_id = $user->ID;
+        }
+
+        // Determine plan from product_map
+        $product_map = LTL_SAAS_Portal_Secrets::get_gumroad_product_map();
+        $plan = isset($product_map[$product_id]) ? $product_map[$product_id] : 'starter';
+        if (!$product_id) {
+            error_log('[LTL-SAAS] Gumroad ping: unmapped product_id=' . $product_id);
+        }
+
+        // Prompt D: Refunded handling
+        $is_active = 1;
+        $deactivated_reason = '';
+        if ($refunded === 'true' || $refunded === '1') {
+            $is_active = 0;
+            $deactivated_reason = 'refunded';
+        }
+
+        // Upsert settings
+        global $wpdb;
+        $settings_table = $wpdb->prefix . 'ltl_saas_settings';
+        $existing = $wpdb->get_row($wpdb->prepare("SELECT id FROM $settings_table WHERE user_id = %d", $user_id));
+
+        if ($existing) {
+            // Update
+            $wpdb->update(
+                $settings_table,
+                [
+                    'plan' => $plan,
+                    'is_active' => $is_active,
+                    'updated_at' => current_time('mysql'),
+                ],
+                ['user_id' => $user_id]
+            );
+        } else {
+            // Insert
+            $wpdb->insert(
+                $settings_table,
+                [
+                    'user_id' => $user_id,
+                    'plan' => $plan,
+                    'is_active' => $is_active,
+                    'posts_this_month' => 0,
+                    'posts_period_start' => date('Y-m-01'),
+                    'created_at' => current_time('mysql'),
+                    'updated_at' => current_time('mysql'),
+                ]
+            );
+        }
+
+        if ($subscription_id) {
+            update_user_meta($user_id, 'gumroad_subscription_id', sanitize_text_field($subscription_id));
+        }
+
         // Respond quickly
         return new WP_REST_Response(['ok' => true], 200);
+    }
+
+    /**
+     * Ensure username is unique
+     */
+    private function ensure_unique_username($base_login) {
+        $login = $base_login;
+        $counter = 1;
+        while (username_exists($login)) {
+            $login = $base_login . $counter;
+            $counter++;
+        }
+        return $login;
+    }
+
+    /**
+     * Send welcome email to new Gumroad customer
+     */
+    private function send_gumroad_welcome_email($email, $user_login, $user_pass) {
+        $subject = 'Willkommen bei LTL AutoBlog Cloud!';
+        $login_url = wp_login_url();
+        $reset_url = wp_lostpassword_url();
+        $message = sprintf(
+            'Hallo,\n\n' .
+            'Dein Account wurde erfolgreich erstellt!\n\n' .
+            'Login: %s\n' .
+            'Benutzer: %s\n' .
+            'Passwort: %s\n\n' .
+            'Login URL: %s\n' .
+            'Passwort zurücksetzen: %s\n\n' .
+            'Viel Erfolg!\nLTL AutoBlog Cloud Team',
+            get_bloginfo('name'),
+            $user_login,
+            $user_pass,
+            $login_url,
+            $reset_url
+        );
+        wp_mail($email, $subject, $message);
     }
 
     /**
