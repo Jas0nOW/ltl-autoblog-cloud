@@ -14,7 +14,7 @@
 - Secrets werden in `wp_options` gespeichert (z.B. `ltl_saas_make_token`, `ltl_saas_api_key`, `ltl_saas_gumroad_secret`) — Evidence: `wp-portal-plugin/ltl-saas-portal/includes/class-ltl-saas-portal-secrets.php` (`get_option/update_option`)
 - REST Namespace ist `ltl-saas/v1` — Evidence: `wp-portal-plugin/ltl-saas-portal/includes/REST/class-rest.php` (`const NAMESPACE`)
 - REST Endpoints (Portal → Health & Make): `GET /health`, `GET /make/tenants`, `GET /active-users` — Evidence: `wp-portal-plugin/ltl-saas-portal/includes/REST/class-rest.php` (`register_routes()`)
-- REST Endpoints (Callbacks/Billing): `POST /run-callback`, `POST /gumroad/ping` — Evidence: `wp-portal-plugin/ltl-saas-portal/includes/REST/class-rest.php` (`register_routes()`)
+- REST Endpoints (Callbacks/Billing): `POST /run-callback`, `POST /gumroad/webhook` (+ legacy `/ping` alias) — Evidence: `wp-portal-plugin/ltl-saas-portal/includes/REST/class-rest.php` (`register_routes()`, `gumroad_webhook()`)
 - REST Endpoints (Customer-UX): `POST /test-connection`, `POST /test-rss` (nur eingeloggter User) — Evidence: `wp-portal-plugin/ltl-saas-portal/includes/REST/class-rest.php` (`permission_user_logged_in`, `test_wp_connection`, `test_rss_feed`)
 - Tenant Pull für Make liefert aktivierte Tenants inkl. decrypted App Password (nur Backend/Service) und Settings + Usage — Evidence: `wp-portal-plugin/ltl-saas-portal/includes/REST/class-rest.php` (`get_make_tenants()`)
 - Auth für `GET /make/tenants`: Header `X-LTL-SAAS-TOKEN`, SSL enforced — Evidence: `wp-portal-plugin/ltl-saas-portal/includes/REST/class-rest.php` (`permission_make_tenants()`)
@@ -29,13 +29,13 @@
 | #20 — M5: Onboarding Wizard (Connect WP → RSS → Start) | PARTIAL | Setup-Progress UI: `wp-portal-plugin/ltl-saas-portal/includes/class-ltl-saas-portal.php` (Block „Dein Setup-Fortschritt“). Test-Endpunkte: `wp-portal-plugin/ltl-saas-portal/includes/REST/class-rest.php` (`/test-connection`, `/test-rss`). Onboarding-Doc: `docs/product/onboarding-detailed.md` | **Gaps:** (1) Kein expliziter Link im UI zu `docs/product/onboarding.md`/`onboarding-detailed.md`. (2) Wizard deckt nur Step 1/2 ab; Plan-Status + „letzter Run“ als Setup-Schritt nicht als Wizard-Status geführt. (3) Kein „Test Run starten“ Button/Action im Portal (Doc erwähnt). |
 | #17 — M4: Basic Retry Strategie (429/5xx) | PARTIAL | Retry-Konzept dokumentiert: `docs/engineering/make/retry-strategy.md`. Smoke Tests: `docs/testing/smoke/issue-17.md`. Callback speichert `raw_payload` und kann retry-Metadaten transportieren (ohne Spalten) — Evidence: `wp-portal-plugin/ltl-saas-portal/includes/REST/class-rest.php` (`run_callback()` erzeugt `raw_payload`) | **Gaps:** (1) Keine Make-Multi-Tenant Blueprint-Datei im Repo, die die Retry-Handler tatsächlich implementiert (nur Docs). (2) DB-Spalten `attempts/last_http_status/retry_backoff_ms` existieren nicht in `wp_ltl_saas_runs` (nur Doc-Vorschlag). (3) `status` Werte sind inkonsistent über Docs (`success/failed` vs `success/error`). |
 | #8 — M1: Plans + Limits Datenmodell (Basic/Pro/Studio) | PARTIAL | Settings Tabelle enthält `plan`, `is_active`, `posts_this_month`, `posts_period_start` — Evidence: `wp-portal-plugin/ltl-saas-portal/includes/class-ltl-saas-portal.php` (`CREATE TABLE ... ltl_saas_settings`). Limit-Berechnung per Plan-Map — Evidence: `wp-portal-plugin/ltl-saas-portal/includes/class-ltl-saas-portal.php` (`ltl_saas_plan_posts_limit`, `ltl_saas_get_tenant_state`). Usage Enforcement + Remaining im Tenant Pull — Evidence: `wp-portal-plugin/ltl-saas-portal/includes/REST/class-rest.php` (`get_make_tenants()` skip/remaining). | **Gaps:** (1) Issue fordert explizite Felder `posts_limit_month`, `posts_used_month` (persistiert) – aktuell derived (`posts_limit_month`) und `posts_this_month` (anderer Name). (2) Plan-Namen im Issue/Docs (`Basic/Pro/Studio`) weichen von Code (`free/starter/pro/agency`) ab; `docs/product/pricing-plans.md` weicht ebenfalls ab. (3) „User hat Plan + Limit sichtbar“: im Customer Dashboard wird Plan/Limit aktuell nicht als klare UI angezeigt (nur Lock-Screen bei `is_active=0` + Runs-Tabelle). |
-| #7 — M1: Gumroad Webhook Endpoint im WP-Plugin | PARTIAL | Implementiert ist `POST /wp-json/ltl-saas/v1/gumroad/ping` mit Secret-Check + User-Provisioning + Plan-Set + Refund->Deactivate — Evidence: `wp-portal-plugin/ltl-saas-portal/includes/REST/class-rest.php` (`register_routes()` + `gumroad_ping()`). Secrets/Mapping in Options: `wp-portal-plugin/ltl-saas-portal/includes/class-ltl-saas-portal-secrets.php` und Admin UI: `wp-portal-plugin/ltl-saas-portal/includes/Admin/class-admin.php`. Smoke Tests Sprint 07: `docs/testing/smoke/sprint-07.md`. | **Gaps:** (1) Route-Name mismatch: Issue fordert `/gumroad/webhook`, Code+Docs nutzen `/gumroad/ping`. (2) Event-Typen (sale/subscribe/cancel/refund) werden nicht explizit ausgewertet; es gibt nur `refunded` Flag. (3) „Log in WP (minimal)“ ist nur rudimentär über `error_log` vorhanden. |
+
 
 ## 3) Risk List (P0/P1/P2, jeweils konkrete Fix-Idee + Pfade)
 
 ### P0 (Launch-Blocker / Security / Revenue)
 
-- P0: Billing Route / Semantik mismatch zu Issue #7 (Webhook vs Ping) → Fix: Route vereinheitlichen (alias oder Umbenennung) + Event-Semantik in Code/Docs synchronisieren — Pfade: `wp-portal-plugin/ltl-saas-portal/includes/REST/class-rest.php`, `docs/billing/gumroad.md`, `docs/testing/smoke/sprint-07.md`
+- P0: ✅ **DONE** — Issue #7 Billing Endpoint finalisiert (Route `/gumroad/webhook` + `/ping` Backward-Compat, Logging enhanced, Docs updated)
 - P0: Welcome Email enthält Klartext-Passwort (Account Provisioning) → Fix: statt Passwort senden: `wp_set_password` vermeiden / ausschließlich Password-Reset-Link, oder Invite Flow; Audit Trail — Pfade: `wp-portal-plugin/ltl-saas-portal/includes/REST/class-rest.php` (`send_gumroad_welcome_email()`)
 - P0: Secrets in `wp_options` unverschlüsselt (API key, Make token, Gumroad secret) → Fix: Encrypt-at-rest für Options (z.B. via `LTL_SAAS_Portal_Crypto` oder WP Secrets API/Env); zusätzlich Hardening + minimaler Scope — Pfade: `wp-portal-plugin/ltl-saas-portal/includes/class-ltl-saas-portal-secrets.php`, `wp-portal-plugin/ltl-saas-portal/includes/Admin/class-admin.php`
 - P0: `/make/tenants` liefert decrypted App Password (hoch-sensitiv); Abuse surface bei Token-Leak → Fix: Token Rotation Policy, allowlist IP/Basic WAF, optional per-tenant key, Logging/Rate limit; ggf. alternative: Make zieht App Password nur on-demand — Pfade: `wp-portal-plugin/ltl-saas-portal/includes/REST/class-rest.php` (`get_make_tenants()`, `permission_make_tenants()`), `docs/engineering/make/multi-tenant.md`
@@ -56,12 +56,7 @@
 
 ### Phase 0 — Launch Blockers (Billing + Plans + UX Contract)
 
-Task: Billing Endpoint finalisieren (Issue #7)
-- Goal: Gumroad Events zuverlässig freischalten/sperren; Route & Docs konsistent.
-- Files to touch: `wp-portal-plugin/ltl-saas-portal/includes/REST/class-rest.php`, `docs/billing/gumroad.md`, `docs/reference/api.md`, `docs/testing/smoke/sprint-07.md`
-- DoD: (1) Endpoint-Contract matcht Issue: `/gumroad/webhook` (oder documented alias) + Shared Secret Validation. (2) Event-Semantik (sale/subscribe/cancel/refund) abgedeckt. (3) Smoke Test Sprint 07 läuft end-to-end.
-- Impact: High
-- Komplexität: M
+✅ **DONE** — Task: Billing Endpoint finalisieren (Issue #7) — Gumroad Webhook Contract implementiert
 
 Task: Plans/Limits Datenmodell vereinheitlichen (Issue #8)
 - Goal: Plan + Limit sind konsistent benannt, abgeleitet/persistiert, und im Portal sichtbar.
