@@ -1,6 +1,6 @@
-# Smoke Test: Gumroad Billing Integration (Sprint 07)
+# Smoke Test: Gumroad Webhook Integration (Sprint 07 – Issue #7)
 
-> **Objective**: Verify all Gumroad ping scenarios work correctly: authentication, user creation, plan assignment, and refunds.
+> **Objective (Issue #7)**: Verify Gumroad webhook endpoint `/gumroad/webhook` processes all scenarios correctly: authentication, user creation, plan assignment, and refunds. Legacy `/gumroad/ping` endpoint also tested for backward compatibility.
 
 ---
 
@@ -10,17 +10,18 @@
 - Gumroad Secret configured (see [Billing Gumroad Setup](billing-gumroad.md))
 - Product-ID → Plan mapping configured (JSON valid)
 - HTTPS enabled (local: self-signed OK, can use `--insecure` with curl)
+- Access to `wp-content/debug.log` to verify webhook logging
 
 ---
 
-## Test Case 1: Wrong Secret → HTTP 403
+## Test Case 1: Wrong Secret → HTTP 403 (New Endpoint)
 
-**Objective**: Verify that invalid/missing secrets are rejected.
+**Objective**: Verify that invalid/missing secrets are rejected on `/gumroad/webhook`.
 
 ### Command
 ```bash
 curl -X POST \
-  "https://YOURDOMAIN/wp-json/ltl-saas/v1/gumroad/ping?secret=WRONG_SECRET" \
+  "https://YOURDOMAIN/wp-json/ltl-saas/v1/gumroad/webhook?secret=WRONG_SECRET" \
   -H "Content-Type: application/x-www-form-urlencoded" \
   -d "email=test1@example.com&product_id=prod_ABC123&refunded=false" \
   --insecure  # For self-signed certificates
@@ -35,12 +36,13 @@ HTTP 403 Forbidden
 ### Verification
 - No user created in WordPress
 - No entry in `wp_ltl_saas_settings` table
+- Log entry: `[LTL-SAAS] Gumroad webhook: Secret mismatch or missing`
 
 ---
 
-## Test Case 2: Valid Secret + New Email → User Created + Active
+## Test Case 2: Valid Secret + New Email → User Created + Active (New Endpoint)
 
-**Objective**: Verify new user account is created with correct plan and welcome email.
+**Objective**: Verify new user account is created with correct plan on `/gumroad/webhook`.
 
 ### Setup
 - Ensure `product_ABC123` maps to `starter` in admin panel
@@ -333,6 +335,52 @@ HTTP 403 Forbidden
 
 ---
 
+## Backward Compatibility: Legacy `/gumroad/ping` Endpoint
+
+**Issue #7 Note**: The new `/gumroad/webhook` endpoint is now recommended. The legacy `/gumroad/ping` endpoint is aliased to the same handler for backward compatibility.
+
+### Test: Both Endpoints Produce Identical Results
+
+**Setup**:
+1. Record a baseline user state: `SELECT COUNT(*) FROM wp_users;`
+2. Prepare webhook payload:
+```json
+{
+  "email": "backcompat-test@example.com",
+  "product_id": "prod_ABC123",
+  "refunded": false,
+  "subscription_id": "sub_TEST123"
+}
+```
+
+**Test New Endpoint (/webhook)**:
+```bash
+curl -X POST \
+  "https://YOURDOMAIN/wp-json/ltl-saas/v1/gumroad/webhook?secret=YOUR_SECRET" \
+  -H "Content-Type: application/x-www-form-urlencoded" \
+  -d "email=webhook-test@example.com&product_id=prod_ABC123&refunded=false" \
+  --insecure
+```
+**Expected**: HTTP 200, user created
+
+**Test Legacy Endpoint (/ping)**:
+```bash
+curl -X POST \
+  "https://YOURDOMAIN/wp-json/ltl-saas/v1/gumroad/ping?secret=YOUR_SECRET" \
+  -H "Content-Type: application/x-www-form-urlencoded" \
+  -d "email=ping-test@example.com&product_id=prod_ABC123&refunded=false" \
+  --insecure
+```
+**Expected**: HTTP 200, user created (identical behavior)
+
+**Verification**:
+- Both `/webhook` and `/ping` process events identically
+- No breaking changes for existing Gumroad configurations
+- Logs show both routes working:
+  - `[LTL-SAAS] Gumroad webhook: new user created, plan=...`
+
+---
+
 ## Cleanup
 
 After smoke tests, optionally delete test users:
@@ -349,8 +397,10 @@ wp user delete <ID> --allow-root
 
 ## Next Steps
 
-1. ✅ Run all test cases above
+1. ✅ Run all test cases above (including backward compatibility)
 2. ✅ Verify debug logs contain no sensitive data
 3. ✅ Review admin panel billing section
-4. ✅ Commit changes (`git commit -m "Sprint 07: Gumroad Billing Integration"`)
+4. ✅ Verify both `/webhook` and `/ping` routes work
+5. ✅ Commit changes (`git commit -m "fix(billing): add /gumroad/webhook route alias (Issue #7)"`)
+
 5. ✅ Create PR with `Closes #17`

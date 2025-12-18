@@ -37,10 +37,16 @@ class LTL_SAAS_Portal_REST {
             'permission_callback' => array( $this, 'permission_make_tenants' ),
         ) );
 
-        // Sprint 07: Gumroad Billing Ping
+        // Issue #7: Gumroad Billing Webhook (Ping endpoint)
+        // Supports both /gumroad/webhook (Issue #7 contract) and /gumroad/ping (legacy)
+        register_rest_route( self::NAMESPACE, '/gumroad/webhook', array(
+            'methods'  => 'POST',
+            'callback' => array( $this, 'gumroad_webhook' ),
+            'permission_callback' => '__return_true',
+        ) );
         register_rest_route( self::NAMESPACE, '/gumroad/ping', array(
             'methods'  => 'POST',
-            'callback' => array( $this, 'gumroad_ping' ),
+            'callback' => array( $this, 'gumroad_webhook' ),
             'permission_callback' => '__return_true',
         ) );
 
@@ -60,13 +66,20 @@ class LTL_SAAS_Portal_REST {
     }
 
     /**
-     * POST /wp-json/ltl-saas/v1/gumroad/ping
-     * Gumroad sends application/x-www-form-urlencoded
+     * POST /wp-json/ltl-saas/v1/gumroad/webhook (or /gumroad/ping for legacy)
+     * Issue #7: Gumroad Billing Webhook Endpoint
+     *
+     * Processes Gumroad sale/subscribe/cancel/refund events:
+     * - sale/subscribe (refunded=false) → User active + Plan set
+     * - cancel/refund (refunded=true) → User deactivated (not deleted)
+     *
+     * Gumroad sends application/x-www-form-urlencoded.
      * Required: secret (query or header), email, product_id, refunded
-     * Security: secret must match option, SSL required
-     * Response: always 200 {ok:true} if processed, else 4xx
+     * Optional: subscription_id, recurrence, sale_id
+     * Security: secret must match option ltl_saas_gumroad_secret, SSL required
+     * Response: always 200 {ok:true} if processed, else 4xx for auth failure
      */
-    public function gumroad_ping( $request ) {
+    public function gumroad_webhook( $request ) {
         require_once LTL_SAAS_PORTAL_PLUGIN_DIR . 'includes/class-ltl-saas-portal-secrets.php';
         // Enforce SSL
         if ( ! is_ssl() ) {
@@ -79,6 +92,7 @@ class LTL_SAAS_Portal_REST {
         }
         $option_secret = LTL_SAAS_Portal_Secrets::get_gumroad_secret();
         if (!$option_secret || !$secret || !hash_equals($option_secret, $secret)) {
+            error_log('[LTL-SAAS] Gumroad webhook: Secret mismatch or missing');
             return new WP_REST_Response(['error' => 'Forbidden'], 403);
         }
         // Parse form params
@@ -90,9 +104,9 @@ class LTL_SAAS_Portal_REST {
         $refunded = isset($params['refunded']) ? $params['refunded'] : '';
         $sale_id = isset($params['sale_id']) ? sanitize_text_field($params['sale_id']) : '';
 
-        // Prompt C: User & Settings Provisioning
+        // Issue #7: User & Settings Provisioning
         if (!$email) {
-            error_log('[LTL-SAAS] Gumroad ping: missing email');
+            error_log('[LTL-SAAS] Gumroad webhook: missing email, no-op (quick response)');
             return new WP_REST_Response(['ok' => true], 200); // Respond quickly
         }
 
@@ -123,11 +137,12 @@ class LTL_SAAS_Portal_REST {
         // Determine plan from product_map
         $product_map = LTL_SAAS_Portal_Secrets::get_gumroad_product_map();
         $plan = isset($product_map[$product_id]) ? $product_map[$product_id] : 'starter';
-        if (!$product_id) {
-            error_log('[LTL-SAAS] Gumroad ping: unmapped product_id=' . $product_id);
+        if ($product_id && !isset($product_map[$product_id])) {
+            error_log('[LTL-SAAS] Gumroad webhook: unmapped product_id=' . $product_id . ', using default plan=starter');
         }
 
-        // Prompt D: Refunded handling
+        // Issue #7: Refunded handling
+        // sale/subscribe (refunded=false) → activate; cancel/refund (refunded=true) → deactivate
         $is_active = 1;
         $deactivated_reason = '';
         if ($refunded === 'true' || $refunded === '1') {
@@ -141,7 +156,7 @@ class LTL_SAAS_Portal_REST {
         $existing = $wpdb->get_row($wpdb->prepare("SELECT id FROM $settings_table WHERE user_id = %d", $user_id));
 
         if ($existing) {
-            // Update
+            // Update existing
             $wpdb->update(
                 $settings_table,
                 [
@@ -151,8 +166,9 @@ class LTL_SAAS_Portal_REST {
                 ],
                 ['user_id' => $user_id]
             );
+            error_log('[LTL-SAAS] Gumroad webhook: plan updated to=' . $plan . ', is_active=' . $is_active . ', user_id=' . $user_id);
         } else {
-            // Insert
+            // Insert new
             $wpdb->insert(
                 $settings_table,
                 [
@@ -165,6 +181,7 @@ class LTL_SAAS_Portal_REST {
                     'updated_at' => current_time('mysql'),
                 ]
             );
+            error_log('[LTL-SAAS] Gumroad webhook: new user created, plan=' . $plan . ', user_id=' . $user_id);
         }
 
         if ($subscription_id) {

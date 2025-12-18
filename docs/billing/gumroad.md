@@ -13,7 +13,9 @@ The LTL AutoBlog Cloud Portal integrates with Gumroad's "Ping endpoint" feature 
 
 ---
 
-## Setup: Gumroad Ping Endpoint
+## Setup: Gumroad Webhook Endpoint
+
+> **Note (Issue #7)**: As of v0.2.0, the recommended endpoint is `/gumroad/webhook`. The legacy `/gumroad/ping` remains supported for backward compatibility but will be deprecated.
 
 ### Step 1: Generate Gumroad Secret
 
@@ -43,7 +45,11 @@ Click **"Validate JSON"** to ensure the format is correct before saving.
 1. Log in to **Gumroad** (www.gumroad.com)
 2. Go to **Products** → select your product
 3. Scroll to **Webhooks** or **Ping endpoint**
-4. Paste the Ping URL from the LTL Admin panel:
+4. Paste the Webhook URL from the LTL Admin panel:
+   ```
+   https://YOURDOMAIN/wp-json/ltl-saas/v1/gumroad/webhook?secret=YOUR_SECRET
+   ```
+   Or use the legacy endpoint (still supported):
    ```
    https://YOURDOMAIN/wp-json/ltl-saas/v1/gumroad/ping?secret=YOUR_SECRET
    ```

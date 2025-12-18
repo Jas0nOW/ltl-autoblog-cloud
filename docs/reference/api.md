@@ -100,3 +100,74 @@ curl -X POST \
 **Hinweise:**
 - Fehlerhafte Requests liefern detaillierte Fehlermeldungen.
 - Endpoint ist deaktiviert, wenn kein API-Key gesetzt ist.
+---
+
+## POST /wp-json/ltl-saas/v1/gumroad/webhook
+
+**Beschreibung (Issue #7):**
+Webhook-Endpoint für Gumroad Billing Events. Verarbeitet Gumroad Verkäufe, Abos, Stornierungen und Rückerstattungen.
+
+**Auth:**
+- Query-Param: `?secret=<secret>`
+- Secret wird in WordPress-Option `ltl_saas_gumroad_secret` gesetzt
+- HMAC-SHA256 Validierung des Gumroad-Signatures
+
+**Event Semantik:**
+- `sale` oder `subscribe` (mit `refunded=false` oder ohne `refunded` Feld) → Benutzer aktivieren, Plan zuweisen
+- `cancel` oder `refund` (mit `refunded=true`) → Benutzer deaktivieren (nicht löschen)
+
+**Request-Body (Gumroad Webhook):**
+```json
+{
+  "product_id": "prod_ABC123",
+  "product_name": "LTL AutoBlog Pro",
+  "license_key": null,
+  "url": "https://example.com",
+  "email": "customer@example.com",
+  "price": 4900,
+  "currency": "USD",
+  "recurring": true,
+  "refunded": false,
+  "subscription_id": "sub_XYZ789",
+  "purchase_id": "pur_ABC123"
+}
+```
+
+**Response:**
+- 200 OK bei erfolgreicher Verarbeitung
+- 401 bei fehlendem/falschem Secret
+- 400 bei ungültigen Daten (fehlende Email, Product Map)
+- 500 bei Serverfehlern
+
+**Logging:**
+Alle Events werden in `wp-content/debug.log` protokolliert:
+- Secret-Validierungsfehler
+- Benutzer erstellt/aktualisiert
+- Plan zugewiesen
+- Unmapped-Produkte (mit Fallback-Plan)
+- Benutzer deaktiviert (Refund)
+
+**Curl Beispiel:**
+```bash
+curl -X POST \
+  -H "Content-Type: application/json" \
+  -d '{
+    "product_id": "prod_ABC123",
+    "email": "customer@example.com",
+    "refunded": false,
+    "subscription_id": "sub_XYZ789"
+  }' \
+  https://<your-portal>/wp-json/ltl-saas/v1/gumroad/webhook?secret=<your_secret>
+```
+
+**Backward Compatibility:**
+Das Legacy-Endpoint `/gumroad/ping` funktioniert identisch und wird noch unterstützt:
+```
+https://<your-portal>/wp-json/ltl-saas/v1/gumroad/ping?secret=<your_secret>
+```
+
+**Hinweise:**
+- **Keine Zeichen-Duplikation**: Jeder Webhook wird genau einmal verarbeitet (Idempotenz via HMAC + Log-Prüfung).
+- Secret darf nicht geloggt werden, nur Hash.
+- Alle Benutzer-Emails werden normalisiert (lowercase).
+- Bei unbekanntem Plan wird Fallback-Plan aus `wp_options` verwendet.
