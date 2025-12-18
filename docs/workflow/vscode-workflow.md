@@ -52,8 +52,8 @@ Du willst **alles** in VS Code machen: Issues → Branch → Commit → Push →
 ## 6) Wenn du Commit-Messages “vergisst”
 Nutze Copilot als Commit-Coach:
 - Staged changes auswählen
-- Copilot Prompt aus `docs/COPILOT_PROMPT_COMMIT_AND_PR.md` nutzen
-- Copy/Paste in VS Code Commit Box
+- Lass Copilot aus den staged changes eine kurze Commit Message vorschlagen
+- Copy/Paste in die VS Code Commit Box
 
 ## 7) Mini-Standard (für’s Gehirn)
 Types: `feat`, `fix`, `docs`, `chore`, `refactor`

@@ -1,6 +1,6 @@
 # TESTING_LOG_TEMPLATE.md
 
-> Kopiere diese Datei nach `docs/TESTING_LOG.md` und fülle sie aus.
+> Kopiere diese Datei nach `docs/testing/logs/testing-log.md` und fülle sie aus.
 
 ## Datum
 - YYYY-MM-DD

@@ -68,24 +68,11 @@ Beispiel (VS Code Source Control):
 
 ---
 
-## Prompts — wann nutzt du welchen?
+## Mini-Standard (PR)
 
-Du hast aktuell 3 Prompt-Dateien im Repo. Nutze sie so:
-
-1) **Sprint / Implementierung** (wenn du Code schreibst)
-   - Datei: `docs/COPILOT_PROMPTS_SPRINT_01.md`
-   - Nutzung: Issue umsetzen (mehrere Files ändern)
-
-2) **Commit + PR Text** (wenn du fertig bist)
-   - Datei: `docs/COPILOT_PROMPT_COMMIT_AND_PR.md`
-   - Nutzung: Commit Summary/Description + PR Title/Description generieren (inkl. `Closes #...`)
-
-3) **PR Maintainer Review** (bevor du mergest)
-   - Datei: `docs/COPILOT_PROMPT_PR.md`
-   - Nutzung: Security-Check, Test-Checklist, Risiken/Edge Cases
-
-**Perfekte Reihenfolge:**
-Sprint Prompt → Commit/PR Prompt → PR Review Prompt → Merge
+- PR Description: 3–6 Bullets (was, warum, wie getestet)
+- Immer mindestens 1 Closing Keyword: `Closes #123` / `Fixes #123`
+- Kein Roman, keine Sprint-Notizen
 
 ---
 

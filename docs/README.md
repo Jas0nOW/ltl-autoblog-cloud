@@ -17,10 +17,7 @@ This folder is intentionally structured to keep the repo professional and easy t
 - `docs/testing/` — smoke tests and test logs
 - `docs/workflow/` — how we work (issue workflow, closeout, VS Code workflow)
 - `docs/marketing/` — landing page copy + publishing steps
-- `docs/prompts/` — Copilot prompt packs (internal)
-- `docs/archive/` — historical sprint notes and deep dives (not “current docs”)
 
 ## Rules (keep it clean)
 - Prefer *updating* an existing doc over creating a new one.
-- If it’s a one-off sprint note or analysis: put it in `docs/archive/`.
-- Avoid personal scratch notes in the repo.
+- Avoid one-off sprint notes, scratchpads, and AI prompt packs in the repo.
