@@ -349,7 +349,7 @@ final class LTL_SAAS_Portal {
                     <div>
                         <strong>Schritt 3: Plan aktiv</strong>
                         <p style="margin: 5px 0; color: #666; font-size: 0.9em;">
-                            <?php 
+                            <?php
                             if ($is_active) {
                                 echo '<span style="color: green;">Plan: ' . esc_html($plan_display) . ' (' . $posts_used . '/' . $posts_limit . ' Posts)</span>';
                             } else {
@@ -386,7 +386,7 @@ final class LTL_SAAS_Portal {
                     <div>
                         <strong>Schritt 4: Erster Durchlauf</strong>
                         <p style="margin: 5px 0; color: #666; font-size: 0.9em;">
-                            <?php 
+                            <?php
                             if ($run_ok) {
                                 $time_ago = human_time_diff(strtotime($last_run['finished_at']), current_time('timestamp'));
                                 echo '<span style="color: green;">✓ Letzter Run: vor ' . esc_html($time_ago) . ' (' . (int)$last_run['posts_created'] . ' Posts)</span>';

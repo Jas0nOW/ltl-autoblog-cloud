@@ -148,24 +148,130 @@ Alle Events werden in `wp-content/debug.log` protokolliert:
 **Curl Beispiel:**
 ```bash
 curl -X POST \
-  -H "Content-Type: application/json" \
-  -d '{
-    "product_id": "prod_ABC123",
-    "email": "customer@example.com",
-    "refunded": false,
-    "subscription_id": "sub_XYZ789"
-  }' \
-  https://<your-portal>/wp-json/ltl-saas/v1/gumroad/webhook?secret=<your_secret>
+  -H "X-Gumroad-Secret: <your_secret>" \
+  -H "Content-Type: application/x-www-form-urlencoded" \
+  -d 'email=customer@example.com&product_id=prod_ABC123&refunded=false&subscription_id=sub_XYZ789' \
+  https://<your-portal>/wp-json/ltl-saas/v1/gumroad/webhook
 ```
 
 **Backward Compatibility:**
 Das Legacy-Endpoint `/gumroad/ping` funktioniert identisch und wird noch unterstützt:
 ```
-https://<your-portal>/wp-json/ltl-saas/v1/gumroad/ping?secret=<your_secret>
+https://<your-portal>/wp-json/ltl-saas/v1/gumroad/ping
 ```
 
 **Hinweise:**
 - **Keine Zeichen-Duplikation**: Jeder Webhook wird genau einmal verarbeitet (Idempotenz via HMAC + Log-Prüfung).
-- Secret darf nicht geloggt werden, nur Hash.
+- Secret Header oder Query-Param akzeptiert.
 - Alle Benutzer-Emails werden normalisiert (lowercase).
 - Bei unbekanntem Plan wird Fallback-Plan aus `wp_options` verwendet.
+
+---
+
+## GET /wp-json/ltl-saas/v1/active-users
+
+**Beschreibung:**
+Liefert eine Liste aller aktiven Benutzer mit ihren Settings (für Make.com Iteration).
+
+**Auth:**
+- Header: `X-LTL-API-Key: <api_key>`
+- API-Key wird in WordPress-Option `ltl_saas_api_key` gesetzt
+
+**Response:**
+- 200 OK + JSON-Array von aktiven Benutzern
+- 401 wenn Header fehlt
+- 403 wenn API-Key fehlt/falsch/leer
+
+**Benutzer-Objekt:**
+```json
+{
+  "user_id": 123,
+  "user_email": "user@example.com",
+  "rss_url": "https://example.com/feed",
+  "language": "de",
+  "tone": "professional",
+  "publish_mode": "draft",
+  "frequency": "weekly",
+  "plan": "pro",
+  "is_active": true
+}
+```
+
+**Hinweise:**
+- Secrets (wp_app_password, wp_url) werden NICHT in dieser Response geliefert (nur in `/make/tenants`).
+- Nur aktive Benutzer werden gelistet.
+
+**Curl Beispiel:**
+```bash
+curl -H "X-LTL-API-Key: <api_key>" \
+  https://<your-portal>/wp-json/ltl-saas/v1/active-users
+```
+
+---
+
+## POST /wp-json/ltl-saas/v1/test-connection
+
+**Beschreibung:**
+Testet die Verbindung zu einem Kunden-WordPress (nur eingeloggte Benutzer).
+
+**Auth:**
+- Benutzer muss eingeloggt sein (Session/Cookie)
+
+**Request:**
+```json
+{
+  "wp_url": "https://example.com",
+  "wp_username": "admin",
+  "wp_app_password": "xxxx yyyy zzzz ..."
+}
+```
+
+**Response:**
+- 200 OK wenn Verbindung erfolgreich
+- 400 wenn Parameter fehlen/ungültig
+- 401 wenn Benutzer nicht eingeloggt
+
+**Curl Beispiel:**
+```bash
+curl -X POST \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer <session_token>" \
+  -d '{
+    "wp_url": "https://example.com",
+    "wp_username": "admin",
+    "wp_app_password": "xxxx yyyy zzzz ..."
+  }' \
+  https://<your-portal>/wp-json/ltl-saas/v1/test-connection
+```
+
+---
+
+## POST /wp-json/ltl-saas/v1/test-rss
+
+**Beschreibung:**
+Testet das Parsing eines RSS-Feeds (nur eingeloggte Benutzer).
+
+**Auth:**
+- Benutzer muss eingeloggt sein (Session/Cookie)
+
+**Request:**
+```json
+{
+  "rss_url": "https://example.com/feed"
+}
+```
+
+**Response:**
+- 200 OK + JSON mit Feed-Info (Titel, Einträge) wenn erfolgreich
+- 400 wenn URL ungültig/nicht erreichbar
+- 401 wenn Benutzer nicht eingeloggt
+
+**Curl Beispiel:**
+```bash
+curl -X POST \
+  -H "Content-Type: application/json" \
+  -d '{
+    "rss_url": "https://example.com/feed"
+  }' \
+  https://<your-portal>/wp-json/ltl-saas/v1/test-rss
+```

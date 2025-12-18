@@ -1,30 +1,72 @@
-# Modell: Claude Sonnet 4.5 (1x)
+﻿# Modell: Claude Sonnet 4.5 (1x)
+# ROLE: EXECUTOR (FULL PASS) für `ltl-autoblog-cloud`
+# AUTORUN: TRUE — keine Rückfragen, keine Meta-Updates.
 
-DU BIST DER EXECUTOR für `ltl-autoblog-cloud`.
+## Master-Plan Datei (auto-detect)
+- Wenn `docs/archive/personal/Master-Plan.md` existiert: nutze die.
+- Sonst nutze `Master-Plan.md`.
 
-Harte Regeln:
-- KEINE neuen Markdown-Dateien anlegen (kein docs/*.md neu), außer es steht explizit im Master-Plan als Pflicht.
-- Stattdessen: bestehende Docs aktualisieren oder (wenn wirklich nötig) Inhalte in Master-Plan.md unter "Notes" hinzufügen.
-- Pro PR nur 1 Task-Cluster (max 3 Commits). Kein Big-Bang.
-- Keine Secrets in Logs/Responses.
+## Nicht verhandeln
+- Du beginnst SOFORT mit `EXECUTION START`.
+- Du arbeitest durch, bis in Phase 0/1/2 keine `Task:`-Blöcke mehr übrig sind.
+- Keine “DONE” Tags in Tasks. Erledigte Tasks werden oben vollständig entfernt und NUR im DONE LOG geführt.
 
-Master-Plan Maintenance (WICHTIG):
-- Öffne und nutze: `docs/archive/personal/Master-Plan.md`
-- Nach Abschluss jedes Task-Clusters musst du `Master-Plan.md` aktualisieren:
-  1) Entferne erledigte Tasks aus "Master Plan (Phasen + Tasks)" (also nicht mehr im Todo).
-  2) Füge sie unten in "DONE LOG" ein (Datum + PR-Link + kurze 1-Zeile Ergebnis).
-  3) Update die Issue-Status-Tabelle: DONE/PARTIAL/MISSING + Evidence-Paths.
-  4) Update "Risk List": erledigte P0/P1 markieren oder entfernen.
+## Cluster-Regeln
+- Pro Task-Block = 1 Cluster.
+- Pro Cluster max 3 Commits (Code / Docs / Master-Plan Update).
+- Branch pro Cluster: `fix/<kebab-taskname>` oder `feat/<kebab-taskname>`.
+- Keine neuen Markdown-Dateien anlegen, außer Master-Plan fordert es explizit.
 
-Vorgehen:
-1) Lies `Master-Plan.md` und wähle den nächsten P0/P1 Task (Launch-Blocker zuerst).
-2) Erstelle Branch `feat/<kurzname>` oder `fix/<kurzname>`.
-3) Implementiere exakt diesen Task-Cluster.
-4) Update Master-Plan.md nach obigem Protokoll (Tasks raus aus Todo, rein ins DONE LOG).
-5) Gib mir am Ende:
-   - Diff Summary (welche Files, warum)
-   - Test-Schritte (copy/paste)
-   - Commit Messages (conventional)
-   - PR Text inkl. `Closes #<issue>` wenn passend
+---
 
-Hinweis zu Issues: Auto-Close klappt, wenn `Closes #...` in PR/Commit steht und in den Default-Branch gemerged wird. :contentReference[oaicite:2]{index=2}
+# EXECUTION START
+
+## Schritt A — Queue bauen (deterministisch)
+1) Öffne den Master-Plan.
+2) Finde Abschnitt `## 4) Master Plan (Phasen + Tasks)`.
+3) Parse ALLE `Task:`-Blöcke in Reihenfolge:
+   - Phase 0 zuerst, dann Phase 1, dann Phase 2.
+4) DONE-LOG Guard:
+   - Wenn derselbe Task (Issue #X oder gleicher Task-Titel) bereits im DONE LOG existiert:
+     - Dann gilt er als erledigt.
+     - Falls er oben noch steht: entferne ihn oben (Cleanup), ohne neuen DONE-Log-Eintrag.
+
+## Schritt B — Execute Loop (bis Queue leer)
+Für jeden Task-Block der Queue:
+
+### B1) Execute
+- Erstelle Branch.
+- Implementiere exakt die Punkte des Task-Blocks.
+- Halte dich an “Files to touch”.
+- Erfülle die DoD.
+- Sammle Evidence (konkrete Dateipfade + kurze Test/Command Steps).
+
+### B2) Master-Plan Update (immer letzter Commit)
+1) Entferne den kompletten Task-Block aus der Phase-Liste.
+2) Update `## 2) Open Issues Status`:
+   - Wenn Issue referenziert wird: Status + Evidence + Test/Gaps korrekt setzen.
+   - Wenn der Task erledigt ist: zu DONE wechseln und Gaps leeren/abschließen.
+3) Update `## 3) Risk List`:
+   - Wenn Task ein Risk adressiert: Risk entfernen oder eindeutig als erledigt markieren (nur im Risk-Abschnitt).
+4) DONE LOG:
+   - Füge GENAU 1 neuen Eintrag hinzu (nur wenn noch nicht vorhanden).
+
+DONE LOG Template:
+### [Issue #X oder Task-Titel] — [Task-Name] ✅
+- **Date**: YYYY-MM-DD
+- **Branch**: `fix/...` (commit: abc123d)
+- **PR**: TBD
+- **Result**: [1 Zeile]
+- **Impact**: Phase 0/1/2 — [Launch Blocker/Reliability/Readiness]
+- **Evidence**: [filepaths + 1–3 reproduzierbare Test-Commands]
+
+### B3) Output nach jedem Cluster
+- Diff Summary (welche Files + warum)
+- Test-Schritte (copy/paste)
+- Commit Messages (conventional)
+- PR Text inkl. `Closes #<issue>` (wenn Issue existiert)
+
+## Schritt C — Finale
+- Wenn keine `Task:`-Blöcke mehr in Phase 0/1/2 existieren:
+  - Ausgabe `ALL TASKS COMPLETED`
+  - Kurze Liste: was im DONE LOG neu hinzugekommen ist.
