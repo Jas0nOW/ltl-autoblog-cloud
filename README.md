@@ -1,46 +1,25 @@
-# LTL AutoBlog Cloud
+# LTL AutoBlog Cloud (Portal + Make Multi-Tenant)
 
-Ein kleines SaaS‑Portal (WordPress) + eine Multi‑Tenant Make.com Engine:  
-**Abo abschließen → RSS + Stil einstellen → WordPress verbinden → Auto‑Blog läuft.**
+This repository contains:
+- **Sanitized Make.com blueprints** (for reference / customer delivery)
+- A **WordPress Portal plugin** (customer login + settings + WP connect)
+- Docs, scripts, and project management assets (issues/milestones/templates)
 
-## Status
-- **MVP Fokus:** Blog‑Bot als SaaS (AutoBlog Engine)
-- **Add‑ons später:** Cross‑Promoter, Newsletter‑Bot, Video‑Bot, Watchdog/Sales intern
+> Goal: Customers subscribe, connect their own WordPress site, configure RSS+tone+language, and your Make scenario publishes posts to their site.
 
-## Was ist in diesem Repo?
-- **Docs** (Roadmap, Architektur, Onboarding, Pricing)
-- **Sanitized Make Blueprints** (für Versionierung/Sharing – nicht 1:1 importierbar)
-- **Scripts** (Blueprint Sanitizer)
+## Quick start (local / staging)
 
-> ⚠️ **Sanitized Blueprints** sind absichtlich von Connections/Webhooks/Secrets bereinigt.  
-> Für echte Runs nutzt du deine originalen Blueprints in Make.com.
+1. Install WordPress (LocalWP, XAMPP, etc.)
+2. Copy `wp-portal-plugin/ltl-saas-portal` into `wp-content/plugins/`
+3. Activate **LTL AutoBlog Cloud Portal**
+4. Create a page with shortcode: `[ltl_saas_dashboard]`
+5. Test API: `GET /wp-json/ltl-saas/v1/health`
 
-## Repo-Struktur
-```
-blueprints/
-  sanitized/
-docs/
-scripts/
-.github/workflows/
-```
+## Roadmap
 
-## Quick Start (Repo)
-1. Lies die Roadmap: `docs/ROADMAP.md`
-2. Lies die Architektur: `docs/ARCHITECTURE.md`
-3. Lies das Onboarding: `docs/ONBOARDING.md`
-4. Blueprints sanitizen:
-   ```bash
-   python scripts/sanitize_make_blueprints.py ./blueprints_raw ./blueprints/sanitized
-   ```
+Work is tracked via GitHub Issues + Milestones (see `/docs`).
 
-## CI (GitHub Actions)
-Dieses Repo nutzt einen kleinen Workflow, der Python-Skripte kompiliert (Smoke‑Check).  
-Workflow-Dateien liegen unter `.github/workflows/`.
+## Security
 
-## Security / Geheimnisse
-- Keine `.env`, Tokens, Webhook‑URLs, Passwörter committen.
-- Nutze `.gitignore` und den Sanitizer.
-- Wenn du was versehentlich gepusht hast: **History bereinigen** (lieber sofort fixen).
-
-## Lizenz
-Aktuell: **All rights reserved** (proprietär), bis du bewusst eine OSS‑Lizenz setzt.
+Never commit secrets.
+Store credentials encrypted at rest and limit REST endpoints with auth.
