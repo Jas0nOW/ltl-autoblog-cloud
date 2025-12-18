@@ -1,0 +1,6 @@
+{
+  "git.enableSmartCommit": false,
+  "git.autofetch": true,
+  "git.confirmSync": true,
+  "files.trimTrailingWhitespace": true
+}

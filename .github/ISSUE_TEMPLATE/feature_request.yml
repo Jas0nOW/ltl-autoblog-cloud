@@ -1,0 +1,48 @@
+name: Feature Request
+description: Suggest an improvement or new feature
+title: "feat: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Feature-Ideen sind willkommen. Bitte denk an MVP vs Add-on.
+  - type: input
+    id: goal
+    attributes:
+      label: Ziel / Problem
+      description: Welches Problem löst das Feature?
+      placeholder: "Kunden wollen mehrere Blogs verwalten und Limits pro Blog sehen"
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Vorschlag
+      description: Was genau soll gebaut werden?
+      placeholder: |
+        - UI...
+        - API...
+        - Make...
+    validations:
+      required: true
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priorität
+      options:
+        - MVP (muss in V1)
+        - Nice-to-have (später)
+        - Add-on (separat bepreist)
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Akzeptanzkriterien
+      description: Woran erkennen wir, dass es fertig ist?
+      placeholder: |
+        - [ ] ...
+        - [ ] ...
+    validations:
+      required: true
