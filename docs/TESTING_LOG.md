@@ -1,15 +1,15 @@
-# TESTING_LOG_TEMPLATE.md
+# TESTING_LOG.md
 
 > Kopiere diese Datei nach `docs/TESTING_LOG.md` und fülle sie aus.
 
 ## Datum
-- YYYY-MM-DD
+- ___
 
 ## Umgebung
-- WordPress: (Version)
-- PHP: (Version)
-- SSL: ja/nein
-- Host: LocalWP/Hostinger/…
+- WordPress: ___
+- PHP: ___
+- SSL: ___
+- Host: ___
 
 ## Sprint 04 Tests — Limits
 
@@ -27,4 +27,4 @@
 - Test 7: /make/tenants ohne Token 403 → Ergebnis: ___
 
 ## Notes / Bugs
-- …
+- ___
