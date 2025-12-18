@@ -63,12 +63,6 @@ Task: Onboarding Wizard finalisieren (Issue #20)
 - Impact: High
 - KomplexitÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¤t: M
 
-Task: API Contract & Smoke Tests konsolidieren
-- Goal: Keine widersprÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¼chlichen Header/Paths/Status ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¼ber Docs.
-- Files to touch: `docs/reference/api.md`, `docs/reference/architecture.md`, `docs/testing/smoke/sprint-04.md`, `docs/engineering/make/multi-tenant.md`
-- DoD: (1) Alle Beispiele nutzen echte Header (`X-LTL-SAAS-TOKEN`, `X-LTL-API-Key`). (2) Pfade stimmen mit `register_routes()` ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¼berein. (3) Statuswerte (`success`/`error`) sind konsistent.
-- Impact: High
-- KomplexitÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¤t: S
 
 ### Phase 1 Ã¢â‚¬â€ Reliability & Abuse Hardening
 
@@ -125,6 +119,14 @@ Task: Multi-Tenant Blueprint als Deliverable
 ---
 
 ## DONE LOG (Erledigte Task-Cluster mit PR-Links)
+
+### API Contract & Smoke Tests konsolidieren ✅
+- **Date**: 2025-12-18
+- **Branch**: `fix/api-contract-consolidation` (commit: 3fecd77)
+- **Result**: Removed duplication from sprint-04.md, fixed auth headers (X-LTL-SAAS-TOKEN, X-LTL-API-Key), added missing endpoint docs (/active-users, /test-connection, /test-rss), enhanced curl examples with correct payloads.
+- **Impact**: P0 — API Contract & Smoke Tests aligned (Cluster 2)
+- **Evidence**: docs/testing/smoke/sprint-04.md (removed duplication + corrected headers), docs/reference/api.md (added 3 endpoints), docs/engineering/make/multi-tenant.md (verified headers)
+
 ### #20 — Onboarding Wizard finalisieren ✅
 - **Date**: 2025-12-18
 - **Branch**: `fix/onboarding-wizard` (commit: 995630a)
