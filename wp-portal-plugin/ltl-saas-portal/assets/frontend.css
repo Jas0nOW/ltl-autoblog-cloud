@@ -1,0 +1,372 @@
+/**
+ * LTL AutoBlog Cloud - Frontend Styles (Shortcodes)
+ *
+ * @package LTL_SAAS_Portal
+ * @version 1.0.0
+ */
+
+/* ============================================
+   CSS Variables (Design Tokens)
+   Same as admin.css for consistency
+   ============================================ */
+
+:root {
+    /* Colors */
+    --ltlb-color-primary: #667eea;
+    --ltlb-color-primary-hover: #5568d3;
+    --ltlb-color-success: #28a745;
+    --ltlb-color-success-light: #d4edda;
+    --ltlb-color-error: #dc3545;
+    --ltlb-color-error-light: #f8d7da;
+    --ltlb-color-warning: #ffc107;
+    --ltlb-color-warning-light: #fff3cd;
+
+    /* Spacing */
+    --ltlb-gap-sm: 8px;
+    --ltlb-gap-md: 16px;
+    --ltlb-gap-lg: 24px;
+    --ltlb-gap-xl: 32px;
+
+    /* Border Radius */
+    --ltlb-radius-sm: 4px;
+    --ltlb-radius-md: 8px;
+    --ltlb-radius-lg: 12px;
+
+    /* Shadows */
+    --ltlb-shadow-sm: 0 2px 4px rgba(0,0,0,0.1);
+    --ltlb-shadow-md: 0 4px 12px rgba(0,0,0,0.15);
+    --ltlb-shadow-lg: 0 8px 24px rgba(0,0,0,0.2);
+
+    /* Transitions */
+    --ltlb-transition: 0.2s ease-in-out;
+}
+
+/* ============================================
+   Button Component
+   ============================================ */
+
+.ltlb-btn {
+    display: inline-block;
+    padding: 10px 20px;
+    border-radius: var(--ltlb-radius-sm);
+    font-weight: 600;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    transition: var(--ltlb-transition);
+    font-size: 0.875rem;
+    line-height: 1.5;
+}
+
+.ltlb-btn--primary {
+    background: var(--ltlb-color-primary);
+    color: white;
+}
+
+.ltlb-btn--primary:hover:not(:disabled) {
+    background: var(--ltlb-color-primary-hover);
+    color: white;
+}
+
+.ltlb-btn--secondary {
+    background: white;
+    color: var(--ltlb-color-primary);
+    border: 1px solid var(--ltlb-color-primary);
+}
+
+.ltlb-btn--secondary:hover:not(:disabled) {
+    background: #f0f4ff;
+}
+
+.ltlb-btn:focus {
+    outline: 2px solid var(--ltlb-color-primary);
+    outline-offset: 2px;
+}
+
+.ltlb-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* ============================================
+   Badge Component
+   ============================================ */
+
+.ltlb-badge {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: var(--ltlb-radius-sm);
+    font-size: 0.75rem;
+    font-weight: 600;
+    line-height: 1;
+}
+
+.ltlb-badge--success {
+    background: var(--ltlb-color-success-light);
+    color: var(--ltlb-color-success);
+}
+
+.ltlb-badge--error {
+    background: var(--ltlb-color-error-light);
+    color: var(--ltlb-color-error);
+}
+
+.ltlb-badge--warning {
+    background: var(--ltlb-color-warning-light);
+    color: #856404;
+}
+
+.ltlb-badge--count {
+    background: #e3f2fd;
+    color: #1976d2;
+}
+
+/* ============================================
+   Card Component
+   ============================================ */
+
+.ltlb-card {
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: var(--ltlb-radius-md);
+    overflow: hidden;
+    margin-bottom: var(--ltlb-gap-lg);
+    box-shadow: var(--ltlb-shadow-sm);
+}
+
+.ltlb-card__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--ltlb-gap-md);
+    border-bottom: 1px solid #eee;
+}
+
+.ltlb-card__title {
+    margin: 0;
+    font-size: 1.125rem;
+    font-weight: 600;
+}
+
+.ltlb-card__body {
+    padding: var(--ltlb-gap-md);
+}
+
+.ltlb-card__footer {
+    padding: var(--ltlb-gap-md);
+    border-top: 1px solid #eee;
+    background: #f8f9fa;
+    display: flex;
+    gap: var(--ltlb-gap-sm);
+}
+
+/* ============================================
+   Progress Tracker Component (Dashboard)
+   ============================================ */
+
+.ltlb-progress {
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: var(--ltlb-radius-md);
+    padding: var(--ltlb-gap-lg);
+    margin-bottom: var(--ltlb-gap-lg);
+    box-shadow: var(--ltlb-shadow-sm);
+}
+
+.ltlb-progress__header {
+    margin-bottom: var(--ltlb-gap-md);
+    padding-bottom: var(--ltlb-gap-md);
+    border-bottom: 1px solid #eee;
+}
+
+.ltlb-progress__header h2 {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+.ltlb-progress__item {
+    display: flex;
+    align-items: center;
+    gap: var(--ltlb-gap-md);
+    padding: var(--ltlb-gap-md) 0;
+    border-bottom: 1px solid #eee;
+}
+
+.ltlb-progress__item:last-child {
+    border-bottom: none;
+}
+
+.ltlb-progress__item--complete .ltlb-progress__icon {
+    color: var(--ltlb-color-success);
+}
+
+.ltlb-progress__item--incomplete .ltlb-progress__icon {
+    color: var(--ltlb-color-warning);
+}
+
+.ltlb-progress__icon {
+    font-size: 1.5em;
+    flex-shrink: 0;
+}
+
+.ltlb-progress__content {
+    flex: 1;
+}
+
+.ltlb-progress__content h4 {
+    margin: 0 0 4px 0;
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.ltlb-progress__content p {
+    margin: 0;
+    color: #666;
+    font-size: 0.875rem;
+}
+
+.ltlb-progress__action {
+    flex-shrink: 0;
+}
+
+/* ============================================
+   Pricing Grid Component
+   ============================================ */
+
+.ltlb-pricing-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: var(--ltlb-gap-lg);
+    margin-bottom: var(--ltlb-gap-lg);
+}
+
+.ltlb-pricing-card {
+    background: white;
+    border: 2px solid #ddd;
+    border-radius: var(--ltlb-radius-md);
+    padding: var(--ltlb-gap-lg);
+    text-align: center;
+    transition: var(--ltlb-transition);
+}
+
+.ltlb-pricing-card:hover {
+    box-shadow: var(--ltlb-shadow-md);
+    transform: translateY(-4px);
+}
+
+.ltlb-pricing-card--highlight {
+    border-color: var(--ltlb-color-primary);
+    position: relative;
+}
+
+.ltlb-pricing-card__header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: var(--ltlb-gap-sm);
+    margin-bottom: var(--ltlb-gap-md);
+}
+
+.ltlb-pricing-card__title {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+.ltlb-pricing-card__price {
+    margin-bottom: var(--ltlb-gap-md);
+}
+
+.ltlb-pricing-card__amount {
+    font-size: 3rem;
+    font-weight: 700;
+    color: var(--ltlb-color-primary);
+}
+
+.ltlb-pricing-card__period {
+    color: #666;
+    font-size: 1rem;
+}
+
+.ltlb-pricing-card__features {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 var(--ltlb-gap-lg) 0;
+    text-align: left;
+}
+
+.ltlb-pricing-card__features li {
+    padding: 8px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.ltlb-pricing-card__features li:before {
+    content: '✓ ';
+    color: var(--ltlb-color-success);
+    font-weight: 700;
+    margin-right: 8px;
+}
+
+.ltlb-pricing-card__footer {
+    margin-top: var(--ltlb-gap-md);
+}
+
+.ltlb-pricing-card__footer .ltlb-btn {
+    width: 100%;
+}
+
+/* ============================================
+   Feedback Component (AJAX responses)
+   ============================================ */
+
+.ltlb-feedback {
+    margin-top: 8px;
+    padding: 8px 12px;
+    border-radius: var(--ltlb-radius-sm);
+    font-size: 0.875rem;
+}
+
+.ltlb-feedback--loading {
+    background: #e3f2fd;
+    color: #1976d2;
+}
+
+.ltlb-feedback--success {
+    background: var(--ltlb-color-success-light);
+    color: var(--ltlb-color-success);
+}
+
+.ltlb-feedback--error {
+    background: var(--ltlb-color-error-light);
+    color: var(--ltlb-color-error);
+}
+
+.ltlb-feedback p {
+    margin: 0;
+}
+
+/* ============================================
+   Responsive Design
+   ============================================ */
+
+@media (max-width: 768px) {
+    .ltlb-progress__item {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .ltlb-card__header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--ltlb-gap-sm);
+    }
+
+    .ltlb-card__footer {
+        flex-direction: column;
+    }
+
+    .ltlb-pricing-grid {
+        grid-template-columns: 1fr;
+    }
+}

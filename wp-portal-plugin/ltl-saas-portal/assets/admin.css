@@ -1,0 +1,299 @@
+/**
+ * LTL AutoBlog Cloud - Admin Styles
+ *
+ * @package LTL_SAAS_Portal
+ * @version 1.0.0
+ */
+
+/* ============================================
+   CSS Variables (Design Tokens)
+   ============================================ */
+
+:root {
+    /* Colors */
+    --ltlb-color-primary: #667eea;
+    --ltlb-color-primary-hover: #5568d3;
+    --ltlb-color-success: #28a745;
+    --ltlb-color-success-light: #d4edda;
+    --ltlb-color-error: #dc3545;
+    --ltlb-color-error-light: #f8d7da;
+    --ltlb-color-warning: #ffc107;
+    --ltlb-color-warning-light: #fff3cd;
+    --ltlb-color-info: #17a2b8;
+
+    /* Spacing */
+    --ltlb-gap-sm: 8px;
+    --ltlb-gap-md: 16px;
+    --ltlb-gap-lg: 24px;
+    --ltlb-gap-xl: 32px;
+
+    /* Border Radius */
+    --ltlb-radius-sm: 4px;
+    --ltlb-radius-md: 8px;
+    --ltlb-radius-lg: 12px;
+
+    /* Shadows */
+    --ltlb-shadow-sm: 0 2px 4px rgba(0,0,0,0.1);
+    --ltlb-shadow-md: 0 4px 12px rgba(0,0,0,0.15);
+    --ltlb-shadow-lg: 0 8px 24px rgba(0,0,0,0.2);
+
+    /* Transitions */
+    --ltlb-transition: 0.2s ease-in-out;
+}
+
+/* ============================================
+   Color Customizer Component
+   ============================================ */
+
+.ltlb-color-customizer {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--ltlb-gap-lg);
+    margin-top: var(--ltlb-gap-md);
+}
+
+.ltlb-color-customizer__controls {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ltlb-gap-sm);
+}
+
+.ltlb-color-customizer__preview {
+    background: #f8f9fa;
+    border: 1px solid #ddd;
+    border-radius: var(--ltlb-radius-md);
+    padding: var(--ltlb-gap-lg);
+    position: sticky;
+    top: 32px;
+}
+
+.ltlb-color-field {
+    margin-bottom: var(--ltlb-gap-md);
+}
+
+.ltlb-color-field label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    font-size: 0.875rem;
+}
+
+.ltlb-color-field__input-group {
+    display: flex;
+    align-items: center;
+    gap: var(--ltlb-gap-sm);
+}
+
+.ltlb-color-picker {
+    width: 60px;
+    height: 40px;
+    border: 1px solid #ddd;
+    border-radius: var(--ltlb-radius-sm);
+    cursor: pointer;
+    transition: var(--ltlb-transition);
+}
+
+.ltlb-color-picker:hover {
+    border-color: var(--ltlb-color-primary);
+}
+
+.ltlb-color-picker:focus {
+    outline: 2px solid var(--ltlb-color-primary);
+    outline-offset: 2px;
+}
+
+.ltlb-color-hex {
+    flex: 1;
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: var(--ltlb-radius-sm);
+    font-family: 'Courier New', monospace;
+    background: #f8f9fa;
+    font-size: 0.875rem;
+}
+
+.ltlb-reset-color {
+    flex-shrink: 0;
+}
+
+.ltlb-color-customizer__preview h4 {
+    margin: 0 0 var(--ltlb-gap-md) 0;
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.ltlb-preview-samples {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ltlb-gap-md);
+    align-items: flex-start;
+}
+
+/* ============================================
+   Button Component
+   ============================================ */
+
+.ltlb-btn {
+    display: inline-block;
+    padding: 10px 20px;
+    border-radius: var(--ltlb-radius-sm);
+    font-weight: 600;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    transition: var(--ltlb-transition);
+    font-size: 0.875rem;
+    line-height: 1.5;
+}
+
+.ltlb-btn--primary {
+    background: var(--ltlb-color-primary);
+    color: white;
+}
+
+.ltlb-btn--primary:hover:not(:disabled) {
+    background: var(--ltlb-color-primary-hover);
+}
+
+.ltlb-btn--secondary {
+    background: white;
+    color: var(--ltlb-color-primary);
+    border: 1px solid var(--ltlb-color-primary);
+}
+
+.ltlb-btn--secondary:hover:not(:disabled) {
+    background: #f0f4ff;
+}
+
+.ltlb-btn:focus {
+    outline: 2px solid var(--ltlb-color-primary);
+    outline-offset: 2px;
+}
+
+.ltlb-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* ============================================
+   Badge Component
+   ============================================ */
+
+.ltlb-badge {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: var(--ltlb-radius-sm);
+    font-size: 0.75rem;
+    font-weight: 600;
+    line-height: 1;
+}
+
+.ltlb-badge--success {
+    background: var(--ltlb-color-success-light);
+    color: var(--ltlb-color-success);
+}
+
+.ltlb-badge--error {
+    background: var(--ltlb-color-error-light);
+    color: var(--ltlb-color-error);
+}
+
+.ltlb-badge--warning {
+    background: var(--ltlb-color-warning-light);
+    color: #856404;
+}
+
+/* ============================================
+   Card Component
+   ============================================ */
+
+.ltlb-card {
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: var(--ltlb-radius-md);
+    overflow: hidden;
+    margin-bottom: var(--ltlb-gap-lg);
+}
+
+.ltlb-card__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--ltlb-gap-md);
+    border-bottom: 1px solid #eee;
+}
+
+.ltlb-card__title {
+    margin: 0;
+    font-size: 1.125rem;
+    font-weight: 600;
+}
+
+.ltlb-card__body {
+    padding: var(--ltlb-gap-md);
+}
+
+/* ============================================
+   Section Component
+   ============================================ */
+
+.ltlb-section {
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: var(--ltlb-radius-md);
+    padding: var(--ltlb-gap-lg);
+    margin-bottom: var(--ltlb-gap-lg);
+}
+
+.ltlb-section__header {
+    margin-bottom: var(--ltlb-gap-md);
+    padding-bottom: var(--ltlb-gap-md);
+    border-bottom: 1px solid #eee;
+}
+
+.ltlb-section__title {
+    margin: 0 0 8px 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+.ltlb-section__description {
+    margin: 0;
+    color: #666;
+    font-size: 0.875rem;
+}
+
+.ltlb-section__description a {
+    color: var(--ltlb-color-primary);
+    text-decoration: none;
+}
+
+.ltlb-section__description a:hover {
+    text-decoration: underline;
+}
+
+/* ============================================
+   Notice Component
+   ============================================ */
+
+.ltlb-notice {
+    margin-top: var(--ltlb-gap-md);
+}
+
+.ltlb-notice p strong {
+    font-weight: 600;
+}
+
+/* ============================================
+   Responsive Design
+   ============================================ */
+
+@media (max-width: 1200px) {
+    .ltlb-color-customizer {
+        grid-template-columns: 1fr;
+    }
+
+    .ltlb-color-customizer__preview {
+        position: static;
+    }
+}
