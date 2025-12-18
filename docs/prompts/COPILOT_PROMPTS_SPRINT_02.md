@@ -1,6 +1,6 @@
 # COPILOT_PROMPTS_SPRINT_02.md — M2/M3 → Richtung MVP (Portal + Make Multi‑Tenant)
 
-> Working branch: `Phase1-Core`  
+> Working branch: `Phase1-Core`
 > Ziel dieses Sprints: **Multi‑Tenant MVP** stabil bekommen (Portal liefert Config → Make iteriert → Portal bekommt Run‑Callback)
 
 ## Welche Modelle nutzen?
@@ -78,7 +78,7 @@ Implementiere einen neuen REST Endpoint:
 - niemals secrets in logs
 
 **Akzeptanz:**
-- Curl Beispiel in `docs/api.md` ergänzen
+- Curl Beispiel in `docs/reference/api.md` ergänzen
 - Endpoint liefert 200 + JSON wenn Token stimmt
 - Endpoint liefert 403 wenn Token fehlt/falsch/leer
 
@@ -129,11 +129,11 @@ Baue eine MVP-Access-Control:
 
 # PROMPT E — Make Multi‑Tenant Loop (#13) — Schritt‑für‑Schritt Anleitung (Docs)
 
-> Das ist kein Code, sondern Make‑Umbau. Copilot soll dir dafür eine saubere Anleitung in `docs/make-multi-tenant.md` schreiben.
+> Das ist kein Code, sondern Make‑Umbau. Copilot soll dir dafür eine saubere Anleitung in `docs/engineering/make/multi-tenant.md` schreiben.
 
 **Copilot Chat Prompt:**
 
-Erstelle eine Anleitung `docs/make-multi-tenant.md`:
+Erstelle eine Anleitung `docs/engineering/make/multi-tenant.md`:
 
 - Überblick: Trigger (Scheduler) → HTTP Pull Tenants → Iterator → pro Tenant: RSS → AI → WP Create Post → Callback
 - Welche Make Module (generisch) nötig sind

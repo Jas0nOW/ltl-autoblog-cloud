@@ -5,7 +5,7 @@
 ## Ziel (DoD)
 - Neukunde kommt **ohne Support** durch Setup (Issue-Definition).
 - Dashboard zeigt **Schritt-für-Schritt** Fortschritt + klare “Next action” Buttons.
-- `docs/ONBOARDING.md` existiert und ist aus UI verlinkt.
+- `docs/product/onboarding.md` existiert und ist aus UI verlinkt.
 
 ## Empfohlenes Modell
 - **UI/Logic:** GPT‑4.1 (0x)
@@ -13,10 +13,10 @@
 
 ---
 
-## Prompt A — `docs/ONBOARDING.md` (Super klar)
+## Prompt A — `docs/product/onboarding.md` (Super klar)
 **Modell:** GPT‑4o (0x)
 
-Erstelle/aktualisiere `docs/ONBOARDING.md` mit:
+Erstelle/aktualisiere `docs/product/onboarding.md` mit:
 1) Account erstellen & einloggen
 2) WordPress verbinden (URL + Username + App Password)
 3) RSS Feed setzen + Sprache + Ton

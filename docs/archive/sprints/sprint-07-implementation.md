@@ -81,8 +81,8 @@
 **Status**: ✓ Completed
 
 **Files Created**:
-- ✅ [docs/billing-gumroad.md](../../docs/billing-gumroad.md) — Complete setup guide
-- ✅ [docs/SMOKE_TEST_SPRINT_07.md](../../docs/SMOKE_TEST_SPRINT_07.md) — 10 test cases
+- ✅ [docs/billing/gumroad.md](../../billing/gumroad.md) — Complete setup guide
+- ✅ [docs/testing/smoke/sprint-07.md](../../testing/smoke/sprint-07.md) — 10 test cases
 
 **Contents**:
 - Setup guide (3 steps)
@@ -101,8 +101,8 @@
 
 **Files Changed**:
 1. ✅ [wp-portal-plugin/ltl-saas-portal/includes/REST/class-rest.php](../../wp-portal-plugin/ltl-saas-portal/includes/REST/class-rest.php) — Provisioning logic (118 lines added)
-2. ✅ [docs/SMOKE_TEST_SPRINT_07.md](../../docs/SMOKE_TEST_SPRINT_07.md) — Smoke tests updated (356 lines)
-3. ✅ [docs/billing-gumroad.md](../../docs/billing-gumroad.md) — New documentation (200 lines)
+2. ✅ [docs/testing/smoke/sprint-07.md](../../testing/smoke/sprint-07.md) — Smoke tests updated (356 lines)
+3. ✅ [docs/billing/gumroad.md](../../billing/gumroad.md) — New documentation (200 lines)
 
 ---
 
@@ -187,7 +187,7 @@ curl -X POST \
 9. ✅ Unmapped product → default plan
 10. ✅ HTTPS enforced
 
-See [docs/SMOKE_TEST_SPRINT_07.md](../../docs/SMOKE_TEST_SPRINT_07.md) for full details.
+See [docs/testing/smoke/sprint-07.md](../../testing/smoke/sprint-07.md) for full details.
 
 ---
 

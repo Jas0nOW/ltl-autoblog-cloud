@@ -74,7 +74,7 @@ Erstelle `docs/marketing/PUBLISH_LANDING.md`:
 ## Prompt E — Smoke Test + PR
 **Modell:** GPT‑5 mini (0x)
 
-- `docs/SMOKE_TEST_ISSUE_19.md`:
+- `docs/testing/smoke/issue-19.md`:
   - Seite lädt ohne Login
   - Buttons zeigen auf korrekte Checkout URLs
   - Planvergleich sichtbar

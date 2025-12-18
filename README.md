@@ -17,7 +17,7 @@ This repository contains:
 
 ## Roadmap
 
-Work is tracked via GitHub Issues + Milestones (see `/docs`).
+Work is tracked via GitHub Issues + Milestones (see `/docs` and `docs/README.md`).
 
 ## Security
 

@@ -101,8 +101,8 @@ Akzeptanz:
 **Empfohlenes Modell:** GPT‑4o (0x)
 
 Erstelle/aktualisiere:
-- `docs/api.md` (Endpoints, Auth, Beispiele)
-- `docs/make-multi-tenant.md` (Scenario: Pull → Iterate → Publish → Callback)
+- `docs/reference/api.md` (Endpoints, Auth, Beispiele)
+- `docs/engineering/make/multi-tenant.md` (Scenario: Pull → Iterate → Publish → Callback)
 
 Kurz, aber konkret:
 - Beispiel JSON

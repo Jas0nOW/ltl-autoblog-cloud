@@ -17,5 +17,5 @@
 - [ ] is_active=1 → normal
 
 ## Docs
-- [ ] docs/api.md vorhanden/aktualisiert
-- [ ] docs/make-multi-tenant.md vorhanden/aktualisiert
+- [ ] docs/reference/api.md vorhanden/aktualisiert
+- [ ] docs/engineering/make/multi-tenant.md vorhanden/aktualisiert

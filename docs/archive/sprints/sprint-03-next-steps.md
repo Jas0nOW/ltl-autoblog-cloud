@@ -2,11 +2,11 @@
 
 **Datum:** 2025-12-18
 
-Du musst mit dem Audit-Output nichts “manuell verarbeiten”.  
+Du musst mit dem Audit-Output nichts “manuell verarbeiten”.
 Du gibst ihn mir (wie jetzt), und wir entscheiden gemeinsam weiter. ✅
 
 Aber: Damit nichts verloren geht, **speicherst du den Audit** einmal im Repo:
-- `docs/audit/AUDIT_REPORT_2025-12-18.md` (einfach reinkopieren)  
+- `docs/audits/2025-12-18-audit-v3.md` (oder neue Datei im gleichen Ordner)
 - Commit: `docs: add audit report 2025-12-18`
 
 ---

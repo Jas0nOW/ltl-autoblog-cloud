@@ -110,7 +110,7 @@ Wichtig:
 **Empfohlenes Modell:** GPT‑4o (0x)
 
 Erstelle:
-- `docs/billing-gumroad.md`
+- `docs/billing/gumroad.md`
 
 Inhalt:
 - Wo man bei Gumroad “Ping endpoint” setzt
@@ -124,7 +124,7 @@ Inhalt:
 ## Prompt F — Smoke Test + Commit + PR
 **Empfohlenes Modell:** GPT‑5 mini (0x) für Commit/PR Text
 
-1) Erstelle `docs/SMOKE_TEST_SPRINT_07.md` mit:
+1) Erstelle `docs/testing/smoke/sprint-07.md` mit:
 - wrong secret → 403
 - valid secret + new email → user created + active
 - valid secret + existing user → plan updated

@@ -36,6 +36,6 @@ Du bist mein Lead-Engineer. Ich arbeite in einem Repo, das ein WordPress Portal 
 
 5) Gib mir **nur** die nächsten 3 Schritte, die jeweils in 60–90 Minuten fertig werden können.
 
-6) packe den Output in einen neuen AUDIT_REPORT_<Datum>_V_X+.md Datei in \docs.
+6) packe den Output in einen neuen `docs/audits/<yyyy-mm-dd>-audit-vX.md`.
 
 Wichtig: Ich will konkrete Antworten (Dateinamen, Funktionen, TODOs), kein allgemeines Gerede.

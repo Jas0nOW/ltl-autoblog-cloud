@@ -134,9 +134,9 @@ $code = wp_remote_retrieve_response_code( $resp );
   - Each with: Filter `429 OR >= 500` → Sleep 2-5s → Retry 1x → Log fail
 
 ### Documentation
-- **`docs/make-retry-strategy.md`** — NEW (Prompt B)
-- **`docs/api.md`** — UPDATE (add response codes section)
-- **`docs/SMOKE_TEST_ISSUE_17.md`** — NEW (Prompt D)
+- **`docs/engineering/make/retry-strategy.md`** — NEW (Prompt B)
+- **`docs/reference/api.md`** — UPDATE (add response codes section)
+- **`docs/testing/smoke/issue-17.md`** — NEW (Prompt D)
 
 ---
 
@@ -202,6 +202,6 @@ $code = wp_remote_retrieve_response_code( $resp );
 ---
 
 ## Next Steps (Prompts B-D)
-- **Prompt B**: Create `docs/make-retry-strategy.md` with Make UI steps
+- **Prompt B**: Create `docs/engineering/make/retry-strategy.md` with Make UI steps
 - **Prompt C**: Optional: Extend logging fields in Portal
 - **Prompt D**: Create smoke tests + commit

@@ -1,4 +1,4 @@
-# SMOKE_TEST_ISSUE_19.md — Pricing Landing Page Tests
+# Smoke Test — Issue 19 (Pricing Landing)
 
 > **Objective**: Verify pricing landing page loads, renders, and buttons work correctly.
 

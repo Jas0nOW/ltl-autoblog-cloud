@@ -92,8 +92,8 @@ Optional:
 **Empfohlenes Modell:** GPT‑4o (0x)
 
 Aktualisiere / erstelle:
-- `docs/api.md` (make/tenants response Felder: skip, remaining, posts_limit_month, posts_this_month)
-- `docs/make-multi-tenant.md` (Make Flow: fetch tenants → for each tenant if skip then continue → run pipeline → callback)
+- `docs/reference/api.md` (make/tenants response Felder: skip, remaining, posts_limit_month, posts_this_month)
+- `docs/engineering/make/multi-tenant.md` (Make Flow: fetch tenants → for each tenant if skip then continue → run pipeline → callback)
 
 Kurz & konkret, mit:
 - Beispiel JSON (tenants list inkl. skip)

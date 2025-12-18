@@ -215,7 +215,7 @@ WHERE tenant_id = 123 ORDER BY created_at;
 
 ## Smoke Test Checklist
 
-Erstelle `docs/SMOKE_TEST_ISSUE_17.md`:
+Erstelle `docs/testing/smoke/issue-17.md`:
 
 - [ ] **Test 1**: Portal 503 → Retry → Success
   - Maintenance Mode aktiviert/deaktiviert ✓
