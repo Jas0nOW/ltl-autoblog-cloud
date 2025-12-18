@@ -105,10 +105,56 @@ final class LTL_SAAS_Portal {
         $user_id = get_current_user_id();
         global $wpdb;
         $table = $wpdb->prefix . 'ltl_saas_connections';
+        $settings_table = $wpdb->prefix . 'ltl_saas_settings';
         $error = '';
         $success = '';
+        $settings_success = '';
 
-        // Handle form submit
+        // --- SETTINGS: Handle settings form submit ---
+        $languages = ['de','en','es','fr','it','pt','nl','pl'];
+        $tones = ['professional','casual','nerdy','funny','serious'];
+        $frequencies = ['daily','3x_week','weekly'];
+        $publish_modes = ['draft','publish'];
+
+        if (isset($_POST['ltl_saas_save_settings']) && wp_verify_nonce($_POST['ltl_saas_settings_nonce'], 'ltl_saas_save_settings')) {
+            $rss_url = esc_url_raw(trim($_POST['rss_url'] ?? ''));
+            $language = $_POST['language'] ?? '';
+            $tone = $_POST['tone'] ?? '';
+            $frequency = $_POST['frequency'] ?? '';
+            $publish_mode = $_POST['publish_mode'] ?? '';
+
+            if ($rss_url && !filter_var($rss_url, FILTER_VALIDATE_URL)) {
+                $error = 'Bitte eine gültige RSS-URL angeben.';
+            } elseif ($language && !in_array($language, $languages, true)) {
+                $error = 'Ungültige Sprache.';
+            } elseif ($tone && !in_array($tone, $tones, true)) {
+                $error = 'Ungültiger Ton.';
+            } elseif ($frequency && !in_array($frequency, $frequencies, true)) {
+                $error = 'Ungültige Frequenz.';
+            } elseif ($publish_mode && !in_array($publish_mode, $publish_modes, true)) {
+                $error = 'Ungültiger Veröffentlichungsmodus.';
+            } else {
+                $row = [
+                    'user_id' => $user_id,
+                    'rss_url' => $rss_url,
+                    'language' => $language,
+                    'tone' => $tone,
+                    'frequency' => $frequency,
+                    'publish_mode' => $publish_mode,
+                    'updated_at' => current_time('mysql'),
+                ];
+                $exists = $wpdb->get_var($wpdb->prepare("SELECT id FROM $settings_table WHERE user_id = %d", $user_id));
+                if ($exists) {
+                    $wpdb->update($settings_table, $row, ['user_id' => $user_id]);
+                } else {
+                    $row['created_at'] = current_time('mysql');
+                    $wpdb->insert($settings_table, $row);
+                }
+                $settings_success = 'Saved ✓';
+            }
+        }
+
+        // --- CONNECTION: Handle connection form submit ---
         if ( isset($_POST['ltl_saas_save_connection']) && wp_verify_nonce($_POST['ltl_saas_nonce'], 'ltl_saas_save_connection') ) {
             $wp_url = esc_url_raw(trim($_POST['wp_url'] ?? ''));
             $wp_user = sanitize_user(trim($_POST['wp_user'] ?? ''));
@@ -146,13 +192,20 @@ final class LTL_SAAS_Portal {
         $wp_url = $conn->wp_url ?? '';
         $wp_user = $conn->wp_user ?? '';
 
+        $settings = $wpdb->get_row($wpdb->prepare("SELECT * FROM $settings_table WHERE user_id = %d", $user_id));
+        $rss_url = $settings->rss_url ?? '';
+        $language = $settings->language ?? '';
+        $tone = $settings->tone ?? '';
+        $frequency = $settings->frequency ?? '';
+        $publish_mode = $settings->publish_mode ?? '';
+
         ob_start();
         ?>
         <div class="ltl-saas-dashboard">
             <h2>LTL AutoBlog Cloud</h2>
             <?php if ($error): ?><div style="color:red;"><strong><?php echo esc_html($error); ?></strong></div><?php endif; ?>
             <?php if ($success): ?><div style="color:green;"><strong><?php echo esc_html($success); ?></strong></div><?php endif; ?>
-            <form method="post">
+            <form method="post" style="margin-bottom:2em;">
                 <?php wp_nonce_field('ltl_saas_save_connection', 'ltl_saas_nonce'); ?>
                 <table>
                     <tr><td>WordPress-URL:</td><td><input type="url" name="wp_url" value="<?php echo esc_attr($wp_url); ?>" required style="width:300px;"></td></tr>
@@ -163,6 +216,31 @@ final class LTL_SAAS_Portal {
                 <button type="button" id="ltl-saas-test-connection">Test connection</button>
             </form>
             <div id="ltl-saas-test-result"></div>
+
+            <form method="post">
+                <?php wp_nonce_field('ltl_saas_save_settings', 'ltl_saas_settings_nonce'); ?>
+                <table>
+                    <tr><td>RSS-Feed URL:</td><td><input type="url" name="rss_url" value="<?php echo esc_attr($rss_url); ?>" style="width:300px;"></td></tr>
+                    <tr><td>Sprache:</td><td><select name="language">
+                        <option value="">Bitte wählen</option>
+                        <?php foreach($languages as $l): ?><option value="<?php echo $l; ?>" <?php selected($language, $l); ?>><?php echo strtoupper($l); ?></option><?php endforeach; ?>
+                    </select></td></tr>
+                    <tr><td>Ton:</td><td><select name="tone">
+                        <option value="">Bitte wählen</option>
+                        <?php foreach($tones as $t): ?><option value="<?php echo $t; ?>" <?php selected($tone, $t); ?>><?php echo ucfirst($t); ?></option><?php endforeach; ?>
+                    </select></td></tr>
+                    <tr><td>Frequenz:</td><td><select name="frequency">
+                        <option value="">Bitte wählen</option>
+                        <?php foreach($frequencies as $f): ?><option value="<?php echo $f; ?>" <?php selected($frequency, $f); ?>><?php echo $f === '3x_week' ? '3x/Woche' : ucfirst($f); ?></option><?php endforeach; ?>
+                    </select></td></tr>
+                    <tr><td>Veröffentlichung:</td><td><select name="publish_mode">
+                        <option value="">Bitte wählen</option>
+                        <?php foreach($publish_modes as $p): ?><option value="<?php echo $p; ?>" <?php selected($publish_mode, $p); ?>><?php echo ucfirst($p); ?></option><?php endforeach; ?>
+                    </select></td></tr>
+                </table>
+                <button type="submit" name="ltl_saas_save_settings">Settings speichern</button>
+                <?php if ($settings_success): ?><span style="color:green;margin-left:1em;"><strong><?php echo esc_html($settings_success); ?></strong></span><?php endif; ?>
+            </form>
         </div>
         <script>
         document.getElementById('ltl-saas-test-connection').addEventListener('click', function(e) {
