@@ -73,7 +73,8 @@
    ============================================ */
 
 .ltlb-dashboard {
-    max-width: 1000px;
+    width: 100%;
+    max-width: 100%;
     margin: 0 auto;
     padding: var(--ltlb-gap-xl);
     font-family: var(--ltlb-font-family);

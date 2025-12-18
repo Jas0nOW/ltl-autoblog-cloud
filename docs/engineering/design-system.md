@@ -119,6 +119,12 @@ Konsistentes 4px Grid-basiertes Spacing:
 
 ## 🧩 Core Components
 
+### Layout & Container Sizing
+
+- Dashboard wrapper `.ltlb-dashboard` now uses `width: 100%` and inherits the parent/container width. Place the shortcode inside any Elementor container to control the overall form size.
+- Avoid fixed widths on parent containers; prefer percentages or Elementor's container width controls for responsive behavior.
+- Locked and login-required boxes intentionally use small `max-width` values for readability; they do not affect the main form sizing.
+
 ### 1. Buttons (`.ltlb-btn`)
 
 ```html
