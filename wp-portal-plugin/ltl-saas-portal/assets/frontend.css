@@ -154,14 +154,16 @@
     box-shadow: var(--ltlb-shadow-sm);
 }
 
-.ltlb-lang-btn--active {
+.ltlb-lang-btn--active,
+.ltlb-lang-btn.active {
     border-color: var(--ltlb-color-primary);
     background: var(--ltlb-color-primary-gradient);
     color: white;
     box-shadow: var(--ltlb-shadow-glow);
 }
 
-.ltlb-lang-btn--active:hover {
+.ltlb-lang-btn--active:hover,
+.ltlb-lang-btn.active:hover {
     color: white;
     transform: translateY(-1px);
 }
@@ -185,30 +187,35 @@
     font-weight: 500;
 }
 
-.ltlb-alert__icon {
+.ltlb-alert__icon,
+.ltlb-alert-icon {
     font-size: 1.25rem;
     flex-shrink: 0;
 }
 
-.ltlb-alert--success {
+.ltlb-alert--success,
+.ltlb-alert-success {
     background: var(--ltlb-color-success-light);
     color: #155724;
     border-left: 4px solid var(--ltlb-color-success);
 }
 
-.ltlb-alert--error {
+.ltlb-alert--error,
+.ltlb-alert-error {
     background: var(--ltlb-color-error-light);
     color: #721c24;
     border-left: 4px solid var(--ltlb-color-error);
 }
 
-.ltlb-alert--warning {
+.ltlb-alert--warning,
+.ltlb-alert-warning {
     background: var(--ltlb-color-warning-light);
     color: #856404;
     border-left: 4px solid var(--ltlb-color-warning);
 }
 
-.ltlb-alert--info {
+.ltlb-alert--info,
+.ltlb-alert-info {
     background: var(--ltlb-color-info-light);
     color: #004085;
     border-left: 4px solid var(--ltlb-color-info);
@@ -315,7 +322,8 @@
     border-bottom: none;
 }
 
-.ltlb-step__icon {
+.ltlb-step__icon,
+.ltlb-step-icon {
     width: 48px;
     height: 48px;
     display: flex;
@@ -339,18 +347,34 @@
     background: var(--ltlb-color-bg-light);
 }
 
-.ltlb-step__content {
+/* Shortcode markup uses state classes on the row */
+.ltlb-step.completed .ltlb-step-icon {
+    background: var(--ltlb-color-success-light);
+}
+
+.ltlb-step.pending .ltlb-step-icon {
+    background: var(--ltlb-color-warning-light);
+}
+
+.ltlb-step.warning .ltlb-step-icon {
+    background: var(--ltlb-color-warning-light);
+}
+
+.ltlb-step__content,
+.ltlb-step-content {
     flex: 1;
 }
 
-.ltlb-step__title {
+.ltlb-step__title,
+.ltlb-step-title {
     margin: 0 0 0.25em 0;
     font-size: 1rem;
     font-weight: 700;
     color: var(--ltlb-color-text);
 }
 
-.ltlb-step__description {
+.ltlb-step__description,
+.ltlb-step-status {
     margin: 0;
     font-size: 0.9rem;
     color: var(--ltlb-color-text-muted);
@@ -378,7 +402,8 @@
     color: #856404;
 }
 
-.ltlb-step__action {
+.ltlb-step__action,
+.ltlb-step-action {
     margin-left: var(--ltlb-gap-md);
 }
 
@@ -476,6 +501,7 @@
     margin-bottom: 0;
 }
 
+.ltlb-label,
 .ltlb-form-label {
     display: flex;
     align-items: center;
@@ -490,16 +516,19 @@
     font-size: 1.1em;
 }
 
+.ltlb-tooltip,
 .ltlb-form-label__tooltip {
     cursor: help;
     color: var(--ltlb-color-primary);
     font-size: 0.9em;
 }
 
+.ltlb-input,
 .ltlb-form-input,
+.ltlb-select,
 .ltlb-form-select {
     width: 100%;
-    padding: 0.75rem 1rem;
+    padding: 0.65rem 1rem; /* balanced vertical padding to avoid clipping */
     font-size: 1rem;
     font-family: var(--ltlb-font-family);
     color: var(--ltlb-color-text);
@@ -509,25 +538,77 @@
     transition: var(--ltlb-transition);
     -webkit-appearance: none;
     appearance: none;
+    line-height: 1.4; /* improves vertical text centering across browsers */
+    min-height: 2.75rem; /* prevents text clipping, including on Windows */
+    box-sizing: border-box; /* include border/padding in height calc */
 }
 
+.ltlb-input:focus,
 .ltlb-form-input:focus,
+.ltlb-select:focus,
 .ltlb-form-select:focus {
     outline: none;
     border-color: var(--ltlb-color-primary);
     box-shadow: 0 0 0 4px rgba(var(--ltlb-color-primary-rgb), 0.15);
 }
 
+.ltlb-input::placeholder,
 .ltlb-form-input::placeholder {
     color: var(--ltlb-color-text-muted);
     opacity: 0.7;
 }
 
+.ltlb-select,
 .ltlb-form-select {
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236c757d' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: right 1rem center;
     padding-right: 2.5rem;
+}
+
+/* Shortcode markup uses <small class="ltlb-help-text"> */
+.ltlb-help-text {
+    display: block;
+    margin-top: var(--ltlb-gap-sm);
+    font-size: 0.85rem;
+    color: var(--ltlb-color-text-muted);
+}
+
+/* Input with action button (RSS test) */
+.ltlb-input-with-action {
+    display: flex;
+    align-items: center;
+    gap: var(--ltlb-gap-sm);
+}
+
+.ltlb-input-with-action .ltlb-input,
+.ltlb-input-with-action .ltlb-form-input {
+    flex: 1;
+}
+
+/* Two-column rows used by shortcode settings */
+.ltlb-form-row {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--ltlb-gap-lg);
+}
+
+.ltlb-form-row .ltlb-col-half {
+    min-width: 0;
+}
+
+@media (max-width: 640px) {
+    .ltlb-form-row {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Action row under forms */
+.ltlb-form-actions {
+    display: flex;
+    gap: var(--ltlb-gap-md);
+    flex-wrap: wrap;
+    margin-top: var(--ltlb-gap-lg);
 }
 
 .ltlb-form-hint {
@@ -679,12 +760,14 @@
     letter-spacing: 0.02em;
 }
 
-.ltlb-badge--success {
+.ltlb-badge--success,
+.ltlb-badge-success {
     background: var(--ltlb-color-success-light);
     color: #155724;
 }
 
-.ltlb-badge--error {
+.ltlb-badge--error,
+.ltlb-badge-error {
     background: var(--ltlb-color-error-light);
     color: #721c24;
 }
@@ -715,6 +798,52 @@
     overflow: hidden;
     box-shadow: var(--ltlb-shadow-sm);
     margin-top: var(--ltlb-gap-xl);
+}
+
+/* Runs section uses the generic section header markup */
+.ltlb-runs-section .ltlb-section-header {
+    justify-content: space-between;
+}
+
+.ltlb-runs-content {
+    display: none;
+    padding: var(--ltlb-gap-lg);
+}
+
+.ltlb-runs-content.open {
+    display: block;
+}
+
+.ltlb-table-wrapper {
+    overflow-x: auto;
+}
+
+.ltlb-empty-state {
+    text-align: center;
+    padding: var(--ltlb-gap-xl);
+    color: var(--ltlb-color-text-muted);
+}
+
+.ltlb-empty-icon {
+    font-size: 2rem;
+    margin-bottom: var(--ltlb-gap-sm);
+}
+
+/* Utility text colors used by inline JS */
+.ltlb-text-success {
+    color: var(--ltlb-color-success);
+}
+
+.ltlb-text-warning {
+    color: #856404;
+}
+
+.ltlb-text-error {
+    color: var(--ltlb-color-error);
+}
+
+.ltlb-text-muted {
+    color: var(--ltlb-color-text-muted);
 }
 
 .ltlb-runs-section__header {

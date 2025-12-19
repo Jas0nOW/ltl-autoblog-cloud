@@ -443,7 +443,7 @@ final class LTL_SAAS_Portal {
                 'help_wp_password' => 'Generate at: WP-Admin → Users → Profile → Application Passwords',
                 'label_rss_url' => 'RSS Source',
                 'tooltip_rss_url' => 'Your RSS URL',
-                'help_rss_url' => '✓ Must be https:// | Examples: blog.com/feed, news-portal.com/rss',
+                'help_rss_url' => '✓ Must be xml files | Examples: https://tomshardware.com/feeds/rss, https://theverge.com/rss/index.xml',
                 'label_language' => 'Language',
                 'help_language' => 'The language in which posts will be written',
                 'label_tone' => 'Tone',
@@ -551,7 +551,7 @@ final class LTL_SAAS_Portal {
                 'help_wp_password' => 'Generieren unter: WP-Admin → Nutzer → Profil → Anwendungspasswörter',
                 'label_rss_url' => 'RSS-Quelle',
                 'tooltip_rss_url' => 'Deine RSS URL',
-                'help_rss_url' => '✓ Muss https:// sein | Beispiele: blog.de/feed, news-portal.com/rss',
+                'help_rss_url' => '✓ Muss XML-Dateien sein | Beispiele: https://tomshardware.com/feeds/rss, https://theverge.com/rss/index.xml',
                 'label_language' => 'Sprache',
                 'help_language' => 'Die Sprache, in der Posts geschrieben werden',
                 'label_tone' => 'Ton',
@@ -1170,6 +1170,7 @@ final class LTL_SAAS_Portal {
                     btn.disabled = true;
                     btn.classList.add('loading');
                     var result = document.getElementById('ltl-saas-test-result');
+                    result.className = 'ltlb-test-result ltlb-test-result--loading';
                     result.innerHTML = '<span class="ltlb-text-muted">⏳ <?php echo esc_js($t['testing']); ?></span>';
 
                     var wpUrl = document.getElementById('wp_url').value;
@@ -1177,6 +1178,7 @@ final class LTL_SAAS_Portal {
                     var wpPass = document.getElementById('wp_app_password').value;
 
                     if (!wpUrl || !wpUser || !wpPass) {
+                        result.className = 'ltlb-test-result ltlb-test-result--error';
                         result.innerHTML = '<span class="ltlb-text-error">❌ <?php echo esc_js($t['error_all_fields']); ?></span>';
                         btn.disabled = false;
                         btn.classList.remove('loading');
@@ -1192,12 +1194,15 @@ final class LTL_SAAS_Portal {
                     .then(function(r) { return r.json(); })
                     .then(function(data) {
                         if (data.success) {
+                            result.className = 'ltlb-test-result ltlb-test-result--success';
                             result.innerHTML = '<span class="ltlb-text-success">✅ <?php echo esc_js($t['connection_success']); ?> (' + data.user + ')</span>';
                         } else {
+                            result.className = 'ltlb-test-result ltlb-test-result--error';
                             result.innerHTML = '<span class="ltlb-text-error">❌ <?php echo esc_js($t['error_prefix']); ?> ' + (data.message || '<?php echo esc_js($t['error_unknown']); ?>') + '</span>';
                         }
                     })
                     .catch(function(err) {
+                        result.className = 'ltlb-test-result ltlb-test-result--error';
                         result.innerHTML = '<span class="ltlb-text-error">❌ <?php echo esc_js($t['error_network']); ?> ' + err + '</span>';
                     })
                     .finally(function() {
@@ -1214,9 +1219,11 @@ final class LTL_SAAS_Portal {
                     e.preventDefault();
                     var rssUrl = document.getElementById('rss_url').value;
                     var result = document.getElementById('ltl-saas-rss-result');
+                    result.className = 'ltlb-test-result ltlb-test-result--loading';
                     result.innerHTML = '<span class="ltlb-text-muted">⏳ <?php echo esc_js($t['testing_rss']); ?></span>';
 
                     if (!rssUrl) {
+                        result.className = 'ltlb-test-result ltlb-test-result--error';
                         result.innerHTML = '<span class="ltlb-text-error">❌ <?php echo esc_js($t['error_rss_required']); ?></span>';
                         return;
                     }
@@ -1230,12 +1237,15 @@ final class LTL_SAAS_Portal {
                     .then(function(r) { return r.json(); })
                     .then(function(data) {
                         if (data.success) {
+                            result.className = 'ltlb-test-result ltlb-test-result--success';
                             result.innerHTML = '<span class="ltlb-text-success">✅ RSS OK! <?php echo esc_js($t['rss_title']); ?> ' + data.title + '</span>';
                         } else {
+                            result.className = 'ltlb-test-result ltlb-test-result--error';
                             result.innerHTML = '<span class="ltlb-text-error">❌ <?php echo esc_js($t['error_prefix']); ?> ' + (data.message || '<?php echo esc_js($t['error_unknown']); ?>') + '</span>';
                         }
                     })
                     .catch(function(err) {
+                        result.className = 'ltlb-test-result ltlb-test-result--error';
                         result.innerHTML = '<span class="ltlb-text-error">❌ <?php echo esc_js($t['error_network']); ?> ' + err + '</span>';
                     });
                 });

@@ -598,10 +598,41 @@ class LTL_SAAS_Portal_REST {
             return new WP_REST_Response( array( 'success' => false, 'message' => 'Missing RSS URL' ), 400 );
         }
 
-        $response = wp_remote_get( $rss_url, array(
-            'timeout' => 5,
+        // Prefer WordPress' built-in feed parser (SimplePie) because it supports
+        // auto-discovery of RSS/Atom feeds from HTML pages (user-friendly URLs).
+        if ( defined( 'ABSPATH' ) ) {
+            include_once ABSPATH . WPINC . '/feed.php';
+
+            $ttl_filter = function () {
+                return 60; // keep cache short for "test" behavior
+            };
+            add_filter( 'wp_feed_cache_transient_lifetime', $ttl_filter );
+            $feed = fetch_feed( $rss_url );
+            remove_filter( 'wp_feed_cache_transient_lifetime', $ttl_filter );
+
+            if ( ! is_wp_error( $feed ) && $feed instanceof \SimplePie ) {
+                $items = $feed->get_items( 0, 1 );
+                if ( ! empty( $items ) && $items[0] instanceof \SimplePie_Item ) {
+                    $title = (string) $items[0]->get_title();
+                    return array(
+                        'success' => true,
+                        'title' => substr( $title, 0, 50 ),
+                    );
+                }
+            }
+        }
+
+        $http_args = array(
+            'timeout' => 10,
             'sslverify' => true,
-        ) );
+            'redirection' => 5,
+            'headers' => array(
+                'User-Agent' => 'LTL-SaaS-Portal/1.0 (+https://lazytechlab.de)',
+                'Accept' => 'application/rss+xml, application/atom+xml, application/xml;q=0.9, text/xml;q=0.8, text/html;q=0.7, */*;q=0.5',
+            ),
+        );
+
+        $response = wp_remote_get( $rss_url, $http_args );
 
         $code = wp_remote_retrieve_response_code( $response );
         if ( $code !== 200 ) {
@@ -612,12 +643,108 @@ class LTL_SAAS_Portal_REST {
         }
 
         $body = wp_remote_retrieve_body( $response );
+
+        // Determine content type; many sites return HTML pages instead of feeds
+        $content_type = wp_remote_retrieve_header( $response, 'content-type' );
+        $is_xml_like = false;
+        if ( is_string( $content_type ) ) {
+            $ct = strtolower( $content_type );
+            $is_xml_like = ( strpos( $ct, 'xml' ) !== false ) || ( strpos( $ct, 'rss' ) !== false ) || ( strpos( $ct, 'atom' ) !== false );
+        }
+        // Fallback sniff based on body
+        if ( ! $is_xml_like ) {
+            $snippet = trim( substr( $body, 0, 200 ) );
+            $is_xml_like = ( stripos( $snippet, '<rss' ) !== false ) || ( stripos( $snippet, '<feed' ) !== false ) || ( stripos( $snippet, '<?xml' ) !== false );
+        }
+
+        // If body looks like HTML, attempt feed discovery via <link rel="alternate" type="application/rss+xml|atom+xml">
+        if ( ! $is_xml_like ) {
+            $discover_url = '';
+            \libxml_use_internal_errors( true );
+            $dom = new \DOMDocument();
+            // DOMDocument::loadHTML() handles encoding auto-detection; no need for conversion
+            $dom->loadHTML( $body );
+            $xpath = new \DOMXPath( $dom );
+            // Find RSS or Atom alternate links
+            $links = $xpath->query( "//link[@rel='alternate' and (contains(@type,'rss') or contains(@type,'atom'))]" );
+            if ( $links && $links->length > 0 ) {
+                /** @var \DOMElement $ln */
+                $ln = $links->item(0);
+                $href = $ln->getAttribute('href');
+                if ( $href ) {
+                    // Resolve relative hrefs against the original URL
+                    if ( preg_match( '#^https?://#i', $href ) ) {
+                        $discover_url = $href;
+                    } else {
+                        $base = wp_parse_url( $rss_url );
+                        if ( $base && isset($base['scheme'], $base['host']) ) {
+                            $prefix = $base['scheme'] . '://' . $base['host'];
+                            if ( isset($base['port']) ) { $prefix .= ':' . $base['port']; }
+                            if ( isset($href[0]) && $href[0] === '/' ) {
+                                $discover_url = $prefix . $href;
+                            } else {
+                                $path = isset($base['path']) ? rtrim(dirname($base['path']), '/') : '';
+                                $discover_url = $prefix . $path . '/' . $href;
+                            }
+                        }
+                    }
+                }
+            }
+            \libxml_clear_errors();
+
+            // If no feed link found in <head>, try common forum/CMS feed patterns (XenForo, Discourse, etc.)
+            if ( ! $discover_url ) {
+                $base = wp_parse_url( $rss_url );
+                if ( $base && isset($base['scheme'], $base['host']) ) {
+                    $prefix = $base['scheme'] . '://' . $base['host'];
+                    if ( isset($base['port']) ) { $prefix .= ':' . $base['port']; }
+                    $path = isset($base['path']) ? rtrim($base['path'], '/') : '';
+
+                    // Common XenForo feed patterns
+                    $candidates = array(
+                        $prefix . '/forums/feed',                        // XenForo forum index feed
+                        $prefix . $path . '/feed',                       // Generic feed at page level
+                        $prefix . '/feeds/threads.xml',                  // XenForo direct feed (some setups)
+                    );
+
+                    // Try each candidate and see if it's valid XML/RSS
+                    foreach ( $candidates as $candidate_url ) {
+                        $resp = wp_remote_get( $candidate_url, $http_args );
+                        if ( wp_remote_retrieve_response_code( $resp ) === 200 ) {
+                            $candidate_body = wp_remote_retrieve_body( $resp );
+                            \libxml_use_internal_errors( true );
+                            $test_xml = simplexml_load_string( $candidate_body );
+                            \libxml_clear_errors();
+                            if ( $test_xml !== false ) {
+                                $discover_url = $candidate_url;
+                                $body = $candidate_body;
+                                $is_xml_like = true;
+                                break; // Found a valid feed
+                            }
+                        }
+                    }
+                }
+            }
+
+            if ( $discover_url && ! $is_xml_like ) {
+                // Fetch discovered feed and replace body
+                $response2 = wp_remote_get( $discover_url, $http_args );
+                if ( wp_remote_retrieve_response_code( $response2 ) === 200 ) {
+                    $body = wp_remote_retrieve_body( $response2 );
+                    $is_xml_like = true;
+                }
+            }
+        }
+
+        // Parse XML/RSS/Atom safely (suppress warnings)
+        \libxml_use_internal_errors( true );
         $xml = simplexml_load_string( $body );
+        \libxml_clear_errors();
 
         if ( $xml === false ) {
             return array(
                 'success' => false,
-                'message' => 'Invalid XML/RSS',
+                'message' => $is_xml_like ? 'Invalid XML/RSS' : 'Not an RSS/Atom feed (HTML detected)',
             );
         }
 
