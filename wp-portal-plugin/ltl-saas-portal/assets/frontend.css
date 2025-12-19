@@ -400,6 +400,8 @@
     box-shadow: var(--ltlb-shadow-md);
 }
 
+/* Section Header - used in form sections */
+.ltlb-section-header,
 .ltlb-form-section__header {
     display: flex;
     align-items: center;
@@ -407,6 +409,21 @@
     padding: var(--ltlb-gap-lg);
     background: var(--ltlb-color-bg-light);
     border-bottom: 1px solid var(--ltlb-color-border);
+}
+
+.ltlb-section-title,
+.ltlb-form-section__title {
+    display: flex;
+    align-items: center;
+    gap: var(--ltlb-gap-sm);
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--ltlb-color-text);
+}
+
+.ltlb-section-icon {
+    font-size: 1.3em;
 }
 
 .ltlb-form-section__icon {
@@ -439,6 +456,11 @@
 }
 
 .ltlb-form-section__body {
+    padding: var(--ltlb-gap-lg);
+}
+
+/* Form inside section - needs padding */
+.ltlb-form-section > .ltlb-form {
     padding: var(--ltlb-gap-lg);
 }
 
