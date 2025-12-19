@@ -598,6 +598,17 @@ class LTL_SAAS_Portal_Admin {
             if ( $key === 'primary' ) {
                 $hover = $this->adjust_color_brightness( $color, -10 );
                 echo '--ltlb-color-primary-hover: ' . esc_attr( $hover ) . ';';
+
+                // Generate light variant
+                $light = $this->adjust_color_brightness( $color, 80 );
+                echo '--ltlb-color-primary-light: ' . esc_attr( $light ) . ';';
+
+                // Generate gradient
+                echo '--ltlb-color-primary-gradient: linear-gradient(135deg, ' . esc_attr( $color ) . ' 0%, ' . esc_attr( $hover ) . ' 100%);';
+
+                // Generate RGB components for rgba() usage
+                $rgb = $this->get_rgb_components( $color );
+                echo '--ltlb-color-primary-rgb: ' . esc_attr( $rgb ) . ';';
             }
 
             // Auto-generate contrasting text color for form background
@@ -651,6 +662,26 @@ class LTL_SAAS_Portal_Admin {
 
         // Return white text for dark backgrounds, dark text for light backgrounds
         return $luminance > 0.5 ? '#1a1a1a' : '#ffffff';
+    }
+
+    /**
+     * Convert hex color to RGB components string for CSS rgba()
+     *
+     * @param string $hex Hex color value.
+     * @return string RGB components as "r, g, b"
+     */
+    private function get_rgb_components( $hex ) {
+        $hex = ltrim( $hex, '#' );
+
+        if ( strlen( $hex ) === 3 ) {
+            $hex = $hex[0] . $hex[0] . $hex[1] . $hex[1] . $hex[2] . $hex[2];
+        }
+
+        $r = hexdec( substr( $hex, 0, 2 ) );
+        $g = hexdec( substr( $hex, 2, 2 ) );
+        $b = hexdec( substr( $hex, 4, 2 ) );
+
+        return $r . ', ' . $g . ', ' . $b;
     }
 
     /**

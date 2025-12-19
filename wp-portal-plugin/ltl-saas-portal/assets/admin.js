@@ -86,8 +86,13 @@
             // Update CSS variable in preview scope
             switch(key) {
                 case 'primary':
+                    const hover = adjustColorBrightness(color, -10);
+                    const light = adjustColorBrightness(color, 80);
                     previewArea.style.setProperty('--ltlb-color-primary' + suffix, color);
-                    previewArea.style.setProperty('--ltlb-color-primary-hover' + suffix, adjustColorBrightness(color, -10));
+                    previewArea.style.setProperty('--ltlb-color-primary-hover' + suffix, hover);
+                    previewArea.style.setProperty('--ltlb-color-primary-light' + suffix, light);
+                    previewArea.style.setProperty('--ltlb-color-primary-gradient' + suffix, `linear-gradient(135deg, ${color} 0%, ${hover} 100%)`);
+                    previewArea.style.setProperty('--ltlb-color-primary-rgb' + suffix, hexToRgbComponents(color));
                     break;
                 case 'success':
                     previewArea.style.setProperty('--ltlb-color-success' + suffix, color);
@@ -156,6 +161,26 @@
                 Math.round(r).toString(16).padStart(2, '0') +
                 Math.round(g).toString(16).padStart(2, '0') +
                 Math.round(b).toString(16).padStart(2, '0');
+        }
+
+        /**
+         * Convert hex color to RGB components for rgba()
+         *
+         * @param {string} hex Hex color value
+         * @return {string} RGB components as "r, g, b"
+         */
+        function hexToRgbComponents(hex) {
+            hex = hex.replace('#', '');
+
+            if (hex.length === 3) {
+                hex = hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2];
+            }
+
+            const r = parseInt(hex.substring(0, 2), 16);
+            const g = parseInt(hex.substring(2, 4), 16);
+            const b = parseInt(hex.substring(4, 6), 16);
+
+            return r + ', ' + g + ', ' + b;
         }
 
         // ============================================
