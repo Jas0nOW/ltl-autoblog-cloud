@@ -571,44 +571,56 @@
     line-height: 1.4;
 }
 
+/* Primary Button */
+.ltlb-btn-primary,
 .ltlb-btn--primary {
     background: var(--ltlb-color-primary-gradient);
     color: white;
     box-shadow: var(--ltlb-shadow-glow);
 }
 
+.ltlb-btn-primary:hover,
 .ltlb-btn--primary:hover {
     transform: translateY(-2px);
     box-shadow: 0 6px 25px rgba(var(--ltlb-color-primary-rgb), 0.35);
     color: white;
 }
 
+/* Secondary Button */
+.ltlb-btn-secondary,
 .ltlb-btn--secondary {
     background: var(--ltlb-color-bg);
     color: var(--ltlb-color-primary);
     border: 2px solid var(--ltlb-color-primary);
 }
 
+.ltlb-btn-secondary:hover,
 .ltlb-btn--secondary:hover {
     background: var(--ltlb-color-primary);
     color: white;
 }
 
+/* Ghost Button */
+.ltlb-btn-ghost,
 .ltlb-btn--ghost {
     background: transparent;
     color: var(--ltlb-color-primary);
     border: 2px solid transparent;
 }
 
+.ltlb-btn-ghost:hover,
 .ltlb-btn--ghost:hover {
     background: var(--ltlb-color-primary-light);
 }
 
+/* Button Sizes */
+.ltlb-btn-sm,
 .ltlb-btn--sm {
     padding: 0.5rem 1rem;
     font-size: 0.85rem;
 }
 
+.ltlb-btn-lg,
 .ltlb-btn--lg {
     padding: 1rem 2rem;
     font-size: 1.1rem;
