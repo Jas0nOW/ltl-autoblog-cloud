@@ -549,40 +549,233 @@ class LTL_SAAS_Portal_REST {
     public function test_wp_connection( $request ) {
         $params = $request->get_json_params();
         $wp_url = isset( $params['wp_url'] ) ? esc_url_raw( $params['wp_url'] ) : '';
-        $wp_user = isset( $params['wp_user'] ) ? sanitize_user( $params['wp_user'] ) : '';
-        $wp_pass = isset( $params['wp_app_password'] ) ? $params['wp_app_password'] : '';
+        // Do not over-sanitize: the remote site needs the exact login/user_login string.
+        $wp_user = isset( $params['wp_user'] ) ? sanitize_text_field( wp_unslash( $params['wp_user'] ) ) : '';
+        // Normalize common copy/paste formatting for Application Passwords (spaces/newlines).
+        $wp_pass = isset( $params['wp_app_password'] ) ? (string) wp_unslash( $params['wp_app_password'] ) : '';
+        $wp_pass = preg_replace( '/\s+/', '', trim( $wp_pass ) );
 
         if ( ! $wp_url || ! $wp_user || ! $wp_pass ) {
             return new WP_REST_Response( array( 'success' => false, 'message' => 'Missing fields' ), 400 );
         }
 
-        // Try to get /wp-json/wp/v2/users/me
+        // Try to get /wp-json/wp/v2/users/me (requires valid Application Password)
         $api_url = rtrim( $wp_url, '/' ) . '/wp-json/wp/v2/users/me';
-        $auth = base64_encode( $wp_user . ':' . $wp_pass );
+        $auth = base64_encode( trim( $wp_user ) . ':' . $wp_pass );
 
-        $response = wp_remote_get( $api_url, array(
-            'headers' => array( 'Authorization' => 'Basic ' . $auth ),
-            'timeout' => 5,
-            'sslverify' => true,
-        ) );
+        $remote_get_follow_redirects = function( $url, $args, $max_redirects = 5 ) {
+            $current_url = $url;
+            $redirect_count = 0;
+            $last_response = null;
+            $last_location = '';
 
-        $code = wp_remote_retrieve_response_code( $response );
-        if ( $code === 200 ) {
-            $body = json_decode( wp_remote_retrieve_body( $response ), true );
-            return array(
-                'success' => true,
-                'user' => isset( $body['name'] ) ? $body['name'] : 'OK',
-            );
-        } else {
-            $error_msg = 'HTTP ' . $code;
-            if ( is_wp_error( $response ) ) {
-                $error_msg = $response->get_error_message();
+            for ( $i = 0; $i <= $max_redirects; $i++ ) {
+                $request_args = $args;
+                $request_args['redirection'] = 0;
+
+                $last_response = wp_remote_get( $current_url, $request_args );
+                if ( is_wp_error( $last_response ) ) {
+                    return array( $last_response, $current_url, $redirect_count );
+                }
+
+                $status = (int) wp_remote_retrieve_response_code( $last_response );
+                if ( in_array( $status, array( 301, 302, 303, 307, 308 ), true ) ) {
+                    $location = wp_remote_retrieve_header( $last_response, 'location' );
+                    if ( ! $location ) {
+                        return array( $last_response, $current_url, $redirect_count, $last_location );
+                    }
+
+                    $last_location = $location;
+
+                    // Resolve relative redirects.
+                    if ( strpos( $location, 'http://' ) !== 0 && strpos( $location, 'https://' ) !== 0 ) {
+                        $parts = wp_parse_url( $current_url );
+                        if ( is_array( $parts ) && isset( $parts['scheme'], $parts['host'] ) ) {
+                            $base = $parts['scheme'] . '://' . $parts['host'];
+                            if ( isset( $parts['port'] ) ) {
+                                $base .= ':' . $parts['port'];
+                            }
+
+                            if ( strpos( $location, '/' ) === 0 ) {
+                                $location = $base . $location;
+                            } else {
+                                $path = isset( $parts['path'] ) ? $parts['path'] : '/';
+                                $dir = trailingslashit( preg_replace( '#/[^/]*$#', '/', $path ) );
+                                $location = $base . $dir . ltrim( $location, '/' );
+                            }
+                        }
+                    }
+
+                    $current_url = $location;
+                    $redirect_count++;
+                    continue;
+                }
+
+                return array( $last_response, $current_url, $redirect_count, $last_location );
             }
-            return array(
-                'success' => false,
-                'message' => $error_msg,
+
+            return array( $last_response, $current_url, $redirect_count, $last_location );
+        };
+
+        $request_args = array(
+            'headers' => array(
+                'Authorization' => 'Basic ' . $auth,
+                'User-Agent' => 'LTL-SaaS-Portal/1.0 (+https://lazytechlab.de)',
+                'Accept' => 'application/json',
+            ),
+            'timeout' => 10,
+            'sslverify' => true,
+        );
+
+        list( $response, $final_url, $redirects, $last_location ) = $remote_get_follow_redirects( $api_url, $request_args, 5 );
+
+        if ( is_wp_error( $response ) ) {
+            return new WP_REST_Response(
+                array(
+                    'success' => false,
+                    'message' => $response->get_error_message(),
+                ),
+                502
             );
         }
+
+        $code = (int) wp_remote_retrieve_response_code( $response );
+        $raw_body = (string) wp_remote_retrieve_body( $response );
+        $decoded = json_decode( $raw_body, true );
+        $content_type = (string) wp_remote_retrieve_header( $response, 'content-type' );
+
+        if ( $code === 200 ) {
+            // A 200 that is not JSON is almost always an HTML login/signup page (i.e. not authenticated).
+            if ( empty( $decoded ) || ! is_array( $decoded ) ) {
+                $msg = 'HTTP 200 – Unexpected response (not JSON). This usually means the request was redirected to an HTML login/signup page, so REST auth did not apply.';
+                if ( $content_type ) {
+                    $msg .= "\nContent-Type: " . $content_type;
+                }
+
+                // Common multisite/local dev symptom: redirect to wp-signup.php when the requested host/port is treated as a new site.
+                if ( is_string( $final_url ) && strpos( $final_url, 'wp-signup.php' ) !== false ) {
+                    $msg .= "\nHint: Redirected to wp-signup.php (Multisite). Use the exact site domain configured in the network (often WITHOUT a port), or disable Multisite for this local site.";
+                }
+
+                return new WP_REST_Response(
+                    array(
+                        'success' => false,
+                        'message' => $msg,
+                    ),
+                    401
+                );
+            }
+
+            return new WP_REST_Response(
+                array(
+                    'success' => true,
+                    'user' => is_array( $decoded ) && isset( $decoded['name'] ) ? $decoded['name'] : 'OK',
+                ),
+                200
+            );
+        }
+
+        // Provide the most useful message possible for the user
+        $remote_message = '';
+        $remote_code = '';
+        if ( is_array( $decoded ) ) {
+            if ( isset( $decoded['message'] ) && is_string( $decoded['message'] ) ) {
+                $remote_message = $decoded['message'];
+            }
+
+            if ( isset( $decoded['code'] ) && is_string( $decoded['code'] ) ) {
+                $remote_code = $decoded['code'];
+            }
+        }
+
+        $error_msg = 'HTTP ' . $code;
+        if ( $remote_message ) {
+            $error_msg .= ' – ' . $remote_message;
+        }
+
+        if ( $remote_code ) {
+            $error_msg .= "\nWP code: " . $remote_code;
+        }
+
+        if ( $code === 401 ) {
+            // If the body looks identical to an unauthenticated call, the Authorization header
+            // is likely not being accepted/processed (proxy/WAF/server config) or app passwords are disabled.
+            $unauth_args = array(
+                'headers' => array(
+                    'User-Agent' => 'LTL-SaaS-Portal/1.0 (+https://lazytechlab.de)',
+                    'Accept' => 'application/json',
+                ),
+                'timeout' => 10,
+                'sslverify' => true,
+            );
+            list( $unauth_response ) = $remote_get_follow_redirects( $api_url, $unauth_args, 5 );
+
+            $auth_ignored_hint = '';
+            if ( ! is_wp_error( $unauth_response ) ) {
+                $unauth_code = (int) wp_remote_retrieve_response_code( $unauth_response );
+                $unauth_body = (string) wp_remote_retrieve_body( $unauth_response );
+                $unauth_decoded = json_decode( $unauth_body, true );
+
+                $same_code = ( $unauth_code === 401 );
+                $same_message = false;
+                if ( is_array( $decoded ) && is_array( $unauth_decoded ) ) {
+                    $same_message = (
+                        ( isset( $decoded['message'], $unauth_decoded['message'] ) && $decoded['message'] === $unauth_decoded['message'] )
+                        && ( isset( $decoded['code'], $unauth_decoded['code'] ) && $decoded['code'] === $unauth_decoded['code'] )
+                    );
+                }
+
+                if ( $same_code && $same_message ) {
+                    $auth_ignored_hint = 'Your credentials may be correct, but the target site is treating this like a request without Basic Auth. Common causes: Application Passwords disabled, server/proxy not passing Authorization headers, or a security plugin/WAF blocking REST authentication.';
+                }
+            }
+
+            $error_msg .= ' (Unauthorized).';
+            if ( $auth_ignored_hint ) {
+                $error_msg .= ' ' . $auth_ignored_hint;
+            } else {
+                $error_msg .= ' Check: WP username (login name), Application Password (Users → Profile → Application Passwords), and that wp_url is the final HTTPS site URL (no http→https or domain redirects).' ;
+            }
+
+            // Extra precision based on common WP REST auth error codes.
+            if ( $remote_code === 'rest_not_logged_in' ) {
+                $error_msg .= "\nHint: WP treats this request as unauthenticated. IMPORTANT: You must use a WordPress *Application Password* (Users → Profile → Application Passwords). Your normal wp-admin login password will NOT authenticate the REST API via Basic Auth.";
+                $error_msg .= "\nHint: If you are already using an Application Password, then the Authorization header is likely being stripped/ignored by server/proxy/WAF (common on some managed hosts / LiteSpeed setups) or blocked by a security plugin.";
+            } elseif ( in_array( $remote_code, array( 'incorrect_password', 'invalid_username' ), true ) ) {
+                $error_msg .= "\nHint: The target WP is actively rejecting the credentials (username/app-password mismatch).";
+            } elseif ( in_array( $remote_code, array( 'application_passwords_disabled', 'application_passwords_disabled_for_user' ), true ) ) {
+                $error_msg .= "\nHint: Application Passwords appear to be disabled on the target WP (globally or for this user).";
+            }
+        } elseif ( $code === 403 ) {
+            $error_msg .= ' (Forbidden). The user may not have permission to access /users/me, or a security plugin/WAF blocks REST authentication.';
+        }
+
+        if ( ! empty( $redirects ) ) {
+            $error_msg .= "\nRedirects followed: " . (int) $redirects;
+        }
+
+        if ( ! empty( $last_location ) && is_string( $last_location ) ) {
+            $error_msg .= "\nLast redirect Location: " . $last_location;
+        }
+
+        if ( ! empty( $final_url ) && is_string( $final_url ) ) {
+            $final_parts = wp_parse_url( $final_url );
+            if ( is_array( $final_parts ) && isset( $final_parts['host'] ) ) {
+                $error_msg .= "\nFinal host: " . $final_parts['host'];
+            }
+
+            if ( strpos( $final_url, 'wp-signup.php' ) !== false ) {
+                $error_msg .= "\nHint: Redirected to wp-signup.php (Multisite). The requested domain/port may not match an existing site in the network.";
+            }
+        }
+
+        return new WP_REST_Response(
+            array(
+                'success' => false,
+                'message' => $error_msg,
+            ),
+            $code > 0 ? $code : 400
+        );
     }
 
     /**

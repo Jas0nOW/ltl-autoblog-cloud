@@ -187,6 +187,13 @@
     font-weight: 500;
 }
 
+.ltlb-alert-message {
+    line-height: 1.45;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+}
+
 .ltlb-alert__icon,
 .ltlb-alert-icon {
     font-size: 1.25rem;
@@ -202,9 +209,15 @@
 
 .ltlb-alert--error,
 .ltlb-alert-error {
-    background: var(--ltlb-color-error-light);
+    background: var(--ltlb-color-error-light, #f8d7da);
     color: #721c24;
-    border-left: 4px solid var(--ltlb-color-error);
+    border-left: 4px solid var(--ltlb-color-error, #dc3545);
+}
+
+.ltlb-alert--error a,
+.ltlb-alert-error a {
+    color: inherit;
+    text-decoration: underline;
 }
 
 .ltlb-alert--warning,
