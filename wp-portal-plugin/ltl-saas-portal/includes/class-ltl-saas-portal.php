@@ -91,8 +91,7 @@ final class LTL_SAAS_Portal {
         add_shortcode( 'ltl_saas_dashboard', array( $this, 'shortcode_dashboard' ) );
         add_shortcode( 'ltl_saas_pricing', array( $this, 'shortcode_pricing' ) );
 
-        // Output custom colors on frontend (priority 100 to ensure after stylesheets)
-        add_action( 'wp_head', array( $this, 'output_custom_colors_frontend' ), 100 );
+        // Custom colors are now added via wp_add_inline_style in enqueue_frontend_assets()
     }
 
     /**
@@ -111,7 +110,68 @@ final class LTL_SAAS_Portal {
             LTL_SAAS_PORTAL_VERSION
         );
 
+        // Add custom colors as inline style AFTER the CSS file
+        $custom_css = $this->get_custom_colors_css();
+        wp_add_inline_style( 'ltlb-frontend', $custom_css );
+
         $enqueued = true;
+    }
+
+    /**
+     * Get custom colors CSS string
+     *
+     * @return string CSS string with custom color variables
+     */
+    private function get_custom_colors_css() {
+        $custom_colors = get_option( 'ltl_saas_custom_colors_frontend', array() );
+
+        $defaults = array(
+            'primary' => '#667eea',
+            'success' => '#28a745',
+            'error' => '#dc3545',
+            'warning' => '#ffc107',
+            'form_bg' => '#f8f9fa',
+        );
+
+        $colors = wp_parse_args( $custom_colors, $defaults );
+
+        $css = ':root {';
+
+        foreach ( $colors as $key => $color ) {
+            if ( ! is_string( $color ) || empty( $color ) ) {
+                continue;
+            }
+
+            $css_key = str_replace( '_', '-', $key );
+            $css .= '--ltlb-color-' . esc_attr( $css_key ) . ': ' . esc_attr( $color ) . ';';
+
+            if ( in_array( $key, array( 'success', 'error', 'warning' ) ) ) {
+                $light = $this->adjust_color_brightness( $color, 80 );
+                $css .= '--ltlb-color-' . esc_attr( $css_key ) . '-light: ' . esc_attr( $light ) . ';';
+            }
+
+            if ( $key === 'primary' ) {
+                $hover = $this->adjust_color_brightness( $color, -10 );
+                $css .= '--ltlb-color-primary-hover: ' . esc_attr( $hover ) . ';';
+
+                $light = $this->adjust_color_brightness( $color, 80 );
+                $css .= '--ltlb-color-primary-light: ' . esc_attr( $light ) . ';';
+
+                $css .= '--ltlb-color-primary-gradient: linear-gradient(135deg, ' . esc_attr( $color ) . ' 0%, ' . esc_attr( $hover ) . ' 100%);';
+
+                $rgb = $this->get_rgb_components( $color );
+                $css .= '--ltlb-color-primary-rgb: ' . esc_attr( $rgb ) . ';';
+            }
+
+            if ( $key === 'form_bg' ) {
+                $text_color = $this->get_contrasting_color( $color );
+                $css .= '--ltlb-color-form-text: ' . esc_attr( $text_color ) . ';';
+            }
+        }
+
+        $css .= '}';
+
+        return $css;
     }
 
     /**
