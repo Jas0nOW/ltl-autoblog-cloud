@@ -350,8 +350,8 @@ class LTL_SAAS_Portal_REST {
             if (is_wp_error($decrypted)) {
                 continue; // skip tenant if decryption fails
             }
-            // Sanitize outputs
-            $site_url = esc_url_raw($u->wp_url);
+            // Sanitize outputs (avoid PHP 8.3 deprecations from esc_url_raw(null))
+            $site_url = esc_url_raw( is_string( $u->wp_url ) ? $u->wp_url : '' );
             $settings_table = $wpdb->prefix . 'ltl_saas_settings';
             $settings = $wpdb->get_row($wpdb->prepare("SELECT * FROM $settings_table WHERE user_id = %d", $u->user_id), ARRAY_A);
             $rss_url = isset($settings['rss_url']) ? esc_url_raw($settings['rss_url']) : '';
@@ -364,7 +364,7 @@ class LTL_SAAS_Portal_REST {
             $tenant = [
                 'tenant_id' => (int)$u->user_id,
                 'site_url' => $site_url,
-                'wp_username' => sanitize_user($u->wp_user),
+                'wp_username' => sanitize_user( is_string( $u->wp_user ) ? $u->wp_user : '' ),
                 'wp_app_password' => $decrypted,
                 'rss_url' => $rss_url,
                 'language' => $language,
@@ -549,40 +549,233 @@ class LTL_SAAS_Portal_REST {
     public function test_wp_connection( $request ) {
         $params = $request->get_json_params();
         $wp_url = isset( $params['wp_url'] ) ? esc_url_raw( $params['wp_url'] ) : '';
-        $wp_user = isset( $params['wp_user'] ) ? sanitize_user( $params['wp_user'] ) : '';
-        $wp_pass = isset( $params['wp_app_password'] ) ? $params['wp_app_password'] : '';
+        // Do not over-sanitize: the remote site needs the exact login/user_login string.
+        $wp_user = isset( $params['wp_user'] ) ? sanitize_text_field( wp_unslash( $params['wp_user'] ) ) : '';
+        // Normalize common copy/paste formatting for Application Passwords (spaces/newlines).
+        $wp_pass = isset( $params['wp_app_password'] ) ? (string) wp_unslash( $params['wp_app_password'] ) : '';
+        $wp_pass = preg_replace( '/\s+/', '', trim( $wp_pass ) );
 
         if ( ! $wp_url || ! $wp_user || ! $wp_pass ) {
             return new WP_REST_Response( array( 'success' => false, 'message' => 'Missing fields' ), 400 );
         }
 
-        // Try to get /wp-json/wp/v2/users/me
+        // Try to get /wp-json/wp/v2/users/me (requires valid Application Password)
         $api_url = rtrim( $wp_url, '/' ) . '/wp-json/wp/v2/users/me';
-        $auth = base64_encode( $wp_user . ':' . $wp_pass );
+        $auth = base64_encode( trim( $wp_user ) . ':' . $wp_pass );
 
-        $response = wp_remote_get( $api_url, array(
-            'headers' => array( 'Authorization' => 'Basic ' . $auth ),
-            'timeout' => 5,
-            'sslverify' => true,
-        ) );
+        $remote_get_follow_redirects = function( $url, $args, $max_redirects = 5 ) {
+            $current_url = $url;
+            $redirect_count = 0;
+            $last_response = null;
+            $last_location = '';
 
-        $code = wp_remote_retrieve_response_code( $response );
-        if ( $code === 200 ) {
-            $body = json_decode( wp_remote_retrieve_body( $response ), true );
-            return array(
-                'success' => true,
-                'user' => isset( $body['name'] ) ? $body['name'] : 'OK',
-            );
-        } else {
-            $error_msg = 'HTTP ' . $code;
-            if ( is_wp_error( $response ) ) {
-                $error_msg = $response->get_error_message();
+            for ( $i = 0; $i <= $max_redirects; $i++ ) {
+                $request_args = $args;
+                $request_args['redirection'] = 0;
+
+                $last_response = wp_remote_get( $current_url, $request_args );
+                if ( is_wp_error( $last_response ) ) {
+                    return array( $last_response, $current_url, $redirect_count );
+                }
+
+                $status = (int) wp_remote_retrieve_response_code( $last_response );
+                if ( in_array( $status, array( 301, 302, 303, 307, 308 ), true ) ) {
+                    $location = wp_remote_retrieve_header( $last_response, 'location' );
+                    if ( ! $location ) {
+                        return array( $last_response, $current_url, $redirect_count, $last_location );
+                    }
+
+                    $last_location = $location;
+
+                    // Resolve relative redirects.
+                    if ( strpos( $location, 'http://' ) !== 0 && strpos( $location, 'https://' ) !== 0 ) {
+                        $parts = wp_parse_url( $current_url );
+                        if ( is_array( $parts ) && isset( $parts['scheme'], $parts['host'] ) ) {
+                            $base = $parts['scheme'] . '://' . $parts['host'];
+                            if ( isset( $parts['port'] ) ) {
+                                $base .= ':' . $parts['port'];
+                            }
+
+                            if ( strpos( $location, '/' ) === 0 ) {
+                                $location = $base . $location;
+                            } else {
+                                $path = isset( $parts['path'] ) ? $parts['path'] : '/';
+                                $dir = trailingslashit( preg_replace( '#/[^/]*$#', '/', $path ) );
+                                $location = $base . $dir . ltrim( $location, '/' );
+                            }
+                        }
+                    }
+
+                    $current_url = $location;
+                    $redirect_count++;
+                    continue;
+                }
+
+                return array( $last_response, $current_url, $redirect_count, $last_location );
             }
-            return array(
-                'success' => false,
-                'message' => $error_msg,
+
+            return array( $last_response, $current_url, $redirect_count, $last_location );
+        };
+
+        $request_args = array(
+            'headers' => array(
+                'Authorization' => 'Basic ' . $auth,
+                'User-Agent' => 'LTL-SaaS-Portal/1.0 (+https://lazytechlab.de)',
+                'Accept' => 'application/json',
+            ),
+            'timeout' => 10,
+            'sslverify' => true,
+        );
+
+        list( $response, $final_url, $redirects, $last_location ) = $remote_get_follow_redirects( $api_url, $request_args, 5 );
+
+        if ( is_wp_error( $response ) ) {
+            return new WP_REST_Response(
+                array(
+                    'success' => false,
+                    'message' => $response->get_error_message(),
+                ),
+                502
             );
         }
+
+        $code = (int) wp_remote_retrieve_response_code( $response );
+        $raw_body = (string) wp_remote_retrieve_body( $response );
+        $decoded = json_decode( $raw_body, true );
+        $content_type = (string) wp_remote_retrieve_header( $response, 'content-type' );
+
+        if ( $code === 200 ) {
+            // A 200 that is not JSON is almost always an HTML login/signup page (i.e. not authenticated).
+            if ( empty( $decoded ) || ! is_array( $decoded ) ) {
+                $msg = 'HTTP 200 – Unexpected response (not JSON). This usually means the request was redirected to an HTML login/signup page, so REST auth did not apply.';
+                if ( $content_type ) {
+                    $msg .= "\nContent-Type: " . $content_type;
+                }
+
+                // Common multisite/local dev symptom: redirect to wp-signup.php when the requested host/port is treated as a new site.
+                if ( is_string( $final_url ) && strpos( $final_url, 'wp-signup.php' ) !== false ) {
+                    $msg .= "\nHint: Redirected to wp-signup.php (Multisite). Use the exact site domain configured in the network (often WITHOUT a port), or disable Multisite for this local site.";
+                }
+
+                return new WP_REST_Response(
+                    array(
+                        'success' => false,
+                        'message' => $msg,
+                    ),
+                    401
+                );
+            }
+
+            return new WP_REST_Response(
+                array(
+                    'success' => true,
+                    'user' => is_array( $decoded ) && isset( $decoded['name'] ) ? $decoded['name'] : 'OK',
+                ),
+                200
+            );
+        }
+
+        // Provide the most useful message possible for the user
+        $remote_message = '';
+        $remote_code = '';
+        if ( is_array( $decoded ) ) {
+            if ( isset( $decoded['message'] ) && is_string( $decoded['message'] ) ) {
+                $remote_message = $decoded['message'];
+            }
+
+            if ( isset( $decoded['code'] ) && is_string( $decoded['code'] ) ) {
+                $remote_code = $decoded['code'];
+            }
+        }
+
+        $error_msg = 'HTTP ' . $code;
+        if ( $remote_message ) {
+            $error_msg .= ' – ' . $remote_message;
+        }
+
+        if ( $remote_code ) {
+            $error_msg .= "\nWP code: " . $remote_code;
+        }
+
+        if ( $code === 401 ) {
+            // If the body looks identical to an unauthenticated call, the Authorization header
+            // is likely not being accepted/processed (proxy/WAF/server config) or app passwords are disabled.
+            $unauth_args = array(
+                'headers' => array(
+                    'User-Agent' => 'LTL-SaaS-Portal/1.0 (+https://lazytechlab.de)',
+                    'Accept' => 'application/json',
+                ),
+                'timeout' => 10,
+                'sslverify' => true,
+            );
+            list( $unauth_response ) = $remote_get_follow_redirects( $api_url, $unauth_args, 5 );
+
+            $auth_ignored_hint = '';
+            if ( ! is_wp_error( $unauth_response ) ) {
+                $unauth_code = (int) wp_remote_retrieve_response_code( $unauth_response );
+                $unauth_body = (string) wp_remote_retrieve_body( $unauth_response );
+                $unauth_decoded = json_decode( $unauth_body, true );
+
+                $same_code = ( $unauth_code === 401 );
+                $same_message = false;
+                if ( is_array( $decoded ) && is_array( $unauth_decoded ) ) {
+                    $same_message = (
+                        ( isset( $decoded['message'], $unauth_decoded['message'] ) && $decoded['message'] === $unauth_decoded['message'] )
+                        && ( isset( $decoded['code'], $unauth_decoded['code'] ) && $decoded['code'] === $unauth_decoded['code'] )
+                    );
+                }
+
+                if ( $same_code && $same_message ) {
+                    $auth_ignored_hint = 'Your credentials may be correct, but the target site is treating this like a request without Basic Auth. Common causes: Application Passwords disabled, server/proxy not passing Authorization headers, or a security plugin/WAF blocking REST authentication.';
+                }
+            }
+
+            $error_msg .= ' (Unauthorized).';
+            if ( $auth_ignored_hint ) {
+                $error_msg .= ' ' . $auth_ignored_hint;
+            } else {
+                $error_msg .= ' Check: WP username (login name), Application Password (Users → Profile → Application Passwords), and that wp_url is the final HTTPS site URL (no http→https or domain redirects).' ;
+            }
+
+            // Extra precision based on common WP REST auth error codes.
+            if ( $remote_code === 'rest_not_logged_in' ) {
+                $error_msg .= "\nHint: WP treats this request as unauthenticated. IMPORTANT: You must use a WordPress *Application Password* (Users → Profile → Application Passwords). Your normal wp-admin login password will NOT authenticate the REST API via Basic Auth.";
+                $error_msg .= "\nHint: If you are already using an Application Password, then the Authorization header is likely being stripped/ignored by server/proxy/WAF (common on some managed hosts / LiteSpeed setups) or blocked by a security plugin.";
+            } elseif ( in_array( $remote_code, array( 'incorrect_password', 'invalid_username' ), true ) ) {
+                $error_msg .= "\nHint: The target WP is actively rejecting the credentials (username/app-password mismatch).";
+            } elseif ( in_array( $remote_code, array( 'application_passwords_disabled', 'application_passwords_disabled_for_user' ), true ) ) {
+                $error_msg .= "\nHint: Application Passwords appear to be disabled on the target WP (globally or for this user).";
+            }
+        } elseif ( $code === 403 ) {
+            $error_msg .= ' (Forbidden). The user may not have permission to access /users/me, or a security plugin/WAF blocks REST authentication.';
+        }
+
+        if ( ! empty( $redirects ) ) {
+            $error_msg .= "\nRedirects followed: " . (int) $redirects;
+        }
+
+        if ( ! empty( $last_location ) && is_string( $last_location ) ) {
+            $error_msg .= "\nLast redirect Location: " . $last_location;
+        }
+
+        if ( ! empty( $final_url ) && is_string( $final_url ) ) {
+            $final_parts = wp_parse_url( $final_url );
+            if ( is_array( $final_parts ) && isset( $final_parts['host'] ) ) {
+                $error_msg .= "\nFinal host: " . $final_parts['host'];
+            }
+
+            if ( strpos( $final_url, 'wp-signup.php' ) !== false ) {
+                $error_msg .= "\nHint: Redirected to wp-signup.php (Multisite). The requested domain/port may not match an existing site in the network.";
+            }
+        }
+
+        return new WP_REST_Response(
+            array(
+                'success' => false,
+                'message' => $error_msg,
+            ),
+            $code > 0 ? $code : 400
+        );
     }
 
     /**
@@ -598,10 +791,41 @@ class LTL_SAAS_Portal_REST {
             return new WP_REST_Response( array( 'success' => false, 'message' => 'Missing RSS URL' ), 400 );
         }
 
-        $response = wp_remote_get( $rss_url, array(
-            'timeout' => 5,
+        // Prefer WordPress' built-in feed parser (SimplePie) because it supports
+        // auto-discovery of RSS/Atom feeds from HTML pages (user-friendly URLs).
+        if ( defined( 'ABSPATH' ) ) {
+            include_once ABSPATH . WPINC . '/feed.php';
+
+            $ttl_filter = function () {
+                return 60; // keep cache short for "test" behavior
+            };
+            add_filter( 'wp_feed_cache_transient_lifetime', $ttl_filter );
+            $feed = fetch_feed( $rss_url );
+            remove_filter( 'wp_feed_cache_transient_lifetime', $ttl_filter );
+
+            if ( ! is_wp_error( $feed ) && $feed instanceof \SimplePie ) {
+                $items = $feed->get_items( 0, 1 );
+                if ( ! empty( $items ) && $items[0] instanceof \SimplePie_Item ) {
+                    $title = (string) $items[0]->get_title();
+                    return array(
+                        'success' => true,
+                        'title' => substr( $title, 0, 50 ),
+                    );
+                }
+            }
+        }
+
+        $http_args = array(
+            'timeout' => 10,
             'sslverify' => true,
-        ) );
+            'redirection' => 5,
+            'headers' => array(
+                'User-Agent' => 'LTL-SaaS-Portal/1.0 (+https://lazytechlab.de)',
+                'Accept' => 'application/rss+xml, application/atom+xml, application/xml;q=0.9, text/xml;q=0.8, text/html;q=0.7, */*;q=0.5',
+            ),
+        );
+
+        $response = wp_remote_get( $rss_url, $http_args );
 
         $code = wp_remote_retrieve_response_code( $response );
         if ( $code !== 200 ) {
@@ -612,12 +836,108 @@ class LTL_SAAS_Portal_REST {
         }
 
         $body = wp_remote_retrieve_body( $response );
+
+        // Determine content type; many sites return HTML pages instead of feeds
+        $content_type = wp_remote_retrieve_header( $response, 'content-type' );
+        $is_xml_like = false;
+        if ( is_string( $content_type ) ) {
+            $ct = strtolower( $content_type );
+            $is_xml_like = ( strpos( $ct, 'xml' ) !== false ) || ( strpos( $ct, 'rss' ) !== false ) || ( strpos( $ct, 'atom' ) !== false );
+        }
+        // Fallback sniff based on body
+        if ( ! $is_xml_like ) {
+            $snippet = trim( substr( $body, 0, 200 ) );
+            $is_xml_like = ( stripos( $snippet, '<rss' ) !== false ) || ( stripos( $snippet, '<feed' ) !== false ) || ( stripos( $snippet, '<?xml' ) !== false );
+        }
+
+        // If body looks like HTML, attempt feed discovery via <link rel="alternate" type="application/rss+xml|atom+xml">
+        if ( ! $is_xml_like ) {
+            $discover_url = '';
+            \libxml_use_internal_errors( true );
+            $dom = new \DOMDocument();
+            // DOMDocument::loadHTML() handles encoding auto-detection; no need for conversion
+            $dom->loadHTML( $body );
+            $xpath = new \DOMXPath( $dom );
+            // Find RSS or Atom alternate links
+            $links = $xpath->query( "//link[@rel='alternate' and (contains(@type,'rss') or contains(@type,'atom'))]" );
+            if ( $links && $links->length > 0 ) {
+                /** @var \DOMElement $ln */
+                $ln = $links->item(0);
+                $href = $ln->getAttribute('href');
+                if ( $href ) {
+                    // Resolve relative hrefs against the original URL
+                    if ( preg_match( '#^https?://#i', $href ) ) {
+                        $discover_url = $href;
+                    } else {
+                        $base = wp_parse_url( $rss_url );
+                        if ( $base && isset($base['scheme'], $base['host']) ) {
+                            $prefix = $base['scheme'] . '://' . $base['host'];
+                            if ( isset($base['port']) ) { $prefix .= ':' . $base['port']; }
+                            if ( isset($href[0]) && $href[0] === '/' ) {
+                                $discover_url = $prefix . $href;
+                            } else {
+                                $path = isset($base['path']) ? rtrim(dirname($base['path']), '/') : '';
+                                $discover_url = $prefix . $path . '/' . $href;
+                            }
+                        }
+                    }
+                }
+            }
+            \libxml_clear_errors();
+
+            // If no feed link found in <head>, try common forum/CMS feed patterns (XenForo, Discourse, etc.)
+            if ( ! $discover_url ) {
+                $base = wp_parse_url( $rss_url );
+                if ( $base && isset($base['scheme'], $base['host']) ) {
+                    $prefix = $base['scheme'] . '://' . $base['host'];
+                    if ( isset($base['port']) ) { $prefix .= ':' . $base['port']; }
+                    $path = isset($base['path']) ? rtrim($base['path'], '/') : '';
+
+                    // Common XenForo feed patterns
+                    $candidates = array(
+                        $prefix . '/forums/feed',                        // XenForo forum index feed
+                        $prefix . $path . '/feed',                       // Generic feed at page level
+                        $prefix . '/feeds/threads.xml',                  // XenForo direct feed (some setups)
+                    );
+
+                    // Try each candidate and see if it's valid XML/RSS
+                    foreach ( $candidates as $candidate_url ) {
+                        $resp = wp_remote_get( $candidate_url, $http_args );
+                        if ( wp_remote_retrieve_response_code( $resp ) === 200 ) {
+                            $candidate_body = wp_remote_retrieve_body( $resp );
+                            \libxml_use_internal_errors( true );
+                            $test_xml = simplexml_load_string( $candidate_body );
+                            \libxml_clear_errors();
+                            if ( $test_xml !== false ) {
+                                $discover_url = $candidate_url;
+                                $body = $candidate_body;
+                                $is_xml_like = true;
+                                break; // Found a valid feed
+                            }
+                        }
+                    }
+                }
+            }
+
+            if ( $discover_url && ! $is_xml_like ) {
+                // Fetch discovered feed and replace body
+                $response2 = wp_remote_get( $discover_url, $http_args );
+                if ( wp_remote_retrieve_response_code( $response2 ) === 200 ) {
+                    $body = wp_remote_retrieve_body( $response2 );
+                    $is_xml_like = true;
+                }
+            }
+        }
+
+        // Parse XML/RSS/Atom safely (suppress warnings)
+        \libxml_use_internal_errors( true );
         $xml = simplexml_load_string( $body );
+        \libxml_clear_errors();
 
         if ( $xml === false ) {
             return array(
                 'success' => false,
-                'message' => 'Invalid XML/RSS',
+                'message' => $is_xml_like ? 'Invalid XML/RSS' : 'Not an RSS/Atom feed (HTML detected)',
             );
         }
 

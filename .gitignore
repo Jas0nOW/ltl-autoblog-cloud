@@ -14,6 +14,7 @@ build/
 .pytest_cache/
 __pycache__/
 *.log
+ltl-saas-portal.zip
 
 # Project-specific
 blueprints_raw/

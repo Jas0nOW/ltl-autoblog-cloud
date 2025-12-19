@@ -4,6 +4,8 @@
  * Description: Customer portal for LTL AutoBlog Cloud (connect WP sites, store settings, and provide Make.com multi-tenant endpoints).
  * Version: 0.1.0
  * Author: LazyTechLab
+ * Text Domain: ltl-saas-portal
+ * Domain Path: /languages
  * License: GPLv2 or later
  */
 
@@ -19,6 +21,18 @@ require_once LTL_SAAS_PORTAL_PLUGIN_DIR . 'includes/class-ltl-saas-portal.php';
 function ltl_saas_portal() {
     return LTL_SAAS_Portal::instance();
 }
+
+/**
+ * Load plugin text domain for translations
+ */
+function ltl_saas_portal_load_textdomain() {
+    load_plugin_textdomain(
+        'ltl-saas-portal',
+        false,
+        dirname( plugin_basename( __FILE__ ) ) . '/languages'
+    );
+}
+add_action( 'plugins_loaded', 'ltl_saas_portal_load_textdomain' );
 
 register_activation_hook( __FILE__, array( 'LTL_SAAS_Portal', 'activate' ) );
 register_deactivation_hook( __FILE__, array( 'LTL_SAAS_Portal', 'deactivate' ) );
